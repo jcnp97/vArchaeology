@@ -57,7 +57,7 @@ public class DatabaseManager {
             Bukkit.getLogger().severe("[vArchaeology] Error while connecting to the database.");
         }
 
-        // Configure HikariCP
+        // Configure HikariCP using default values
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
         config.setUsername(username);
@@ -90,9 +90,9 @@ public class DatabaseManager {
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
                             "playerName VARCHAR(16) NOT NULL," +
-                            "playerArchEXP DECIMAL(12,2) DEFAULT 0.00," +
-                            "playerArchLevel TINYINT DEFAULT 1" +
-                            "playerArchApt INT DEFAULT 0" +
+                            "playerArchEXP INT DEFAULT 0," +
+                            "playerArchLevel TINYINT DEFAULT 1," +
+                            "playerArchApt INT DEFAULT 0," +
                             "playerArchLuck TINYINT DEFAULT 0" +
                             ")"
             );
@@ -147,8 +147,8 @@ public class DatabaseManager {
                     "UPDATE archPlayerStats SET " +
                             "playerName = ?, " +
                             "playerArchEXP = ?, " +
-                            "playerArchLevel = ? " +
-                            "playerArchApt = ? " +
+                            "playerArchLevel = ?, " +
+                            "playerArchApt = ?, " +
                             "playerArchLuck = ? " +
                             "WHERE playerUUID = ?"
             );
@@ -164,7 +164,7 @@ public class DatabaseManager {
             ps = conn.prepareStatement(
                     "UPDATE archInternalStats SET " +
                             "archADP = ?, " +
-                            "archXPMul = ? " +
+                            "archXPMul = ?, " +
                             "archBonusXP = ? " +
                             "WHERE playerUUID = ?"
             );
@@ -178,19 +178,104 @@ public class DatabaseManager {
             ps = conn.prepareStatement(
                     "UPDATE archAchievements SET " +
                             "blocksMined = ?, " +
-                            "artefactsFound = ? " +
-                            "artefactsRestored = ? " +
+                            "artefactsFound = ?, " +
+                            "artefactsRestored = ?, " +
                             "treasuresFound = ? " +
                             "WHERE playerUUID = ?"
             );
-            ps.setDouble(1, blocksMined);
-            ps.setDouble(2, artFound);
-            ps.setDouble(3, artRestored);
-            ps.setDouble(4, treasuresFound);
+            ps.setInt(1, blocksMined);
+            ps.setInt(2, artFound);
+            ps.setInt(3, artRestored);
+            ps.setInt(4, treasuresFound);
             ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void createNewPlayerData(UUID uuid, String name) {
+        Connection conn = null;
+        try {
+            conn = dataSource.getConnection();
+            conn.setAutoCommit(false);
+
+            try {
+                PreparedStatement ps = conn.prepareStatement(
+                        "INSERT INTO archPlayerStats (" +
+                                "playerUUID, " +
+                                "playerName, " +
+                                "playerArchEXP, " +
+                                "playerArchLevel, " +
+                                "playerArchApt, " +
+                                "playerArchLuck" +
+                                ") VALUES (?, ?, ?, ?, ?, ?)"
+                );
+                ps.setString(1, uuid.toString());
+                ps.setString(2, name);
+                ps.setInt(3, 0);
+                ps.setInt(4, 1);
+                ps.setInt(5, 0);
+                ps.setInt(6, 0);
+                ps.executeUpdate();
+
+                ps = conn.prepareStatement(
+                        "INSERT INTO archInternalStats (" +
+                                "playerUUID, " +
+                                "archADP, " +
+                                "archXPMul, " +
+                                "archBonusXP" +
+                                ") VALUES (?, ?, ?, ?)"
+                );
+                ps.setString(1, uuid.toString());
+                ps.setDouble(2, 0.0);
+                ps.setDouble(3, 0.0);
+                ps.setInt(4, 0);
+                ps.executeUpdate();
+
+                ps = conn.prepareStatement(
+                        "INSERT INTO archAchievements (" +
+                                "playerUUID, " +
+                                "blocksMined, " +
+                                "artefactsFound, " +
+                                "artefactsRestored, " +
+                                "treasuresFound" +
+                                ") VALUES (?, ?, ?, ?, ?)"
+                );
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, 0);
+                ps.setInt(3, 0);
+                ps.setInt(4, 0);
+                ps.setInt(5, 0);
+                ps.executeUpdate();
+
+                // If all inserts succeed, commit the transaction
+                conn.commit();
+                plugin.getLogger().info("Successfully created new player data for " + name);
+
+            } catch (SQLException e) {
+                // If any error occurs during data creation, roll back the transaction
+                if (conn != null) {
+                    conn.rollback();
+                }
+                plugin.getLogger().severe("Failed to create player data for " + name + ". Error: " + e.getMessage());
+                throw e; // Re-throw to be caught by outer catch block
+            }
+
+        } catch (SQLException e) {
+            plugin.getLogger().severe("Database error while creating player data: " + e.getMessage());
+            e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                try {
+                    // Reset auto-commit to true before closing
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    plugin.getLogger().severe("Error closing database connection: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
