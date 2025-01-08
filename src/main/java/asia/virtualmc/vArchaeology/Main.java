@@ -28,7 +28,7 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         getLogger().info("[vArchaeology] Closing database connections..");
         if (databaseManager != null) {
-            databaseManager.close();
+            databaseManager.closeConnection();
         } else {
             getLogger().severe("[vArchaeology] Failed to close database connections.");
         }

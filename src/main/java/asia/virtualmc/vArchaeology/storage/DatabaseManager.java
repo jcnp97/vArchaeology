@@ -87,7 +87,7 @@ public class DatabaseManager {
             Bukkit.getLogger().info("[vArchaeology] Successfully connected to the database.");
             // Create playerStats table
             conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS playerStats (" +
+                    "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
                             "playerName VARCHAR(16) NOT NULL," +
                             "playerArchEXP DECIMAL(12,2) DEFAULT 0.00," +
@@ -98,53 +98,27 @@ public class DatabaseManager {
             );
             // Create internalStats table
             conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS internalStats (" +
+                    "CREATE TABLE IF NOT EXISTS archInternalStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
-                            "breakChance DOUBLE DEFAULT 0.0," +
-                            "gatherRate DOUBLE DEFAULT 1.0," +
-                            "FOREIGN KEY (playerUUID) REFERENCES playerStats(playerUUID)" +
+                            "archADP DECIMAL(5,2) DEFAULT 0.00," +
+                            "archXPMul DECIMAL(4,2) DEFAULT 0.00," +
+                            "archBonusXP INT DEFAULT 0," +
+                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
+                            ")"
+            );
+            // Create achievementStats table
+            conn.createStatement().execute(
+                    "CREATE TABLE IF NOT EXISTS archAchievements (" +
+                            "playerUUID VARCHAR(36) PRIMARY KEY," +
+                            "blocksMined INT DEFAULT 0," +
+                            "artefactsFound INT DEFAULT 0," +
+                            "artefactsRestored INT DEFAULT 0," +
+                            "treasuresFound INT DEFAULT 0," +
+                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
                             ")"
             );
         } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-
-
-
-
-        String archPlayerStatsTable = "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
-                "playerUUID CHAR(36) PRIMARY KEY, " +
-                "playerName VARCHAR(16), " +
-                "playerArchEXP DECIMAL(12,2) DEFAULT 0.00, " +
-                "playerArchLevel TINYINT DEFAULT 0, " +
-                "playerArchApt INT DEFAULT 0, " +
-                "playerArchLuck TINYINT DEFAULT 0);"
-                ;
-
-        String archInternalStatsTable = "CREATE TABLE IF NOT EXISTS archInternalStats (" +
-                "playerUUID CHAR(36) PRIMARY KEY, " +
-                "archBreakChance TINYINT DEFAULT 0, " +
-                "archGatherRate DECIMAL(5,2) DEFAULT 0.00, " +
-                "archADP DECIMAL(5,2) DEFAULT 0.00, " +
-                "archADB DECIMAL(4,2) DEFAULT 0.00, " +
-                "archXPMul DECIMAL(4,2) DEFAULT 0.00, " +
-                "archBonusXP INT DEFAULT 0);"
-                ;
-
-        String archAchievementsTable = "CREATE TABLE IF NOT EXISTS archAchievements (" +
-                "playerUUID CHAR(36) PRIMARY KEY, " +
-                "blocksMined INT DEFAULT 0, " +
-                "artefactsFound INT DEFAULT 0, " +
-                "artefactsRestored INT DEFAULT 0, " +
-                "treasuresFound INT DEFAULT 0);"
-                ;
-
-        try (Connection connection = getConnection(); Statement statement = connection.createStatement()) {
-            statement.executeUpdate(archPlayerStatsTable);
-            statement.executeUpdate(archInternalStatsTable);
-            statement.executeUpdate(archAchievementsTable);
-        } catch (SQLException e) {
+            //e.printStackTrace();
             Bukkit.getLogger().severe("[vArchaeology] Failed to create tables: " + e.getMessage());
         }
     }
@@ -157,45 +131,66 @@ public class DatabaseManager {
         }
     }
 
-    public void close() {
+    public void closeConnection() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
         }
     }
 
-//    public void updateAllPlayerData() {
-//        for (UUID uuid : playerDataMap.keySet()) {
-//            updatePlayerData(uuid);
-//        }
-//    }
+    public void savePlayerData(
+            UUID uuid, String name, int archExp, int archLevel, int archApt, int archLuck, double archADP,
+            double archXPMul, int archBonusXP, int blocksMined, int artFound, int artRestored, int treasuresFound
+    ) {
+        try (Connection conn = dataSource.getConnection()) {
+            // Update playerStats database from latest HashMap data
+            PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE archPlayerStats SET " +
+                            "playerName = ?, " +
+                            "playerArchEXP = ?, " +
+                            "playerArchLevel = ? " +
+                            "playerArchApt = ? " +
+                            "playerArchLuck = ? " +
+                            "WHERE playerUUID = ?"
+            );
+            ps.setString(1, name);
+            ps.setInt(2, archExp);
+            ps.setInt(3, archLevel);
+            ps.setInt(4, archApt);
+            ps.setInt(5, archLuck);
+            ps.setString(6, uuid.toString());
+            ps.executeUpdate();
 
-    public void updatePlayerData(UUID uuid) {
-        PlayerDataManager data = playerDataMap.get(uuid);
-        if (data == null) return;
+            // Update internalStats database from latest HashMap data
+            ps = conn.prepareStatement(
+                    "UPDATE archInternalStats SET " +
+                            "archADP = ?, " +
+                            "archXPMul = ? " +
+                            "archBonusXP = ? " +
+                            "WHERE playerUUID = ?"
+            );
+            ps.setDouble(1, archADP);
+            ps.setDouble(2, archXPMul);
+            ps.setDouble(3, archBonusXP);
+            ps.setString(4, uuid.toString());
+            ps.executeUpdate();
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "REPLACE INTO archPlayerStats (" +
-                             "playerUUID, " +
-                             "playerName, " +
-                             "playerArchEXP, " +
-                             "playerArchLevel, " +
-                             "playerArchApt, " +
-                             "playerArchLuck)" +
-                             "VALUES (?, ?, ?, ?, ?, ?)")) {
-            statement.setString(1, uuid.toString());
-            statement.setString(2, data.getPlayerName());
-            statement.setBigDecimal(3, data.getPlayerArchEXP());
-            statement.setInt(4, data.getPlayerArchLevel());
-            statement.setInt(5, data.getPlayerArchApt());
-            statement.setInt(6, data.getPlayerArchLuck());
-            statement.executeUpdate();
+            // Update archAchievements database from latest HashMap data
+            ps = conn.prepareStatement(
+                    "UPDATE archAchievements SET " +
+                            "blocksMined = ?, " +
+                            "artefactsFound = ? " +
+                            "artefactsRestored = ? " +
+                            "treasuresFound = ? " +
+                            "WHERE playerUUID = ?"
+            );
+            ps.setDouble(1, blocksMined);
+            ps.setDouble(2, artFound);
+            ps.setDouble(3, artRestored);
+            ps.setDouble(4, treasuresFound);
+            ps.setString(5, uuid.toString());
+            ps.executeUpdate();
         } catch (SQLException e) {
-            plugin.getLogger().severe("Failed to update player data for UUID: " + uuid + ", Error: " + e.getMessage());
+            e.printStackTrace();
         }
-    }
-
-    public HashMap<UUID, PlayerDataManager> getPlayerDataMap() {
-        return playerDataMap;
     }
 }
