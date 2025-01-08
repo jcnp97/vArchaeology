@@ -1,64 +1,86 @@
 package asia.virtualmc.vArchaeology.storage;
+import asia.virtualmc.vArchaeology.Main;
 
-import java.math.BigDecimal;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class PlayerDataManager {
+    private final Main plugin;
+    private final DatabaseManager databaseManager;
+    private final Map<UUID, PlayerData> playerDataMap;
+    private BukkitTask updateTask;
 
-    private final UUID playerUUID;
-    private final String playerName;
-    private BigDecimal playerArchEXP;
-    private int playerArchLevel;
-    private int playerArchApt;
-    private int playerArchLuck;
-
-    public PlayerDataManager(UUID playerUUID, String playerName) {
-        this.playerUUID = playerUUID;
-        this.playerName = playerName;
-        this.playerArchEXP = BigDecimal.ZERO;
-        this.playerArchLevel = 0;
-        this.playerArchApt = 0;
-        this.playerArchLuck = 0;
+    public PlayerDataManager(Main plugin, DatabaseManager databaseManager) {
+        this.plugin = plugin;
+        this.databaseManager = databaseManager;
+        this.playerDataMap = new HashMap<>();
+        startUpdateTask();
     }
 
-    public UUID getPlayerUUID() {
-        return playerUUID;
+    private void startUpdateTask() {
+        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
+                this::updateAllData, 12000L, 12000L);
     }
 
-    public String getPlayerName() {
-        return playerName;
+    public void updateAllData() {
+        for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
+            PlayerData data = entry.getValue();
+            databaseManager.savePlayerData(
+                    entry.getKey(),
+                    data.getName(),
+                    data.getExp(),
+                    data.getLevel(),
+                    data.getBreakChance(),
+                    data.getGatherRate()
+            );
+        }
     }
 
-    public BigDecimal getPlayerArchEXP() {
-        return playerArchEXP;
+    public void loadData(UUID uuid) {
+        try (ResultSet rs = databaseManager.getPlayerData(uuid)) {
+            if (rs.next()) {
+                PlayerData data = new PlayerData(
+                        rs.getString("playerName"),
+                        rs.getInt("playerEXP"),
+                        rs.getInt("playerLevel"),
+                        rs.getDouble("breakChance"),
+                        rs.getDouble("gatherRate")
+                );
+                playerDataMap.put(uuid, data);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
-    public int getPlayerArchLevel() {
-        return playerArchLevel;
+    public void unloadData(UUID uuid) {
+        playerDataMap.remove(uuid);
     }
 
-    public int getPlayerArchApt() {
-        return playerArchApt;
+    public PlayerData getPlayerData(UUID uuid) {
+        return playerDataMap.get(uuid);
     }
 
-    public int getPlayerArchLuck() {
-        return playerArchLuck;
+    // Data Manipulation on HashMap
+    public void updateExp(UUID uuid, int exp) {
+        PlayerData data = playerDataMap.get(uuid);
+        if (data != null) {
+            data.setExp(exp);
+        }
     }
 
-    public void setPlayerArchEXP(BigDecimal playerArchEXP) {
-        this.playerArchEXP = playerArchEXP;
-    }
-
-    public void setPlayerArchLevel(int playerArchLevel) {
-        this.playerArchLevel = playerArchLevel;
-    }
-
-    public void setPlayerArchApt(int playerArchApt) {
-        this.playerArchApt = playerArchApt;
-    }
-
-    public void setPlayerArchLuck(int playerArchLuck) {
-        this.playerArchLuck = playerArchLuck;
+    public void updateLevel(UUID uuid, int level) {
+        PlayerData data = playerDataMap.get(uuid);
+        if (data != null) {
+            data.setLevel(level);
+        }
     }
 }
 

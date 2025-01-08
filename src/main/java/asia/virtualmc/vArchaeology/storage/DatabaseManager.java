@@ -11,11 +11,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-//import java.sql.Statement;
+import java.sql.ResultSet;
 import java.util.UUID;
-//import java.util.HashMap;
 
 public class DatabaseManager {
     private Main plugin;
@@ -268,7 +266,7 @@ public class DatabaseManager {
         } finally {
             if (conn != null) {
                 try {
-                    // Reset auto-commit to true before closing
+                    // Reset auto-commit to true before closing connection.
                     conn.setAutoCommit(true);
                     conn.close();
                 } catch (SQLException e) {
@@ -276,6 +274,26 @@ public class DatabaseManager {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    public ResultSet getPlayerData(UUID uuid) {
+        try {
+            Connection conn = dataSource.getConnection();
+            PreparedStatement ps = conn.prepareStatement(
+                    "SELECT p.*, " +
+                            "i.archADP, i.archXPMul, i.archBonusXP, " +
+                            "a.blocksMined, a.artefactsFound, a.artefactsRestored, a.treasuresFound " +
+                            "FROM archPlayerStats p " +
+                            "LEFT JOIN archInternalStats i ON p.playerUUID = i.playerUUID " +
+                            "LEFT JOIN archAchievements a ON p.playerUUID = a.playerUUID " +
+                            "WHERE p.playerUUID = ?"
+            );
+            ps.setString(1, uuid.toString());
+            return ps.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
         }
     }
 }
