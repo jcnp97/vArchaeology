@@ -54,18 +54,47 @@ public class PlayerData {
     public int getTreasuresFound() { return treasuresFound; }
 
     // Data Manipulation Methods
-    public void setName(String value) { this.name = value; }
-    public void setArchLevel(int value) { this.archLevel = value; }
-    public void addArchLevel(int value) { this.archLevel += value; }
-    public void subtractArchLevel(int value) { this.archLevel += value; }
+    public void setArchEXP(int value) {
+        if (value < 0 || value > 1000000000) {
+            this.archEXP = 0;
+        } else {
+            this.archEXP = value;
+        }
+    }
+    public void addArchEXP(int value) {
+        if (this.archEXP + value > 1000000000) {
+            this.archEXP = 1000000000;
+        } else {
+            this.archEXP += value;
+        }
+    }
+    public void subtractArchEXP(int value) {
+        if (this.archEXP - value < 0) {
+            this.archEXP = 0;
+        } else {
+            this.archEXP -= value;
+        }
+    }
 
-
-    public void setExp(int exp) { this.archADP = exp; }
-
-
-    public void setLevel(int level) { this.level = level; }
-
-    public void setBreakChance(double breakChance) { this.breakChance = breakChance; }
-
-    public void setGatherRate(double gatherRate) { this.gatherRate = gatherRate; }
+    public void setArchLevel(int value) {
+        if (value < 1 || value > 120) {
+            this.archLevel = 1;
+        } else {
+            this.archLevel = value;
+        }
+    }
+    public void addArchLevel(int value) {
+        if (this.archLevel + value > 120) {
+            this.archLevel = 120;
+        } else {
+            this.archLevel += value;
+        }
+    }
+    public void subtractArchLevel(int value) {
+        if (this.archLevel - value < 1) {
+            this.archLevel = 1;
+        } else {
+            this.archLevel -= value;
+        }
+    }
 }

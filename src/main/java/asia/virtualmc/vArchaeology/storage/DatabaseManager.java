@@ -88,10 +88,10 @@ public class DatabaseManager {
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
                             "playerName VARCHAR(16) NOT NULL," +
-                            "playerArchEXP INT DEFAULT 0," +
-                            "playerArchLevel TINYINT DEFAULT 1," +
-                            "playerArchApt INT DEFAULT 0," +
-                            "playerArchLuck TINYINT DEFAULT 0" +
+                            "archEXP INT DEFAULT 0," +
+                            "archLevel TINYINT DEFAULT 1," +
+                            "archApt INT DEFAULT 0," +
+                            "archLuck TINYINT DEFAULT 0" +
                             ")"
             );
             // Create internalStats table
@@ -144,10 +144,10 @@ public class DatabaseManager {
             PreparedStatement ps = conn.prepareStatement(
                     "UPDATE archPlayerStats SET " +
                             "playerName = ?, " +
-                            "playerArchEXP = ?, " +
-                            "playerArchLevel = ?, " +
-                            "playerArchApt = ?, " +
-                            "playerArchLuck = ? " +
+                            "archEXP = ?, " +
+                            "archLevel = ?, " +
+                            "archApt = ?, " +
+                            "archLuck = ? " +
                             "WHERE playerUUID = ?"
             );
             ps.setString(1, name);
@@ -203,10 +203,10 @@ public class DatabaseManager {
                         "INSERT INTO archPlayerStats (" +
                                 "playerUUID, " +
                                 "playerName, " +
-                                "playerArchEXP, " +
-                                "playerArchLevel, " +
-                                "playerArchApt, " +
-                                "playerArchLuck" +
+                                "archEXP, " +
+                                "archLevel, " +
+                                "archApt, " +
+                                "archLuck" +
                                 ") VALUES (?, ?, ?, ?, ?, ?)"
                 );
                 ps.setString(1, uuid.toString());

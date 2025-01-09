@@ -29,13 +29,9 @@ public class PlayerJoinManager implements Listener {
                     playerDataManager.loadData(event.getPlayer().getUniqueId());
                 } else {
                     // Player doesn't exist, create new data
-                    databaseManager.savePlayerData(
+                    databaseManager.createNewPlayerData(
                             event.getPlayer().getUniqueId(),
-                            event.getPlayer().getName(),
-                            0, // Default EXP
-                            1, // Default Level
-                            0.0, // Default Break Chance
-                            1.0  // Default Gather Rate
+                            event.getPlayer().getName()
                     );
                     playerDataManager.loadData(event.getPlayer().getUniqueId());
                 }
@@ -54,10 +50,17 @@ public class PlayerJoinManager implements Listener {
                 databaseManager.savePlayerData(
                         event.getPlayer().getUniqueId(),
                         event.getPlayer().getName(),
-                        data.getExp(),
-                        data.getLevel(),
-                        data.getBreakChance(),
-                        data.getGatherRate()
+                        data.getArchExp(),
+                        data.getArchLevel(),
+                        data.getArchApt(),
+                        data.getArchLuck(),
+                        data.getArchADP(),
+                        data.getArchXPMul(),
+                        data.getArchBonusXP(),
+                        data.getBlocksMined(),
+                        data.getArtefactsFound(),
+                        data.getArtefactsRestored(),
+                        data.getTreasuresFound()
                 );
                 playerDataManager.unloadData(event.getPlayer().getUniqueId());
             }

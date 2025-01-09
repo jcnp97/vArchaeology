@@ -35,10 +35,17 @@ public class PlayerDataManager {
             databaseManager.savePlayerData(
                     entry.getKey(),
                     data.getName(),
-                    data.getExp(),
-                    data.getLevel(),
-                    data.getBreakChance(),
-                    data.getGatherRate()
+                    data.getArchExp(),
+                    data.getArchLevel(),
+                    data.getArchApt(),
+                    data.getArchLuck(),
+                    data.getArchADP(),
+                    data.getArchXPMul(),
+                    data.getArchBonusXP(),
+                    data.getBlocksMined(),
+                    data.getArtefactsFound(),
+                    data.getArtefactsRestored(),
+                    data.getTreasuresFound()
             );
         }
     }
@@ -48,10 +55,17 @@ public class PlayerDataManager {
             if (rs.next()) {
                 PlayerData data = new PlayerData(
                         rs.getString("playerName"),
-                        rs.getInt("playerEXP"),
-                        rs.getInt("playerLevel"),
-                        rs.getDouble("breakChance"),
-                        rs.getDouble("gatherRate")
+                        rs.getInt("archEXP"),
+                        rs.getInt("archLevel"),
+                        rs.getInt("archApt"),
+                        rs.getInt("archLuck"),
+                        rs.getDouble("archADP"),
+                        rs.getDouble("archXPMul"),
+                        rs.getInt("archBonusXP"),
+                        rs.getInt("blocksMined"),
+                        rs.getInt("artefactsFound"),
+                        rs.getInt("artefactsRestored"),
+                        rs.getInt("treasuresFound")
                 );
                 playerDataMap.put(uuid, data);
             }
@@ -68,18 +82,17 @@ public class PlayerDataManager {
         return playerDataMap.get(uuid);
     }
 
-    // Data Manipulation on HashMap
     public void updateExp(UUID uuid, int exp) {
         PlayerData data = playerDataMap.get(uuid);
         if (data != null) {
-            data.setExp(exp);
+            data.setArchEXP(exp);
         }
     }
 
     public void updateLevel(UUID uuid, int level) {
         PlayerData data = playerDataMap.get(uuid);
         if (data != null) {
-            data.setLevel(level);
+            data.setArchLevel(level);
         }
     }
 }
