@@ -1,12 +1,16 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.storage.*;
+import asia.virtualmc.vArchaeology.storage.DatabaseManager;
+import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.storage.PlayerData;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.UUID;
 
 public class PlayerJoinManager implements Listener {
     private final Main plugin;
@@ -21,21 +25,22 @@ public class PlayerJoinManager implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        UUID playerUUID = event.getPlayer().getUniqueId();
+        String playerName = event.getPlayer().getName();
+
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
-                // Check if player exists in database
-                if (databaseManager.getPlayerData(event.getPlayer().getUniqueId()).next()) {
-                    // Player exists, load their data
-                    playerDataManager.loadData(event.getPlayer().getUniqueId());
+                // Check if player exists in the database
+                if (databaseManager.getPlayerData(playerUUID).next()) {
+                    // Load existing player data
+                    playerDataManager.loadData(playerUUID);
                 } else {
-                    // Player doesn't exist, create new data
-                    databaseManager.createNewPlayerData(
-                            event.getPlayer().getUniqueId(),
-                            event.getPlayer().getName()
-                    );
-                    playerDataManager.loadData(event.getPlayer().getUniqueId());
+                    // Create new player data in the database
+                    databaseManager.createNewPlayerData(playerUUID, playerName);
+                    playerDataManager.loadData(playerUUID);
                 }
             } catch (Exception e) {
+                plugin.getLogger().severe("Error loading player data for " + playerName + ": " + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -43,13 +48,13 @@ public class PlayerJoinManager implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
+        UUID playerUUID = event.getPlayer().getUniqueId();
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            // Update player data in database before unloading
-            PlayerData data = playerDataManager.getPlayerData(event.getPlayer().getUniqueId());
+            PlayerData data = playerDataManager.getPlayerData(playerUUID);
             if (data != null) {
                 databaseManager.savePlayerData(
-                        event.getPlayer().getUniqueId(),
-                        event.getPlayer().getName(),
+                        playerUUID,
+                        data.getName(),
                         data.getArchExp(),
                         data.getArchLevel(),
                         data.getArchApt(),
@@ -62,7 +67,7 @@ public class PlayerJoinManager implements Listener {
                         data.getArtefactsRestored(),
                         data.getTreasuresFound()
                 );
-                playerDataManager.unloadData(event.getPlayer().getUniqueId());
+                playerDataManager.unloadData(playerUUID);
             }
         });
     }

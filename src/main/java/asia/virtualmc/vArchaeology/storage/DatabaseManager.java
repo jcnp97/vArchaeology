@@ -67,19 +67,11 @@ public class DatabaseManager {
         config.setIdleTimeout(300000);
         config.setConnectionTimeout(10000);
         config.setMaxLifetime(1800000);
-//        config.addDataSourceProperty("cachePrepStmts", "true");
-//        config.addDataSourceProperty("prepStmtCacheSize", "250");
-//        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        config.addDataSourceProperty("cachePrepStmts", "true");
+        config.addDataSourceProperty("prepStmtCacheSize", "250");
+        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
         dataSource = new HikariDataSource(config);
         createTables();
-//        try (Connection connection = getConnection()) {
-//            if (connection != null) {
-//                Bukkit.getLogger().info("[vArchaeology] Successfully connected to the database.");
-//
-//            }
-//        } catch (SQLException e) {
-//            Bukkit.getLogger().severe("[vArchaeology] Database connection failed: " + e.getMessage());
-//        }
     }
 
     public void createTables() {
@@ -251,19 +243,19 @@ public class DatabaseManager {
 
                 // If all inserts succeed, commit the transaction
                 conn.commit();
-                plugin.getLogger().info("Successfully created new player data for " + name);
+                ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Successfully created new player data for " + name);
 
             } catch (SQLException e) {
                 // If any error occurs during data creation, roll back the transaction
                 if (conn != null) {
                     conn.rollback();
                 }
-                plugin.getLogger().severe("Failed to create player data for " + name + ". Error: " + e.getMessage());
+                plugin.getLogger().severe("[vArchaeology] Failed to create player data for " + name + ". Error: " + e.getMessage());
                 throw e; // Re-throw to be caught by outer catch block
             }
 
         } catch (SQLException e) {
-            plugin.getLogger().severe("Database error while creating player data: " + e.getMessage());
+            plugin.getLogger().severe("[vArchaeology] Database error while creating player data: " + e.getMessage());
             e.printStackTrace();
         } finally {
             if (conn != null) {
@@ -272,7 +264,7 @@ public class DatabaseManager {
                     conn.setAutoCommit(true);
                     conn.close();
                 } catch (SQLException e) {
-                    plugin.getLogger().severe("Error closing database connection: " + e.getMessage());
+                    plugin.getLogger().severe("[vArchaeology] Error closing database connection: " + e.getMessage());
                     e.printStackTrace();
                 }
             }

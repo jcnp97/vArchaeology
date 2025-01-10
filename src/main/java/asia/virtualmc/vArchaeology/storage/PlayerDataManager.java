@@ -1,62 +1,82 @@
+// PlayerDataManager.class
 package asia.virtualmc.vArchaeology.storage;
+
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
+    private static final long UPDATE_INTERVAL = 12000L;
+
     private final Main plugin;
     private final DatabaseManager databaseManager;
     private final Map<UUID, PlayerData> playerDataMap;
-    private final Map<Integer, Integer> experienceTable = new HashMap<>();
-    private BukkitTask updateTask;
+    private final Map<Integer, Integer> experienceTable;
 
-    public PlayerDataManager(Main plugin, DatabaseManager databaseManager) {
+    public PlayerDataManager(@NotNull Main plugin, @NotNull DatabaseManager databaseManager) {
         this.plugin = plugin;
         this.databaseManager = databaseManager;
-        this.playerDataMap = new HashMap<>();
+        this.playerDataMap = new ConcurrentHashMap<>();
+        this.experienceTable = new HashMap<>();
+
+        loadExperienceTable();
         startUpdateTask();
     }
 
+    @NotNull
+    public Map<Integer, Integer> getExperienceTable() {
+        return new HashMap<>(experienceTable);
+    }
+
     private void startUpdateTask() {
-        updateTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
-                this::updateAllData, 12000L, 12000L);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                updateAllData();
+            }
+        }.runTaskTimerAsynchronously(plugin, UPDATE_INTERVAL, UPDATE_INTERVAL);
     }
 
     public void updateAllData() {
-        for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
-            PlayerData data = entry.getValue();
-            databaseManager.savePlayerData(
-                    entry.getKey(),
-                    data.getName(),
-                    data.getArchExp(),
-                    data.getArchLevel(),
-                    data.getArchApt(),
-                    data.getArchLuck(),
-                    data.getArchADP(),
-                    data.getArchXPMul(),
-                    data.getArchBonusXP(),
-                    data.getBlocksMined(),
-                    data.getArtefactsFound(),
-                    data.getArtefactsRestored(),
-                    data.getTreasuresFound()
-            );
-        }
+        playerDataMap.forEach((uuid, data) -> {
+            try {
+                databaseManager.savePlayerData(
+                        uuid,
+                        data.getName(),
+                        data.getArchExp(),
+                        data.getArchLevel(),
+                        data.getArchApt(),
+                        data.getArchLuck(),
+                        data.getArchADP(),
+                        data.getArchXPMul(),
+                        data.getArchBonusXP(),
+                        data.getBlocksMined(),
+                        data.getArtefactsFound(),
+                        data.getArtefactsRestored(),
+                        data.getTreasuresFound()
+                );
+            } catch (Exception e) {
+                plugin.getLogger().severe("[vArchaeology] Failed to save data for player " + uuid + ": " + e.getMessage());
+            }
+        });
     }
 
-    public void loadData(UUID uuid) {
+    public void loadData(@NotNull UUID uuid) {
         try (ResultSet rs = databaseManager.getPlayerData(uuid)) {
             if (rs.next()) {
                 PlayerData data = new PlayerData(
@@ -76,49 +96,38 @@ public class PlayerDataManager {
                 playerDataMap.put(uuid, data);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            plugin.getLogger().severe("[vArchaeology] Failed to load data for player " + uuid + ": " + e.getMessage());
         }
     }
 
-    public void unloadData(UUID uuid) {
+    public void unloadData(@NotNull UUID uuid) {
         playerDataMap.remove(uuid);
     }
 
-    public PlayerData getPlayerData(UUID uuid) {
+    @Nullable
+    public PlayerData getPlayerData(@NotNull UUID uuid) {
         return playerDataMap.get(uuid);
     }
 
-    public void updateExp(UUID uuid, int exp, String param) {
+    public void updateExp(@NotNull UUID uuid, int exp, @NotNull String param) {
         PlayerData data = playerDataMap.get(uuid);
-        if (data != null) {
-            switch (param.toLowerCase()) {
-                case "add":
-                    data.addArchEXP(exp);
-                    break;
-                case "sub":
-                    data.subtractArchEXP(exp);
-                    break;
-                default:
-                    data.setArchEXP(exp);
-                    break;
-            }
+        if (data == null) return;
+
+        switch (param.toLowerCase()) {
+            case "add" -> data.addArchEXP(exp);
+            case "sub" -> data.subtractArchEXP(exp);
+            default -> data.setArchEXP(exp);
         }
     }
 
-    public void updateLevel(UUID uuid, int level, String param) {
+    public void updateLevel(@NotNull UUID uuid, int level, @NotNull String param) {
         PlayerData data = playerDataMap.get(uuid);
-        if (data != null) {
-            switch (param.toLowerCase()) {
-                case "add":
-                    data.addArchLevel(level);
-                    break;
-                case "sub":
-                    data.subtractArchLevel(level);
-                    break;
-                default:
-                    data.setArchLevel(level);
-                    break;
-            }
+        if (data == null) return;
+
+        switch (param.toLowerCase()) {
+            case "add" -> data.addArchLevel(level);
+            case "sub" -> data.subtractArchLevel(level);
+            default -> data.setArchLevel(level);
         }
     }
 
@@ -128,7 +137,7 @@ public class PlayerDataManager {
             try {
                 plugin.saveResource("experience-table.yml", false);
             } catch (Exception e) {
-                Bukkit.getLogger().severe("Experience table not found. Disabling the plugin..");
+                Bukkit.getLogger().severe("[vArchaeology] Experience table not found. Disabling the plugin..");
                 Bukkit.getServer().getPluginManager().disablePlugin(plugin);
                 return;
             }
@@ -136,29 +145,30 @@ public class PlayerDataManager {
         FileConfiguration config = YamlConfiguration.loadConfiguration(expTableFile);
         int previousExp = -1;
 
+        experienceTable.clear();
         for (String key : config.getKeys(false)) {
-            int level;
-            int exp;
-
             try {
-                level = Integer.parseInt(key);
-                String expString = config.getString(key).replace(",", "");
-                exp = Integer.parseInt(expString);
+                int level = Integer.parseInt(key);
+                String expString = config.getString(key, "0").replace(",", "");
+                int exp = Integer.parseInt(expString);
+
+                if (previousExp >= 0 && exp <= previousExp) {
+                    throw new IllegalStateException("[vArchaeology] Invalid progression: Level " + level +
+                            " has lower or equal EXP than previous level");
+                }
+
+                experienceTable.put(level, exp);
+                previousExp = exp;
             } catch (NumberFormatException e) {
-                Bukkit.getLogger().severe("Invalid formatting on experience table. Disabling the plugin..");
-                Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+                plugin.getLogger().severe("[vArchaeology] Invalid number format in experience table at level " + key);
+                Bukkit.getPluginManager().disablePlugin(plugin);
+                return;
+            } catch (IllegalStateException e) {
+                plugin.getLogger().severe(e.getMessage());
+                Bukkit.getPluginManager().disablePlugin(plugin);
                 return;
             }
-
-            if (previousExp >= 0 && exp <= previousExp) {
-                Bukkit.getLogger().severe("Invalid progression on exp table. Higher levels must have higher EXP.");
-                Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-                return;
-            }
-
-            experienceTable.put(level, exp);
-            previousExp = exp;
         }
-        Bukkit.getLogger().severe("Experience table has been loaded successfully.");
+        ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Experience table has been loaded.");
     }
 }

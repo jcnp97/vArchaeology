@@ -24,7 +24,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         if (playerDataManager != null) {
-            playerDataManager.updateAllData(); // Save all data before shutdown
+            playerDataManager.updateAllData();
         }
         ConsoleMessageUtil.sendConsoleMessage("<#FFFF55>[vArchaeology] Closing database connections..");
         if (databaseManager != null) {
