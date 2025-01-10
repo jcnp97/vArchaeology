@@ -1,0 +1,6 @@
+# vArchaeology Settings
+settings:
+  blockBreakChance: 80
+  blocksList:
+    SAND: 1
+    GRAVEL: 2

@@ -26,6 +26,7 @@ public class DatabaseManager {
 
     public DatabaseManager(Main plugin) {
         this.plugin = plugin;
+        setupDatabase();
     }
 
     public void setupDatabase() {

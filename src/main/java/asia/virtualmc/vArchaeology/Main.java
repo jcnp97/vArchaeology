@@ -5,20 +5,25 @@ import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
 
 public final class Main extends JavaPlugin {
     private DatabaseManager databaseManager;
     private PlayerDataManager playerDataManager;
     private PlayerJoinManager playerJoinManager;
+    private BukkitAudiences adventure;
 
     @Override
     public void onEnable() {
         this.databaseManager = new DatabaseManager(this);
         this.playerDataManager = new PlayerDataManager(this, databaseManager);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
+        this.adventure = BukkitAudiences.create(this);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
-        getLogger().info("[vArchaeology] has been enabled!");
+        adventure.console().sendMessage(MiniMessage.miniMessage().deserialize("<gradient:#ff0000:#0000ff>[vArchaeology] has been enabled!</gradient>"));
     }
 
     @Override

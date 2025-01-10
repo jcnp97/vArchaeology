@@ -54,6 +54,13 @@ public class PlayerData {
     public int getTreasuresFound() { return treasuresFound; }
 
     // Data Manipulation Methods
+//    public void checkAndApplyLevelUp() {
+//        while (experienceTable.containsKey(this.archLevel + 1) && this.archEXP >= experienceTable.get(this.archLevel + 1)) {
+//            addArchLevel(1);
+//            this.archEXP -= experienceTable.get(this.archLevel);
+//        }
+//    }
+
     public void setArchEXP(int value) {
         if (value < 0 || value > 1000000000) {
             this.archEXP = 0;
