@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -83,7 +84,7 @@ public class DatabaseManager {
 
     public void createTables() {
         try (Connection conn = dataSource.getConnection()) {
-            Bukkit.getLogger().info("[vArchaeology] Successfully connected to the database.");
+            ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Successfully create tables on your database.");
             // Create playerStats table
             conn.createStatement().execute(
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
