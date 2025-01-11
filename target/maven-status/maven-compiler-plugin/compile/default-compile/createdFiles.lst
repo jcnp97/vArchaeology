@@ -1,5 +1,7 @@
+asia\virtualmc\vArchaeology\utilities\ConsoleMessageUtil.class
 asia\virtualmc\vArchaeology\Main.class
 asia\virtualmc\vArchaeology\storage\PlayerData.class
 asia\virtualmc\vArchaeology\storage\DatabaseManager.class
 asia\virtualmc\vArchaeology\storage\PlayerDataManager.class
 asia\virtualmc\vArchaeology\listeners\PlayerJoinManager.class
+asia\virtualmc\vArchaeology\storage\PlayerDataManager$1.class
