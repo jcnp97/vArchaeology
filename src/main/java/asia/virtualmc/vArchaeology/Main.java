@@ -1,5 +1,7 @@
 package asia.virtualmc.vArchaeology;
 
+import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
+import asia.virtualmc.vArchaeology.listeners.CommandManager;
 import asia.virtualmc.vArchaeology.storage.DatabaseManager;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
@@ -11,14 +13,20 @@ public final class Main extends JavaPlugin {
     private DatabaseManager databaseManager;
     private PlayerDataManager playerDataManager;
     private PlayerJoinManager playerJoinManager;
+    private CommandManager commandManager;
+    private BlockBreakManager blockBreakManager;
 
     @Override
     public void onEnable() {
         this.databaseManager = new DatabaseManager(this);
         this.playerDataManager = new PlayerDataManager(this, databaseManager);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
+        this.commandManager = new CommandManager(this, playerDataManager);
+        this.blockBreakManager = new BlockBreakManager(this, playerDataManager);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
+        getCommand("varch").setExecutor(commandManager);
+        getServer().getPluginManager().registerEvents(blockBreakManager, this);
     }
 
     @Override

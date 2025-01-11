@@ -4,7 +4,7 @@ main: asia.virtualmc.vArchaeology.Main
 api-version: '1.21'
 softdepend: [PlaceholderAPI]
 
-#commands:
-#  varch:
-#    description: A description of your command.
-#    usage: /<command>
+commands:
+  varch:
+    description: A description of your command.
+    usage: /<command>
