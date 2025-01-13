@@ -21,6 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
+    private static final int MAX_LEVEL = 120;
     private static final long UPDATE_INTERVAL = 12000L;
 
     private final Main plugin;
@@ -80,6 +81,7 @@ public class PlayerDataManager {
         try (ResultSet rs = databaseManager.getPlayerData(uuid)) {
             if (rs.next()) {
                 PlayerData data = new PlayerData(
+                        this,
                         rs.getString("playerName"),
                         rs.getInt("archEXP"),
                         rs.getInt("archLevel"),
@@ -171,4 +173,15 @@ public class PlayerDataManager {
         }
         ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Experience table has been loaded.");
     }
+
+//    public void checkAndApplyLevelUp(@NotNull PlayerData data) {
+//        int currentLevel = data.getArchLevel();
+//        int currentExp = data.getArchExp();
+//        while (experienceTable.containsKey(currentLevel + 1) &&
+//                currentExp >= experienceTable.get(currentLevel + 1) &&
+//                currentLevel < MAX_LEVEL) {
+//            data.addArchLevel(1);
+//            currentLevel = data.getArchLevel();
+//        }
+//    }
 }

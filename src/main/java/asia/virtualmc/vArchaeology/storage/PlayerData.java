@@ -1,6 +1,6 @@
+// PlayerData.class
 package asia.virtualmc.vArchaeology.storage;
 
-import asia.virtualmc.vArchaeology.Main;
 import org.jetbrains.annotations.NotNull;
 
 public class PlayerData {
@@ -34,11 +34,11 @@ public class PlayerData {
         this.archLevel = MIN_LEVEL;
     }
 
-    public PlayerData(@NotNull String name, int archEXP, int archLevel, int archApt, int archLuck,
+    public PlayerData(@NotNull PlayerDataManager playerDataManager, @NotNull String name, int archEXP, int archLevel, int archApt, int archLuck,
                       double archADP, double archXPMul, int archBonusXP,
                       int blocksMined, int artefactsFound, int artefactsRestored, int treasuresFound
                       ) {
-        this.playerDataManager = null;
+        this.playerDataManager = playerDataManager;
         this.name = name;
         this.archEXP = archEXP;
         this.archLevel = archLevel;
@@ -77,6 +77,9 @@ public class PlayerData {
         if (value <= 0) return;
         setArchEXP(Math.min(MAX_EXP, archEXP + value));
         checkAndApplyLevelUp();
+//        if (playerDataManager != null) {
+//            playerDataManager.checkAndApplyLevelUp(this);
+//        }
     }
 
     public void subtractArchEXP(int value) {

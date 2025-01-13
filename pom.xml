@@ -111,9 +111,8 @@
         <!-- CommandAPI -->
         <dependency>
             <groupId>dev.jorel</groupId>
-            <artifactId>commandapi-bukkit-core</artifactId>
+            <artifactId>commandapi-bukkit-shade</artifactId>
             <version>9.7.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
