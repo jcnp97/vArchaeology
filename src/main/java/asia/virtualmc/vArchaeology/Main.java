@@ -7,6 +7,9 @@ import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
+import dev.jorel.commandapi.CommandAPI;
+import dev.jorel.commandapi.CommandAPIBukkitConfig;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
@@ -18,6 +21,8 @@ public final class Main extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        CommandAPI.onEnable();
+
         this.databaseManager = new DatabaseManager(this);
         this.playerDataManager = new PlayerDataManager(this, databaseManager);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
@@ -25,12 +30,20 @@ public final class Main extends JavaPlugin {
         this.blockBreakManager = new BlockBreakManager(this, playerDataManager);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
-        getCommand("varch").setExecutor(commandManager);
         getServer().getPluginManager().registerEvents(blockBreakManager, this);
     }
 
     @Override
+    public void onLoad() {
+        CommandAPI.onLoad(new CommandAPIBukkitConfig(this)
+                .verboseOutput(true)
+                .silentLogs(false)
+        );
+    }
+
+    @Override
     public void onDisable() {
+        CommandAPI.onDisable();
         if (playerDataManager != null) {
             playerDataManager.updateAllData();
         }
