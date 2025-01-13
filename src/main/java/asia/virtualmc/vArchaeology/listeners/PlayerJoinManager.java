@@ -3,7 +3,6 @@ package asia.virtualmc.vArchaeology.listeners;
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.DatabaseManager;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
-import asia.virtualmc.vArchaeology.storage.PlayerData;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,23 +49,8 @@ public class PlayerJoinManager implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID playerUUID = event.getPlayer().getUniqueId();
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            PlayerData data = playerDataManager.getPlayerData(playerUUID);
-            if (data != null) {
-                databaseManager.savePlayerData(
-                        playerUUID,
-                        data.getName(),
-                        data.getArchExp(),
-                        data.getArchLevel(),
-                        data.getArchApt(),
-                        data.getArchLuck(),
-                        data.getArchADP(),
-                        data.getArchXPMul(),
-                        data.getArchBonusXP(),
-                        data.getBlocksMined(),
-                        data.getArtefactsFound(),
-                        data.getArtefactsRestored(),
-                        data.getTreasuresFound()
-                );
+            if (playerDataManager.getPlayerName(playerUUID) != null) {
+                playerDataManager.updateAllData();
                 playerDataManager.unloadData(playerUUID);
             }
         });

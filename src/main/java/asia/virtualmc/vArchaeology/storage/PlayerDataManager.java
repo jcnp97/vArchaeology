@@ -21,27 +21,56 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerDataManager {
-    private static final int MAX_LEVEL = 120;
     private static final long UPDATE_INTERVAL = 12000L;
+    private static final int MAX_EXP = 1_000_000_000;
+    private static final int MIN_LEVEL = 1;
+    private static final int MAX_LEVEL = 120;
 
     private final Main plugin;
     private final DatabaseManager databaseManager;
-    private final Map<UUID, PlayerData> playerDataMap;
     private final Map<Integer, Integer> experienceTable;
+    private final Map<UUID, PlayerStats> playerStatsMap;
 
     public PlayerDataManager(@NotNull Main plugin, @NotNull DatabaseManager databaseManager) {
         this.plugin = plugin;
         this.databaseManager = databaseManager;
-        this.playerDataMap = new ConcurrentHashMap<>();
         this.experienceTable = new HashMap<>();
+        this.playerStatsMap = new ConcurrentHashMap<>();
 
         loadExperienceTable();
         startUpdateTask();
     }
 
-    @NotNull
-    public Map<Integer, Integer> getExperienceTable() {
-        return new HashMap<>(experienceTable);
+    private static class PlayerStats {
+        String name;
+        int archEXP;
+        int archLevel;
+        int archApt;
+        int archLuck;
+        double archADP;
+        double archXPMul;
+        int archBonusXP;
+        int blocksMined;
+        int artefactsFound;
+        int artefactsRestored;
+        int treasuresFound;
+
+        PlayerStats(String name, int archEXP, int archLevel, int archApt, int archLuck,
+                    double archADP, double archXPMul, int archBonusXP,
+                    int blocksMined, int artefactsFound, int artefactsRestored, int treasuresFound) {
+            this.name = name;
+            this.archEXP = archEXP;
+            this.archLevel = archLevel;
+            this.archApt = archApt;
+            this.archLuck = archLuck;
+            this.archADP = archADP;
+            this.archXPMul = archXPMul;
+            this.archBonusXP = archBonusXP;
+            this.blocksMined = blocksMined;
+            this.artefactsFound = artefactsFound;
+            this.artefactsRestored = artefactsRestored;
+            this.treasuresFound = treasuresFound;
+        }
     }
 
     private void startUpdateTask() {
@@ -54,22 +83,13 @@ public class PlayerDataManager {
     }
 
     public void updateAllData() {
-        playerDataMap.forEach((uuid, data) -> {
+        playerStatsMap.forEach((uuid, stats) -> {
             try {
                 databaseManager.savePlayerData(
-                        uuid,
-                        data.getName(),
-                        data.getArchExp(),
-                        data.getArchLevel(),
-                        data.getArchApt(),
-                        data.getArchLuck(),
-                        data.getArchADP(),
-                        data.getArchXPMul(),
-                        data.getArchBonusXP(),
-                        data.getBlocksMined(),
-                        data.getArtefactsFound(),
-                        data.getArtefactsRestored(),
-                        data.getTreasuresFound()
+                        uuid, stats.name, stats.archEXP, stats.archLevel,
+                        stats.archApt, stats.archLuck, stats.archADP,
+                        stats.archXPMul, stats.archBonusXP, stats.blocksMined,
+                        stats.artefactsFound, stats.artefactsRestored, stats.treasuresFound
                 );
             } catch (Exception e) {
                 plugin.getLogger().severe("[vArchaeology] Failed to save data for player " + uuid + ": " + e.getMessage());
@@ -80,8 +100,7 @@ public class PlayerDataManager {
     public void loadData(@NotNull UUID uuid) {
         try (ResultSet rs = databaseManager.getPlayerData(uuid)) {
             if (rs.next()) {
-                PlayerData data = new PlayerData(
-                        this,
+                PlayerStats stats = new PlayerStats(
                         rs.getString("playerName"),
                         rs.getInt("archEXP"),
                         rs.getInt("archLevel"),
@@ -95,7 +114,7 @@ public class PlayerDataManager {
                         rs.getInt("artefactsRestored"),
                         rs.getInt("treasuresFound")
                 );
-                playerDataMap.put(uuid, data);
+                playerStatsMap.put(uuid, stats);
             }
         } catch (SQLException e) {
             plugin.getLogger().severe("[vArchaeology] Failed to load data for player " + uuid + ": " + e.getMessage());
@@ -103,33 +122,49 @@ public class PlayerDataManager {
     }
 
     public void unloadData(@NotNull UUID uuid) {
-        playerDataMap.remove(uuid);
-    }
-
-    @Nullable
-    public PlayerData getPlayerData(@NotNull UUID uuid) {
-        return playerDataMap.get(uuid);
+        playerStatsMap.remove(uuid);
     }
 
     public void updateExp(@NotNull UUID uuid, int exp, @NotNull String param) {
-        PlayerData data = playerDataMap.get(uuid);
-        if (data == null) return;
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats == null) return;
 
         switch (param.toLowerCase()) {
-            case "add" -> data.addArchEXP(exp);
-            case "sub" -> data.subtractArchEXP(exp);
-            default -> data.setArchEXP(exp);
+            case "add" -> {
+                if (exp <= 0) return;
+                stats.archEXP = Math.min(MAX_EXP, stats.archEXP + exp);
+                checkAndApplyLevelUp(uuid);
+            }
+            case "sub" -> stats.archEXP = Math.max(0, stats.archEXP - exp);
+            default -> stats.archEXP = Math.max(0, Math.min(exp, MAX_EXP));
         }
     }
 
     public void updateLevel(@NotNull UUID uuid, int level, @NotNull String param) {
-        PlayerData data = playerDataMap.get(uuid);
-        if (data == null) return;
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats == null) return;
 
         switch (param.toLowerCase()) {
-            case "add" -> data.addArchLevel(level);
-            case "sub" -> data.subtractArchLevel(level);
-            default -> data.setArchLevel(level);
+            case "add" -> {
+                if (level <= 0) return;
+                stats.archLevel = Math.min(MAX_LEVEL, stats.archLevel + level);
+            }
+            case "sub" -> {
+                if (level <= 0) return;
+                stats.archLevel = Math.max(MIN_LEVEL, stats.archLevel - level);
+            }
+            default -> stats.archLevel = Math.max(MIN_LEVEL, Math.min(level, MAX_LEVEL));
+        }
+    }
+
+    private void checkAndApplyLevelUp(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats == null) return;
+
+        while (experienceTable.containsKey(stats.archLevel + 1) &&
+                stats.archEXP >= experienceTable.get(stats.archLevel + 1) &&
+                stats.archLevel < MAX_LEVEL) {
+            stats.archLevel++;
         }
     }
 
@@ -174,14 +209,86 @@ public class PlayerDataManager {
         ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Experience table has been loaded.");
     }
 
-//    public void checkAndApplyLevelUp(@NotNull PlayerData data) {
-//        int currentLevel = data.getArchLevel();
-//        int currentExp = data.getArchExp();
-//        while (experienceTable.containsKey(currentLevel + 1) &&
-//                currentExp >= experienceTable.get(currentLevel + 1) &&
-//                currentLevel < MAX_LEVEL) {
-//            data.addArchLevel(1);
-//            currentLevel = data.getArchLevel();
-//        }
-//    }
+    // Increment methods for achievements
+    public void incrementBlocksMined(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.blocksMined++;
+    }
+
+    public void incrementArtefactsFound(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.artefactsFound++;
+    }
+
+    public void incrementArtefactsRestored(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.artefactsRestored++;
+    }
+
+    public void incrementTreasuresFound(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.treasuresFound++;
+    }
+
+    // Getter methods for player stats
+    @Nullable
+    public String getPlayerName(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.name : null;
+    }
+
+    public int getArchExp(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archEXP : 0;
+    }
+
+    public int getArchLevel(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archLevel : MIN_LEVEL;
+    }
+
+    public int getArchApt(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archApt : 0;
+    }
+
+    public int getArchBonusXP(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archBonusXP : 0;
+    }
+
+    public int getArchLuck(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archLuck : 0;
+    }
+
+    public double getArchADP(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archLuck : 0.0;
+    }
+
+    public double getArchXPMul(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.archLuck : 0.0;
+    }
+
+    public int getBlocksMined(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.blocksMined : 0;
+    }
+
+    public int getArtefactsFound(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.artefactsFound : 0;
+    }
+
+    public int getArtefactsRestored(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.artefactsRestored : 0;
+    }
+
+    public int getTreasureFound(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.treasuresFound : 0;
+    }
 }

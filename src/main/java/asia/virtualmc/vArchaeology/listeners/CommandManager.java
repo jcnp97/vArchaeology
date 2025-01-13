@@ -1,7 +1,6 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 
 import dev.jorel.commandapi.CommandAPI;
@@ -47,9 +46,10 @@ public class CommandManager {
                 .withPermission("varchaeology.command.get")
                 .executes((sender, args) -> {
                     Player target = (Player) args.get("player");
-                    PlayerData data = playerDataManager.getPlayerData(target.getUniqueId());
+                    UUID targetUUID = target.getUniqueId();
+                    String playerName = playerDataManager.getPlayerName(targetUUID);
 
-                    if (data == null) {
+                    if (playerName == null) {
                         sender.sendMessage(Component.text("[vArchaeology] No data found for that player!")
                                 .color(TextColor.color(255, 0, 0)));
                         return;
@@ -57,19 +57,21 @@ public class CommandManager {
 
                     sender.sendMessage(Component.text("=== Player Data for " + target.getName() + " ===")
                             .color(TextColor.color(0, 255, 162)));
-                    sender.sendMessage(Component.text("Archaeology EXP: " + data.getArchExp())
+                    sender.sendMessage(Component.text("Archaeology EXP: " + playerDataManager.getArchExp(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("Archaeology Level: " + data.getArchLevel())
+                    sender.sendMessage(Component.text("Archaeology Level: " + playerDataManager.getArchLevel(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("Aptitude: " + data.getArchApt())
+                    sender.sendMessage(Component.text("Aptitude: " + playerDataManager.getArchApt(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("Luck: " + data.getArchLuck())
+                    sender.sendMessage(Component.text("Luck: " + playerDataManager.getArchLuck(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("ADP: " + data.getArchADP())
+                    sender.sendMessage(Component.text("ADP: " + playerDataManager.getArchADP(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("XP Multiplier: " + data.getArchXPMul())
+                    sender.sendMessage(Component.text("XP Multiplier: " + playerDataManager.getArchXPMul(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("Bonus XP: " + data.getArchBonusXP())
+                    sender.sendMessage(Component.text("Bonus XP: " + playerDataManager.getArchBonusXP(targetUUID))
+                            .color(TextColor.color(255, 255, 255)));
+                    sender.sendMessage(Component.text("Blocks Mined: " + playerDataManager.getBlocksMined(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
                 });
     }

@@ -85,12 +85,13 @@ public class BlockBreakManager implements Listener {
 
         // Award XP to the player
         playerDataManager.updateExp(player.getUniqueId(), expValue, "add");
+        playerDataManager.incrementBlocksMined(player.getUniqueId());
 
         // Increment blocks mined statistic
-        var playerData = playerDataManager.getPlayerData(player.getUniqueId());
-        if (playerData != null) {
-            playerData.incrementBlocksMined();
-        }
+//        var playerData = playerDataManager.playerStatsMap.get(player.getUniqueId());
+//        if (playerData != null) {
+//            playerDataManager.incrementBlocksMined();
+//        }
     }
 
     public void saveDefaultConfig() {
