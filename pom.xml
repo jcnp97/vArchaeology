@@ -48,6 +48,12 @@
                                         <include>com.zaxxer.hikari.**</include>
                                     </includes>
                                 </relocation>
+
+                                <!-- CommandAPI relocation -->
+                                <relocation>
+                                    <pattern>dev.jorel.commandapi</pattern>
+                                    <shadedPattern>asia.virtualmc.vArchaeology.libs.commandapi</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
@@ -100,6 +106,14 @@
             <artifactId>HikariCP</artifactId>
             <version>4.0.3</version>
             <scope>compile</scope>
+        </dependency>
+
+        <!-- CommandAPI -->
+        <dependency>
+            <groupId>dev.jorel</groupId>
+            <artifactId>commandapi-bukkit-core</artifactId>
+            <version>9.7.0</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
