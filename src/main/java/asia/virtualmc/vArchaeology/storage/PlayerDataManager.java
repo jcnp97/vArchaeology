@@ -3,6 +3,7 @@ package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
+import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -28,12 +29,14 @@ public class PlayerDataManager {
 
     private final Main plugin;
     private final DatabaseManager databaseManager;
+    private final BossBarUtil bossBarUtil;
     private final Map<Integer, Integer> experienceTable;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerDataManager(@NotNull Main plugin, @NotNull DatabaseManager databaseManager) {
+    public PlayerDataManager(@NotNull Main plugin, @NotNull DatabaseManager databaseManager, @NotNull BossBarUtil bossBarUtil) {
         this.plugin = plugin;
         this.databaseManager = databaseManager;
+        this.bossBarUtil = bossBarUtil;
         this.experienceTable = new HashMap<>();
         this.playerStatsMap = new ConcurrentHashMap<>();
 
@@ -133,6 +136,8 @@ public class PlayerDataManager {
             case "add" -> {
                 if (exp <= 0) return;
                 stats.archEXP = Math.min(MAX_EXP, stats.archEXP + exp);
+                //
+                bossBarUtil.bossBarUpdate(uuid, exp, stats.archLevel, stats.archEXP, experienceTable.get(stats.archLevel + 1));
                 checkAndApplyLevelUp(uuid);
             }
             case "sub" -> stats.archEXP = Math.max(0, stats.archEXP - exp);
