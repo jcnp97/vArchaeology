@@ -12,6 +12,8 @@ import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
+import de.tr7zw.changeme.nbtapi.*;
+
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
@@ -25,6 +27,11 @@ public final class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         CommandAPI.onEnable();
+        if (!NBT.preloadApi()) {
+            getLogger().warning("NBT-API wasn't initialized properly, disabling the plugin");
+            getPluginLoader().disablePlugin(this);
+            return;
+        }
 
         this.bossBarUtil = new BossBarUtil(this);
         this.databaseManager = new DatabaseManager(this);

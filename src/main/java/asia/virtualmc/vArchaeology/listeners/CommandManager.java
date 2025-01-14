@@ -35,6 +35,7 @@ public class CommandManager {
                 .withSubcommand(archGetStats())
                 .withSubcommand(archSetEXP())
                 .withSubcommand(archSetLevel())
+                .withSubcommand(archSetXPMul())
                 .withSubcommand(archResetStats())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
@@ -106,6 +107,23 @@ public class CommandManager {
 
                     playerDataManager.updateLevel(target.getUniqueId(), value, operation);
                     sender.sendMessage(Component.text("[vArchaeology] Successfully updated " + target.getName() + "'s level!")
+                            .color(TextColor.color(0, 255, 162)));
+                });
+    }
+
+    private CommandAPICommand archSetXPMul() {
+        return new CommandAPICommand("xpmul")
+                .withArguments(new MultiLiteralArgument("operation", "add", "subtract", "set"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new DoubleArgument("value", 0.0))
+                .withPermission("varchaeology.command.xpmul")
+                .executes((sender, args) -> {
+                    String operation = (String) args.get("operation");
+                    Player target = (Player) args.get("player");
+                    double value = (double) args.get("value");
+
+                    playerDataManager.updateXPMul(target.getUniqueId(), value, operation);
+                    sender.sendMessage(Component.text("[vArchaeology] Successfully updated " + target.getName() + "'s XP Multiplier!")
                             .color(TextColor.color(0, 255, 162)));
                 });
     }

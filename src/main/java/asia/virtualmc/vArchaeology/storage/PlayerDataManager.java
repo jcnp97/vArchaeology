@@ -46,7 +46,7 @@ public class PlayerDataManager {
 
     private static class PlayerStats {
         String name;
-        int archEXP;
+        double archEXP;
         int archLevel;
         int archApt;
         int archLuck;
@@ -58,7 +58,7 @@ public class PlayerDataManager {
         int artefactsRestored;
         int treasuresFound;
 
-        PlayerStats(String name, int archEXP, int archLevel, int archApt, int archLuck,
+        PlayerStats(String name, double archEXP, int archLevel, int archApt, int archLuck,
                     double archADP, double archXPMul, int archBonusXP,
                     int blocksMined, int artefactsFound, int artefactsRestored, int treasuresFound) {
             this.name = name;
@@ -105,7 +105,7 @@ public class PlayerDataManager {
             if (rs.next()) {
                 PlayerStats stats = new PlayerStats(
                         rs.getString("playerName"),
-                        rs.getInt("archEXP"),
+                        rs.getDouble("archEXP"),
                         rs.getInt("archLevel"),
                         rs.getInt("archApt"),
                         rs.getInt("archLuck"),
@@ -128,9 +128,12 @@ public class PlayerDataManager {
         playerStatsMap.remove(uuid);
     }
 
-    public void updateExp(@NotNull UUID uuid, int exp, @NotNull String param) {
+    public void updateExp(@NotNull UUID uuid, double exp, @NotNull String param) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats == null) return;
+
+        // All experience received is rounded to two decimals
+        exp = Math.round(exp * 100.0) / 100.0;
 
         switch (param.toLowerCase()) {
             case "add" -> {
@@ -158,6 +161,26 @@ public class PlayerDataManager {
                 stats.archLevel = Math.max(MIN_LEVEL, stats.archLevel - level);
             }
             default -> stats.archLevel = Math.max(MIN_LEVEL, Math.min(level, MAX_LEVEL));
+        }
+    }
+
+    public void updateXPMul(@NotNull UUID uuid, double XPMul, @NotNull String param) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats == null) return;
+
+        switch (param.toLowerCase()) {
+            case "add" -> {
+                if (XPMul <= 0) return;
+                stats.archXPMul += XPMul;
+            }
+            case "sub" -> {
+                if (XPMul <= 0) return;
+                stats.archXPMul = Math.max(0, stats.archXPMul - XPMul);
+            }
+            default -> {
+                if (XPMul <= 0) return;
+                stats.archXPMul = XPMul;
+            }
         }
     }
 
@@ -241,7 +264,7 @@ public class PlayerDataManager {
         return stats != null ? stats.name : null;
     }
 
-    public int getArchExp(@NotNull UUID uuid) {
+    public double getArchExp(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
         return stats != null ? stats.archEXP : 0;
     }
@@ -268,12 +291,12 @@ public class PlayerDataManager {
 
     public double getArchADP(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.archLuck : 0.0;
+        return stats != null ? stats.archADP : 0.0;
     }
 
     public double getArchXPMul(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.archLuck : 0.0;
+        return stats != null ? stats.archXPMul : 1.0;
     }
 
     public int getBlocksMined(@NotNull UUID uuid) {

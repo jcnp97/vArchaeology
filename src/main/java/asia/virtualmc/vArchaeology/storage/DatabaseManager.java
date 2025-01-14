@@ -82,7 +82,7 @@ public class DatabaseManager {
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
                             "playerName VARCHAR(16) NOT NULL," +
-                            "archEXP INT DEFAULT 0," +
+                            "archEXP DECIMAL(13,2) DEFAULT 0.00," +
                             "archLevel TINYINT DEFAULT 1," +
                             "archApt INT DEFAULT 0," +
                             "archLuck TINYINT DEFAULT 0" +
@@ -93,7 +93,7 @@ public class DatabaseManager {
                     "CREATE TABLE IF NOT EXISTS archInternalStats (" +
                             "playerUUID VARCHAR(36) PRIMARY KEY," +
                             "archADP DECIMAL(5,2) DEFAULT 0.00," +
-                            "archXPMul DECIMAL(4,2) DEFAULT 0.00," +
+                            "archXPMul DECIMAL(4,2) DEFAULT 1.00," +
                             "archBonusXP INT DEFAULT 0," +
                             "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
                             ")"
@@ -130,7 +130,7 @@ public class DatabaseManager {
     }
 
     public void savePlayerData(
-            UUID uuid, String name, int archExp, int archLevel, int archApt, int archLuck, double archADP,
+            UUID uuid, String name, double archExp, int archLevel, int archApt, int archLuck, double archADP,
             double archXPMul, int archBonusXP, int blocksMined, int artFound, int artRestored, int treasuresFound
     ) {
         try (Connection conn = dataSource.getConnection()) {
@@ -145,7 +145,7 @@ public class DatabaseManager {
                             "WHERE playerUUID = ?"
             );
             ps.setString(1, name);
-            ps.setInt(2, archExp);
+            ps.setDouble(2, archExp);
             ps.setInt(3, archLevel);
             ps.setInt(4, archApt);
             ps.setInt(5, archLuck);
@@ -162,7 +162,7 @@ public class DatabaseManager {
             );
             ps.setDouble(1, archADP);
             ps.setDouble(2, archXPMul);
-            ps.setDouble(3, archBonusXP);
+            ps.setInt(3, archBonusXP);
             ps.setString(4, uuid.toString());
             ps.executeUpdate();
 
@@ -205,7 +205,7 @@ public class DatabaseManager {
                 );
                 ps.setString(1, uuid.toString());
                 ps.setString(2, name);
-                ps.setInt(3, 0);
+                ps.setDouble(3, 0);
                 ps.setInt(4, 1);
                 ps.setInt(5, 0);
                 ps.setInt(6, 0);
@@ -221,7 +221,7 @@ public class DatabaseManager {
                 );
                 ps.setString(1, uuid.toString());
                 ps.setDouble(2, 0.0);
-                ps.setDouble(3, 0.0);
+                ps.setDouble(3, 1.0);
                 ps.setInt(4, 0);
                 ps.executeUpdate();
 

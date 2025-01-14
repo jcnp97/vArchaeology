@@ -40,9 +40,6 @@ public class BlockBreakManager implements Listener {
         plugin.reloadConfig();
         FileConfiguration config = plugin.getConfig();
 
-        // Load blockBreakChance
-        blockBreakChance = config.getInt("settings.blockBreakChance", 80);
-
         // Clear and reload blocksList
         blocksList.clear();
         ConfigurationSection blocksSection = config.getConfigurationSection("settings.blocksList");
@@ -72,42 +69,35 @@ public class BlockBreakManager implements Listener {
             return; // Not a configured block, let it break normally
         }
 
-        // Cancel vanilla drops regardless of break chance
-        event.setDropItems(false);
-
-        // Process the break chance
-        boolean shouldBreak = random.nextInt(100) < blockBreakChance;
-
-        // If break chance fails, cancel the break but still give XP
-        if (!shouldBreak) {
-            event.setCancelled(true);
-        }
+        event.setDropItems(false); // Cancel vanilla drops
 
         // Award XP to the player
-        playerDataManager.updateExp(player.getUniqueId(), expValue, "add");
+        playerDataManager.updateExp(player.getUniqueId(), (double) expValue * (playerDataManager.getArchXPMul(player.getUniqueId())), "add");
         playerDataManager.incrementBlocksMined(player.getUniqueId());
-
-        // Increment blocks mined statistic
-//        var playerData = playerDataManager.playerStatsMap.get(player.getUniqueId());
-//        if (playerData != null) {
-//            playerDataManager.incrementBlocksMined();
-//        }
     }
 
     public void saveDefaultConfig() {
         FileConfiguration config = plugin.getConfig();
 
         // Set default values if they don't exist
-        if (!config.contains("settings.blockBreakChance")) {
-            config.set("settings.blockBreakChance", 80);
-        }
-
         if (!config.contains("settings.blocksList.SAND")) {
             config.set("settings.blocksList.SAND", 1);
         }
 
         if (!config.contains("settings.blocksList.GRAVEL")) {
-            config.set("settings.blocksList.GRAVEL", 2);
+            config.set("settings.blocksList.GRAVEL", 1);
+        }
+
+        if (!config.contains("settings.blocksList.GRASS_BLOCK")) {
+            config.set("settings.blocksList.GRASS_BLOCK", 1);
+        }
+
+        if (!config.contains("settings.blocksList.DIRT")) {
+            config.set("settings.blocksList.DIRT", 1);
+        }
+
+        if (!config.contains("settings.blocksList.CLAY_BLOCK")) {
+            config.set("settings.blocksList.CLAY_BLOCK", 1);
         }
 
         plugin.saveConfig();

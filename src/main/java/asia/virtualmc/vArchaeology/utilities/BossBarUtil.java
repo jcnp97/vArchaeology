@@ -34,7 +34,7 @@ public class BossBarUtil {
      * @param nextLevelExp    The player's current experience.
      * @param currentLevel  The experience needed to next level.
      */
-    public void bossBarUpdate(@NotNull UUID uuid, int newExp, int currentExp, int nextLevelExp, int currentLevel) {
+    public void bossBarUpdate(@NotNull UUID uuid, double newExp, double currentExp, int nextLevelExp, int currentLevel) {
         BossBar bossBar = activeBossBars.computeIfAbsent(uuid, k -> BossBar.bossBar(
                 Component.text(""),
                 0.0f,
@@ -62,9 +62,9 @@ public class BossBarUtil {
                         BossBar bossBar = activeBossBars.get(uuid);
 
                         if (player != null && player.isOnline() && bossBar != null) {
-                            int currentExp = data.getCurrentExp();
+                            double currentExp = data.getCurrentExp();
                             int nextLevelExp = data.getNextLevelExp();
-                            int totalExp = data.getNewExp();
+                            double totalExp = data.getNewExp();
 
                             float progress = (float) currentExp / nextLevelExp;
 
@@ -93,23 +93,23 @@ public class BossBarUtil {
     }
 
     private static class BossBarData {
-        private int newExp;
-        private int currentExp;
+        private double newExp;
+        private double currentExp;
         private int nextLevelExp;
         private int currentLevel;
 
-        public BossBarData(int newExp, int currentExp, int nextLevelExp, int currentLevel) {
+        public BossBarData(double newExp, double currentExp, int nextLevelExp, int currentLevel) {
             this.newExp = newExp;
             this.currentExp = currentExp;
             this.nextLevelExp = nextLevelExp;
             this.currentLevel = currentLevel;
         }
 
-        public int getNewExp() {
+        public double getNewExp() {
             return newExp;
         }
 
-        public int getCurrentExp() {
+        public double getCurrentExp() {
             return currentExp;
         }
 
@@ -121,11 +121,11 @@ public class BossBarUtil {
             return currentLevel;
         }
 
-        public void addExp(int exp) {
+        public void addExp(double exp) {
             this.newExp += exp;
         }
 
-        public void updateCurrentExp(int currentExp) {
+        public void updateCurrentExp(double currentExp) {
             this.currentExp = currentExp;
         }
 
