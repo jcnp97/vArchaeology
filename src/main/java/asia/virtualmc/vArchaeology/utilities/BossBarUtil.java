@@ -55,7 +55,6 @@ public class BossBarUtil {
         new BukkitRunnable() {
             @Override
             public void run() {
-                // Run the main logic synchronously to avoid threading issues with Bukkit API
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     expUpdates.forEach((uuid, data) -> {
                         Player player = Bukkit.getPlayer(uuid);

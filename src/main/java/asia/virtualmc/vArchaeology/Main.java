@@ -1,6 +1,7 @@
 // Main.class
 package asia.virtualmc.vArchaeology;
 
+import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
 import asia.virtualmc.vArchaeology.listeners.CommandManager;
 import asia.virtualmc.vArchaeology.storage.DatabaseManager;
@@ -23,6 +24,7 @@ public final class Main extends JavaPlugin {
     private CommandManager commandManager;
     private BlockBreakManager blockBreakManager;
     private BossBarUtil bossBarUtil;
+    private ItemManager itemManager;
 
     @Override
     public void onEnable() {
@@ -34,6 +36,7 @@ public final class Main extends JavaPlugin {
         }
 
         this.bossBarUtil = new BossBarUtil(this);
+        this.itemManager = new ItemManager(this);
         this.databaseManager = new DatabaseManager(this);
         this.playerDataManager = new PlayerDataManager(this, databaseManager, bossBarUtil);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);

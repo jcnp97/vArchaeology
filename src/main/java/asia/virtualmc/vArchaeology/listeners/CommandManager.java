@@ -49,6 +49,7 @@ public class CommandManager {
                     Player target = (Player) args.get("player");
                     UUID targetUUID = target.getUniqueId();
                     String playerName = playerDataManager.getPlayerName(targetUUID);
+                    String archEXP = String.format("%,.2f", playerDataManager.getArchExp(targetUUID));
 
                     if (playerName == null) {
                         sender.sendMessage(Component.text("[vArchaeology] No data found for that player!")
@@ -58,7 +59,7 @@ public class CommandManager {
 
                     sender.sendMessage(Component.text("=== Player Data for " + target.getName() + " ===")
                             .color(TextColor.color(0, 255, 162)));
-                    sender.sendMessage(Component.text("Archaeology EXP: " + playerDataManager.getArchExp(targetUUID))
+                    sender.sendMessage(Component.text("Archaeology EXP: " + archEXP)
                             .color(TextColor.color(255, 255, 255)));
                     sender.sendMessage(Component.text("Archaeology Level: " + playerDataManager.getArchLevel(targetUUID))
                             .color(TextColor.color(255, 255, 255)));

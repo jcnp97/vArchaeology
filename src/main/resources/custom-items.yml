@@ -1,0 +1,18 @@
+# vArchaeology Items
+itemsList:
+  purpleheart_wood: # item_id for commands
+    material: FLINT # base material
+  name: "&6Purpleheart Wood"
+  custom-model-data: 100000
+  lore:
+    - "&aThis line 1"
+    - "&bThis line 2"
+    - "&cThis line 3"
+  imperial_steel: # item_id for commands
+    material: FLINT # base material
+  name: "&6Purpleheart Wood"
+  custom-model-data: 100001
+  lore:
+    - "&aThis line 1"
+    - "&bThis line 2"
+    - "&cThis line 3"

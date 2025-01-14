@@ -139,8 +139,10 @@ public class PlayerDataManager {
             case "add" -> {
                 if (exp <= 0) return;
                 stats.archEXP = Math.min(MAX_EXP, stats.archEXP + exp);
-                bossBarUtil.bossBarUpdate(uuid, exp, stats.archEXP, experienceTable.get(stats.archLevel + 1), stats.archLevel);
-                checkAndApplyLevelUp(uuid);
+                if (stats.archLevel < 120) {
+                    bossBarUtil.bossBarUpdate(uuid, exp, stats.archEXP, experienceTable.get(stats.archLevel + 1), stats.archLevel);
+                    checkAndApplyLevelUp(uuid);
+                }
             }
             case "sub" -> stats.archEXP = Math.max(0, stats.archEXP - exp);
             default -> stats.archEXP = Math.max(0, Math.min(exp, MAX_EXP));
@@ -266,7 +268,7 @@ public class PlayerDataManager {
 
     public double getArchExp(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.archEXP : 0;
+        return stats != null ? stats.archEXP : 0.0;
     }
 
     public int getArchLevel(@NotNull UUID uuid) {
