@@ -2,6 +2,7 @@
 package asia.virtualmc.vArchaeology;
 
 import asia.virtualmc.vArchaeology.items.ItemManager;
+import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
 import asia.virtualmc.vArchaeology.listeners.CommandManager;
 import asia.virtualmc.vArchaeology.storage.DatabaseManager;
@@ -18,13 +19,14 @@ import de.tr7zw.changeme.nbtapi.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
+    private ItemManager itemManager;
     private DatabaseManager databaseManager;
     private PlayerDataManager playerDataManager;
     private PlayerJoinManager playerJoinManager;
     private CommandManager commandManager;
     private BlockBreakManager blockBreakManager;
     private BossBarUtil bossBarUtil;
-    private ItemManager itemManager;
+    private RNGManager rngManager;
 
     @Override
     public void onEnable() {
@@ -37,11 +39,12 @@ public final class Main extends JavaPlugin {
 
         this.bossBarUtil = new BossBarUtil(this);
         this.itemManager = new ItemManager(this);
+        this.rngManager = new RNGManager(this);
         this.databaseManager = new DatabaseManager(this);
         this.playerDataManager = new PlayerDataManager(this, databaseManager, bossBarUtil);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
-        this.commandManager = new CommandManager(this, playerDataManager);
-        this.blockBreakManager = new BlockBreakManager(this, playerDataManager);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager);
+        this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
         getServer().getPluginManager().registerEvents(blockBreakManager, this);

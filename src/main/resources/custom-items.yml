@@ -1,18 +1,65 @@
 # vArchaeology Items
 itemsList:
   purpleheart_wood: # item_id for commands
+    id: 1
     material: FLINT # base material
-  name: "&6Purpleheart Wood"
-  custom-model-data: 100000
-  lore:
-    - "&aThis line 1"
-    - "&bThis line 2"
-    - "&cThis line 3"
+    name: "&aPurpleheart Wood"
+    custom-model-data: 100000
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"
   imperial_steel: # item_id for commands
+    id: 2
     material: FLINT # base material
-  name: "&6Purpleheart Wood"
-  custom-model-data: 100001
-  lore:
+    name: "&6Imperial Steel"
+    custom-model-data: 100001
+    lore:
     - "&aThis line 1"
     - "&bThis line 2"
     - "&cThis line 3"
+  everlight_silvthril: # item_id for commands
+    id: 3
+    material: FLINT # base material
+    name: "&6Everlight Silvthril"
+    custom-model-data: 100002
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"
+  chaotic_brimstone: # item_id for commands
+    id: 4
+    material: FLINT # base material
+    name: "&6Chaotic Brimstone"
+    custom-model-data: 100003
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"
+  hellfire_metal: # item_id for commands
+    id: 5
+    material: FLINT # base material
+    name: "&6Hellfire Metal"
+    custom-model-data: 100004
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"
+  aetherium_alloy: # item_id for commands
+    id: 6
+    material: FLINT # base material
+    name: "&6Aetherium Alloy"
+    custom-model-data: 100005
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"
+  quintessence: # item_id for commands
+    id: 7
+    material: FLINT # base material
+    name: "&6Quintessence"
+    custom-model-data: 100006
+    lore:
+      - "&aThis line 1"
+      - "&bThis line 2"
+      - "&cThis line 3"

@@ -2,11 +2,15 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.items.ItemManager;
+import asia.virtualmc.vArchaeology.items.RNGManager;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Item;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -17,30 +21,31 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 public class BlockBreakManager implements Listener {
     private final Main plugin;
     private final PlayerDataManager playerDataManager;
+    private final ItemManager itemManager;
+    private final RNGManager rngManager;
     private final Random random;
-    private int blockBreakChance;
     private final Map<Material, Integer> blocksList;
 
-    public BlockBreakManager(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager) {
+    public BlockBreakManager(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
+        this.itemManager = itemManager;
+        this.rngManager = rngManager;
         this.random = new Random();
         this.blocksList = new HashMap<>();
 
-        // Save default config if it doesn't exist
-        plugin.saveDefaultConfig();
+        saveDefaultConfig();
         loadConfiguration();
     }
 
     public void loadConfiguration() {
         plugin.reloadConfig();
         FileConfiguration config = plugin.getConfig();
-
-        // Clear and reload blocksList
         blocksList.clear();
         ConfigurationSection blocksSection = config.getConfigurationSection("settings.blocksList");
 
@@ -62,24 +67,27 @@ public class BlockBreakManager implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         Material material = block.getType();
+        Location blockLocation = event.getBlock().getLocation();
+        UUID uuid = player.getUniqueId();
 
-        // Check if the broken block is in our configured list
         Integer expValue = blocksList.get(material);
         if (expValue == null) {
-            return; // Not a configured block, let it break normally
+            return;
+        }
+
+        if (!rngManager.hasDropTable(uuid)) {
+            rngManager.initializeDropTable(uuid, playerDataManager.getArchLevel(uuid));
         }
 
         event.setDropItems(false); // Cancel vanilla drops
-
-        // Award XP to the player
-        playerDataManager.updateExp(player.getUniqueId(), (double) expValue * (playerDataManager.getArchXPMul(player.getUniqueId())), "add");
-        playerDataManager.incrementBlocksMined(player.getUniqueId());
+        playerDataManager.updateExp(uuid, (double) expValue * (playerDataManager.getArchXPMul(uuid)), "add");
+        playerDataManager.incrementBlocksMined(uuid);
+        itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
     }
 
     public void saveDefaultConfig() {
         FileConfiguration config = plugin.getConfig();
 
-        // Set default values if they don't exist
         if (!config.contains("settings.blocksList.SAND")) {
             config.set("settings.blocksList.SAND", 1);
         }
@@ -99,7 +107,6 @@ public class BlockBreakManager implements Listener {
         if (!config.contains("settings.blocksList.CLAY_BLOCK")) {
             config.set("settings.blocksList.CLAY_BLOCK", 1);
         }
-
         plugin.saveConfig();
     }
 }

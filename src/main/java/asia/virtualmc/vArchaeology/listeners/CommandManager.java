@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.items.ItemManager;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
@@ -16,16 +17,19 @@ import net.kyori.adventure.text.format.TextColor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Set;
 
 public class CommandManager {
     private final Main plugin;
     private final PlayerDataManager playerDataManager;
+    private final ItemManager itemManager;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
+        this.itemManager = itemManager;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -37,6 +41,7 @@ public class CommandManager {
                 .withSubcommand(archSetLevel())
                 .withSubcommand(archSetXPMul())
                 .withSubcommand(archResetStats())
+                .withSubcommand(archGetItem())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -163,5 +168,36 @@ public class CommandManager {
                             .color(TextColor.color(0, 255, 162)));
                     resetConfirmations.remove(targetUUID);
                 });
+    }
+
+    // Item Commands
+    private CommandAPICommand archGetItem() {
+        return new CommandAPICommand("getitem")
+                .withArguments(new MultiLiteralArgument("item_name", "purpleheart_wood", "imperial_steel", "everlight_silvthril", "chaotic_brimstone", "hellfire_metal", "aetherium_alloy", "quintessence"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getitem")
+                .executes((sender, args) -> {
+                    String itemName = (String) args.get("item_name");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    int itemId = getItemIdFromName(itemName);
+                    sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
+                    itemManager.giveArchItem(target.getUniqueId(), itemId, value);
+                });
+    }
+
+    private int getItemIdFromName(String name) {
+        return switch (name.toLowerCase()) {
+            case "purpleheart_wood" -> 1;
+            case "imperial_steel" -> 2;
+            case "everlight_silvthril" -> 3;
+            case "chaotic_brimstone" -> 4;
+            case "hellfire_metal" -> 5;
+            case "aetherium_alloy" -> 6;
+            case "quintessence" -> 7;
+            default -> throw new IllegalArgumentException("Unknown item: " + name);
+        };
     }
 }

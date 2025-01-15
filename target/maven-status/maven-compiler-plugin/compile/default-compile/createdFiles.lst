@@ -12,3 +12,4 @@ asia\virtualmc\vArchaeology\storage\PlayerDataManager$PlayerStats.class
 asia\virtualmc\vArchaeology\listeners\BlockBreakManager.class
 asia\virtualmc\vArchaeology\storage\PlayerDataManager$1.class
 asia\virtualmc\vArchaeology\utilities\BossBarUtil$BossBarData.class
+asia\virtualmc\vArchaeology\items\RNGManager.class
