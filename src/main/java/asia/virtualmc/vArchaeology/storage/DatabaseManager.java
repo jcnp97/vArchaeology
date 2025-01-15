@@ -109,6 +109,38 @@ public class DatabaseManager {
                             "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
                             ")"
             );
+            // Create dropStats table
+            // obtainedT1 - Purpleheart Wood Obtained
+            // obtainedT2 - Imperial Steel Obtained
+            // obtainedT3 - Everlight Silvthril Obtained
+            // obtainedT4 - Chaotic Brimstone Obtained
+            // obtainedT5 - Hellfire Metal Obtained
+            // obtainedT6 - Aetherium Alloy Obtained
+            // obtainedT7 - Quintessence Obtained
+            conn.createStatement().execute(
+                    "CREATE TABLE IF NOT EXISTS archDropStats (" +
+                            "playerUUID VARCHAR(36) PRIMARY KEY," +
+                            "obtainedT1 INT DEFAULT 0," +
+                            "obtainedT2 INT DEFAULT 0," +
+                            "obtainedT3 INT DEFAULT 0," +
+                            "obtainedT4 INT DEFAULT 0," +
+                            "obtainedT5 INT DEFAULT 0," +
+                            "obtainedT6 INT DEFAULT 0," +
+                            "obtainedT7 INT DEFAULT 0," +
+                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
+                            ")"
+            );
+            // Create innateTrait table
+            conn.createStatement().execute(
+                    "CREATE TABLE IF NOT EXISTS archTraits (" +
+                            "playerUUID VARCHAR(36) PRIMARY KEY," +
+                            "wisdomTrait INT DEFAULT 0," +
+                            "charismaTrait INT DEFAULT 0," +
+                            "karmaTrait INT DEFAULT 0," +
+                            "dexterityTrait INT DEFAULT 0," +
+                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
+                            ")"
+            );
         } catch (SQLException e) {
             //e.printStackTrace();
             Bukkit.getLogger().severe("[vArchaeology] Failed to create tables: " + e.getMessage());
@@ -131,7 +163,9 @@ public class DatabaseManager {
 
     public void savePlayerData(
             UUID uuid, String name, double archExp, int archLevel, int archApt, int archLuck, double archADP,
-            double archXPMul, int archBonusXP, int blocksMined, int artFound, int artRestored, int treasuresFound
+            double archXPMul, int archBonusXP, int blocksMined, int artFound, int artRestored, int treasuresFound,
+            int obtainedT1, int obtainedT2, int obtainedT3, int obtainedT4, int obtainedT5, int obtainedT6,
+            int obtainedT7, int wisdomTrait, int charismaTrait, int karmaTrait, int dexterityTrait
     ) {
         try (Connection conn = dataSource.getConnection()) {
             // Update playerStats database from latest HashMap data
@@ -179,6 +213,44 @@ public class DatabaseManager {
             ps.setInt(2, artFound);
             ps.setInt(3, artRestored);
             ps.setInt(4, treasuresFound);
+            ps.setString(5, uuid.toString());
+            ps.executeUpdate();
+
+            // Update archDropStats database from latest HashMap data
+            ps = conn.prepareStatement(
+                    "UPDATE archAchievements SET " +
+                            "obtainedT1 = ?, " +
+                            "obtainedT2 = ?, " +
+                            "obtainedT3 = ?, " +
+                            "obtainedT4 = ?, " +
+                            "obtainedT5 = ?, " +
+                            "obtainedT6 = ?, " +
+                            "obtainedT7 = ?, " +
+                            "WHERE playerUUID = ?"
+            );
+            ps.setInt(1, obtainedT1);
+            ps.setInt(2, obtainedT2);
+            ps.setInt(3, obtainedT3);
+            ps.setInt(4, obtainedT4);
+            ps.setInt(5, obtainedT5);
+            ps.setInt(6, obtainedT6);
+            ps.setInt(7, obtainedT7);
+            ps.setString(8, uuid.toString());
+            ps.executeUpdate();
+
+            // Update archTraits database from latest HashMap data
+            ps = conn.prepareStatement(
+                    "UPDATE archAchievements SET " +
+                            "wisdomTrait = ?, " +
+                            "charismaTrait = ?, " +
+                            "karmaTrait = ?, " +
+                            "dexterityTrait = ?, " +
+                            "WHERE playerUUID = ?"
+            );
+            ps.setInt(1, wisdomTrait);
+            ps.setInt(2, charismaTrait);
+            ps.setInt(3, karmaTrait);
+            ps.setInt(4, dexterityTrait);
             ps.setString(5, uuid.toString());
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -241,6 +313,44 @@ public class DatabaseManager {
                 ps.setInt(5, 0);
                 ps.executeUpdate();
 
+                ps = conn.prepareStatement(
+                        "INSERT INTO archDropStats (" +
+                                "playerUUID, " +
+                                "obtainedT1, " +
+                                "obtainedT2, " +
+                                "obtainedT3, " +
+                                "obtainedT4, " +
+                                "obtainedT5, " +
+                                "obtainedT6, " +
+                                "obtainedT7, " +
+                                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, 0);
+                ps.setInt(3, 0);
+                ps.setInt(4, 0);
+                ps.setInt(5, 0);
+                ps.setInt(6, 0);
+                ps.setInt(7, 0);
+                ps.setInt(8, 0);
+                ps.executeUpdate();
+
+                ps = conn.prepareStatement(
+                        "INSERT INTO archTraits (" +
+                                "playerUUID, " +
+                                "wisdomTrait, " +
+                                "charismaTrait, " +
+                                "karmaTrait, " +
+                                "dexterityTrait, " +
+                                ") VALUES (?, ?, ?, ?, ?)"
+                );
+                ps.setString(1, uuid.toString());
+                ps.setInt(2, 0);
+                ps.setInt(3, 0);
+                ps.setInt(4, 0);
+                ps.setInt(5, 0);
+                ps.executeUpdate();
+
                 // If all inserts succeed, commit the transaction
                 conn.commit();
                 ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Successfully created new player data for " + name);
@@ -278,9 +388,13 @@ public class DatabaseManager {
                     "SELECT p.*, " +
                             "i.archADP, i.archXPMul, i.archBonusXP, " +
                             "a.blocksMined, a.artefactsFound, a.artefactsRestored, a.treasuresFound " +
+                            "d.obtainedT1, d.obtainedT2, d.obtainedT3, d.obtainedT4, d.obtainedT5, d.obtainedT6, d.obtainedT7 " +
+                            "t.wisdomTrait, t.charismaTrait, t.karmaTrait, t.dexterityTrait " +
                             "FROM archPlayerStats p " +
                             "LEFT JOIN archInternalStats i ON p.playerUUID = i.playerUUID " +
                             "LEFT JOIN archAchievements a ON p.playerUUID = a.playerUUID " +
+                            "LEFT JOIN archDropStats a ON p.playerUUID = d.playerUUID " +
+                            "LEFT JOIN archTraits a ON p.playerUUID = t.playerUUID " +
                             "WHERE p.playerUUID = ?"
             );
             ps.setString(1, uuid.toString());

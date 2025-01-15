@@ -27,9 +27,9 @@ public class RNGManager {
     public void initializeDropTable(UUID playerId, int archLevel) {
         if (hasDropTable(playerId)) return;
         List<Integer> dropTable = new ArrayList<>();
-        dropTable.add(80);
-        if (archLevel > 10) dropTable.add(40);
-        if (archLevel > 20) dropTable.add(25);
+        dropTable.add(50);
+        if (archLevel > 10) dropTable.add(35);
+        if (archLevel > 20) dropTable.add(20);
         if (archLevel > 30) dropTable.add(15);
         if (archLevel > 40) dropTable.add(8);
         if (archLevel > 50) dropTable.add(4);
