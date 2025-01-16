@@ -2,69 +2,54 @@ package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.UUID;
-import java.util.List;
 
-public class DatabaseManager {
+public class PlayerDataDB {
     private Main plugin;
+    private final ConfigManager configManager;
     private HikariDataSource dataSource;
-    private String host;
-    private String database;
-    private String username;
-    private String password;
-    private int port;
 
-    public DatabaseManager(Main plugin) {
+    public PlayerDataDB(Main plugin, ConfigManager configManager) {
         this.plugin = plugin;
-        //setupDatabase();
+        this.configManager = configManager;
+        setupDatabase();
     }
 
     public void setupDatabase() {
-        // Create plugin folder if it doesn't exist
-        if (!plugin.getDataFolder().exists()) {
-            plugin.getDataFolder().mkdirs();
-        }
-
-        // Create and load database.yml
-        File dbConfigFile = new File(plugin.getDataFolder(), "database.yml");
-        if (!dbConfigFile.exists()) {
-            try {
-                plugin.saveResource("database.yml", false);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return;
-            }
-        }
-        FileConfiguration dbConfig = YamlConfiguration.loadConfiguration(dbConfigFile);
-        try {
-            host = dbConfig.getString("mysql.host", "localhost");
-            port = dbConfig.getInt("mysql.port", 3306);
-            database = dbConfig.getString("mysql.database", "minecraft");
-            username = dbConfig.getString("mysql.username", "root");
-            password = dbConfig.getString("mysql.password");
-        } catch (Exception e) {
-            Bukkit.getLogger().severe("[vArchaeology] Error while connecting to the database.");
-        }
-
         // Configure HikariCP using default values
+        try {
+            HikariConfig config = createHikariConfig();
+            dataSource = new HikariDataSource(config);
+
+            try (Connection connection = dataSource.getConnection()) {
+                if (connection != null && !connection.isClosed()) {
+                    ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully connected to the MySQL database.");
+                }
+            } catch (SQLException e) {
+                Bukkit.getLogger().severe("[vArchaeology] Failed to connect to database: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().severe("[vArchaeology] Error during database connection: " + e.getMessage());
+        }
+        createTables();
+    }
+
+    private HikariConfig createHikariConfig() {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
-        config.setUsername(username);
-        config.setPassword(password);
+        config.setJdbcUrl("jdbc:mysql://" + configManager.host + ":" + configManager.port + "/" + configManager.dbname);
+        config.setUsername(configManager.username);
+        config.setPassword(configManager.password);
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(5);
         config.setIdleTimeout(300000);
@@ -73,14 +58,16 @@ public class DatabaseManager {
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        dataSource = new HikariDataSource(config);
-        createTables();
-        createTalentTables();
+        return config;
+    }
+
+    public HikariDataSource getDataSource() {
+        return dataSource;
     }
 
     public void createTables() {
         try (Connection conn = dataSource.getConnection()) {
-            ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Successfully create tables on your database.");
+            ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully created PlayerData tables.");
             // Create playerStats table
             conn.createStatement().execute(
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +
@@ -146,46 +133,7 @@ public class DatabaseManager {
                             ")"
             );
         } catch (SQLException e) {
-            //e.printStackTrace();
             Bukkit.getLogger().severe("[vArchaeology] Failed to create tables: " + e.getMessage());
-        }
-    }
-
-    public void createTalentTables() {
-        try (Connection conn = dataSource.getConnection()) {
-            List<String> talentData = Arrays.asList("Sagacity", "Prosperity", "Insightful Judgement",
-                    "Extraction", "Adept Restoration", "Archaeological Prowess", "Divine Opulence",
-                    "Rapid Discovery", "Prudence", "Blessed Treatment", "Stroke of Luck"
-            );
-            // Create talentTree table
-            conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS archTalentTree (" +
-                            "talentID INT NOT NULL AUTO_INCREMENT," +
-                            "talentName VARCHAR(255) NOT NULL," +
-                            "PRIMARY KEY (talentID)" +
-                            ")"
-            );
-            // Create playerTalent table
-            conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS archPlayerTalent (" +
-                            "UUID VARCHAR(36) NOT NULL," +
-                            "talentID INT NOT NULL," +
-                            "talentLevel INT DEFAULT 0," +
-                            "PRIMARY KEY (UUID, talentID)," +
-                            "FOREIGN KEY (talentID) REFERENCES talentTree(talentID)" +
-                            ")"
-            );
-            // Add all Talent into Talent Tree table
-            try (PreparedStatement ps = conn.prepareStatement("INSERT INTO archTalentTree (talentName) VALUES (?)")) {
-                for (String talent : talentData) {
-                    ps.setString(1, talent);
-                    ps.addBatch();
-                }
-                ps.executeBatch();
-            }
-            ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Talent tables created/updated successfully.");
-        } catch (SQLException e) {
-            Bukkit.getLogger().severe("[vArchaeology] Failed to create talent tables: " + e.getMessage());
         }
     }
 
@@ -297,20 +245,6 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void savePlayerTalent(UUID uuid, int talentID, int newLevel) {
-        try (Connection conn = dataSource.getConnection()) {
-            PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE archPlayerTalent SET talentLevel = ? WHERE UUID = ? AND talentID = ?"
-            );
-            ps.setInt(1, newLevel);
-            ps.setString(2, uuid.toString());
-            ps.setInt(3, talentID);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            Bukkit.getLogger().severe("[vArchaeology] Failed to update player talent: " + e.getMessage());
         }
     }
 
@@ -434,32 +368,6 @@ public class DatabaseManager {
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    public void createNewPlayerTalent(UUID uuid) {
-        try (Connection conn = dataSource.getConnection()) {
-            conn.setAutoCommit(false);
-            PreparedStatement talentStmt = conn.prepareStatement("SELECT talentID FROM archTalentTree");
-            ResultSet rs = talentStmt.executeQuery();
-
-            PreparedStatement ps = conn.prepareStatement(
-                    "INSERT INTO archPlayerTalent (UUID, talentID, talentLevel) VALUES (?, ?, 0)"
-            );
-            while (rs.next()) {
-                int currentTalentID = rs.getInt("talentID");
-
-                ps.setString(1, uuid.toString());
-                ps.setInt(2, currentTalentID);
-                ps.addBatch();
-            }
-            ps.executeBatch();
-            conn.commit();
-            conn.setAutoCommit(true);
-            conn.close();
-            Bukkit.getLogger().info("[vArchaeology] Successfully created new player talents for UUID: " + uuid);
-        } catch (SQLException e) {
-            Bukkit.getLogger().severe("[vArchaeology] Failed to create new player talent: " + e.getMessage());
         }
     }
 

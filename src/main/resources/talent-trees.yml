@@ -1,0 +1,68 @@
+# vArchaeology Talent Trees
+talentList:
+  1: # talentID
+    name: "&eSagacity"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 40."
+  2: # talentID
+    name: "&eProsperity"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 45."
+  3: # talentID
+    name: "&eInsightful Judgement"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 50."
+  4: # talentID
+    name: "&eExtraction"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 55."
+  5: # talentID
+    name: "&eAdept Restoration"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 60."
+  6: # talentID
+    name: "&eArchaeological Prowess"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 65."
+  7: # talentID
+    name: "&eDivine Opulence"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 70."
+  8: # talentID
+    name: "&eRapid Discovery"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 80."
+  9: # talentID
+    name: "&ePrudence"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 90."
+  10: # talentID
+    name: "&eBlessed Treatment"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 95."
+  11: # talentID
+    name: "&eStroke of Luck"
+    material: FLINT # material icon for GUI display
+    custom-model-data: 100000
+    lore:
+      - "&7Unlocked at Level 99."

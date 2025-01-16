@@ -1,13 +1,16 @@
 // Main.class
 package asia.virtualmc.vArchaeology;
 
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
 import asia.virtualmc.vArchaeology.listeners.CommandManager;
 import asia.virtualmc.vArchaeology.storage.DatabaseManager;
+import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
+import asia.virtualmc.vArchaeology.storage.TalentTreeDB;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
@@ -27,6 +30,9 @@ public final class Main extends JavaPlugin {
     private BlockBreakManager blockBreakManager;
     private BossBarUtil bossBarUtil;
     private RNGManager rngManager;
+    private ConfigManager configManager;
+    private PlayerDataDB playerDataDB;
+    private TalentTreeDB talentTreeDB;
 
     @Override
     public void onEnable() {
@@ -37,10 +43,13 @@ public final class Main extends JavaPlugin {
             return;
         }
 
+        this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
         this.itemManager = new ItemManager(this);
         this.rngManager = new RNGManager(this);
         this.databaseManager = new DatabaseManager(this);
+        this.playerDataDB = new PlayerDataDB(this, configManager);
+        this.talentTreeDB = new TalentTreeDB(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, databaseManager, bossBarUtil);
         this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager);

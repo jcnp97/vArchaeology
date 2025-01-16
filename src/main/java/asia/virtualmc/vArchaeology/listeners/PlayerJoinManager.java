@@ -36,6 +36,8 @@ public class PlayerJoinManager implements Listener {
                 } else {
                     // Create new player data in the database
                     databaseManager.createNewPlayerData(playerUUID, playerName);
+                    databaseManager.createNewPlayerTalent(playerUUID);
+                    // Load them into memory
                     playerDataManager.loadData(playerUUID);
                 }
             } catch (Exception e) {
