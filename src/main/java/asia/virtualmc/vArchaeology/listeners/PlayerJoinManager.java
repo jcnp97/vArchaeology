@@ -1,8 +1,9 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.storage.DatabaseManager;
+import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.storage.TalentTreeDB;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,13 +14,15 @@ import java.util.UUID;
 
 public class PlayerJoinManager implements Listener {
     private final Main plugin;
-    private final DatabaseManager databaseManager;
+    private final PlayerDataDB playerDataDB;
     private final PlayerDataManager playerDataManager;
+    private final TalentTreeDB talentTreeDB;
 
-    public PlayerJoinManager(Main plugin, DatabaseManager databaseManager, PlayerDataManager playerDataManager) {
+    public PlayerJoinManager(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeDB talentTreeDB) {
         this.plugin = plugin;
-        this.databaseManager = databaseManager;
+        this.playerDataDB = playerDataDB;
         this.playerDataManager = playerDataManager;
+        this.talentTreeDB = talentTreeDB;
     }
 
     @EventHandler
@@ -30,13 +33,13 @@ public class PlayerJoinManager implements Listener {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             try {
                 // Check if player exists in the database
-                if (databaseManager.getPlayerData(playerUUID).next()) {
+                if (playerDataDB.getPlayerData(playerUUID).next()) {
                     // Load existing player data
                     playerDataManager.loadData(playerUUID);
                 } else {
                     // Create new player data in the database
-                    databaseManager.createNewPlayerData(playerUUID, playerName);
-                    databaseManager.createNewPlayerTalent(playerUUID);
+                    playerDataDB.createNewPlayerData(playerUUID, playerName);
+                    talentTreeDB.createNewPlayerTalent(playerUUID);
                     // Load them into memory
                     playerDataManager.loadData(playerUUID);
                 }

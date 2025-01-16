@@ -28,14 +28,14 @@ public class PlayerDataManager {
     private static final int MAX_LEVEL = 120;
 
     private final Main plugin;
-    private final DatabaseManager databaseManager;
+    private final PlayerDataDB playerDataDB;
     private final BossBarUtil bossBarUtil;
     private final Map<Integer, Integer> experienceTable;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerDataManager(@NotNull Main plugin, @NotNull DatabaseManager databaseManager, @NotNull BossBarUtil bossBarUtil) {
+    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil) {
         this.plugin = plugin;
-        this.databaseManager = databaseManager;
+        this.playerDataDB = playerDataDB;
         this.bossBarUtil = bossBarUtil;
         this.experienceTable = new HashMap<>();
         this.playerStatsMap = new ConcurrentHashMap<>();
@@ -114,7 +114,7 @@ public class PlayerDataManager {
     public void updateAllData() {
         playerStatsMap.forEach((uuid, stats) -> {
             try {
-                databaseManager.savePlayerData(
+                playerDataDB.savePlayerData(
                         uuid, stats.name, stats.archEXP, stats.archLevel,
                         stats.archApt, stats.archLuck, stats.archADP,
                         stats.archXPMul, stats.archBonusXP, stats.blocksMined,
@@ -130,7 +130,7 @@ public class PlayerDataManager {
     }
 
     public void loadData(@NotNull UUID uuid) {
-        try (ResultSet rs = databaseManager.getPlayerData(uuid)) {
+        try (ResultSet rs = playerDataDB.getPlayerData(uuid)) {
             if (rs.next()) {
                 PlayerStats stats = new PlayerStats(
                         rs.getString("playerName"),

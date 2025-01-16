@@ -6,7 +6,6 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
 import asia.virtualmc.vArchaeology.listeners.CommandManager;
-import asia.virtualmc.vArchaeology.storage.DatabaseManager;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
@@ -23,7 +22,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Main extends JavaPlugin {
     private ItemManager itemManager;
-    private DatabaseManager databaseManager;
     private PlayerDataManager playerDataManager;
     private PlayerJoinManager playerJoinManager;
     private CommandManager commandManager;
@@ -47,11 +45,10 @@ public final class Main extends JavaPlugin {
         this.bossBarUtil = new BossBarUtil(this);
         this.itemManager = new ItemManager(this);
         this.rngManager = new RNGManager(this);
-        this.databaseManager = new DatabaseManager(this);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.talentTreeDB = new TalentTreeDB(this, playerDataDB, configManager);
-        this.playerDataManager = new PlayerDataManager(this, databaseManager, bossBarUtil);
-        this.playerJoinManager = new PlayerJoinManager(this, databaseManager, playerDataManager);
+        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil);
+        this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeDB);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager);
         this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager);
 
@@ -74,8 +71,8 @@ public final class Main extends JavaPlugin {
             playerDataManager.updateAllData();
         }
         ConsoleMessageUtil.sendConsoleMessage("<#FFFF55>[vArchaeology] Closing database connections..");
-        if (databaseManager != null) {
-            databaseManager.closeConnection();
+        if (playerDataDB != null) {
+            playerDataDB.closeConnection();
         } else {
             getLogger().severe("[vArchaeology] Failed to close database connections.");
         }
