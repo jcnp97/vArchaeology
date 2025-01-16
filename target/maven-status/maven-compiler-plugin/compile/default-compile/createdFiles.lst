@@ -1,6 +1,7 @@
 asia\virtualmc\vArchaeology\configs\ConfigManager.class
 asia\virtualmc\vArchaeology\storage\PlayerDataManager.class
 asia\virtualmc\vArchaeology\items\ItemManager.class
+asia\virtualmc\vArchaeology\storage\TalentTreeManager.class
 asia\virtualmc\vArchaeology\listeners\PlayerJoinManager.class
 asia\virtualmc\vArchaeology\listeners\CommandManager.class
 asia\virtualmc\vArchaeology\utilities\BossBarUtil$1.class
@@ -11,7 +12,7 @@ asia\virtualmc\vArchaeology\storage\PlayerDataDB.class
 asia\virtualmc\vArchaeology\utilities\BossBarUtil.class
 asia\virtualmc\vArchaeology\storage\PlayerDataManager$PlayerStats.class
 asia\virtualmc\vArchaeology\listeners\BlockBreakManager.class
-asia\virtualmc\vArchaeology\storage\TalentTreeDB.class
+asia\virtualmc\vArchaeology\storage\StatsManager.class
 asia\virtualmc\vArchaeology\storage\PlayerDataManager$1.class
 asia\virtualmc\vArchaeology\utilities\BossBarUtil$BossBarData.class
 asia\virtualmc\vArchaeology\items\RNGManager.class

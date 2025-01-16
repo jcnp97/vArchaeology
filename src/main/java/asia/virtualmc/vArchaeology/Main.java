@@ -9,7 +9,8 @@ import asia.virtualmc.vArchaeology.listeners.CommandManager;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
-import asia.virtualmc.vArchaeology.storage.TalentTreeDB;
+import asia.virtualmc.vArchaeology.storage.StatsManager;
+import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
@@ -30,7 +31,8 @@ public final class Main extends JavaPlugin {
     private RNGManager rngManager;
     private ConfigManager configManager;
     private PlayerDataDB playerDataDB;
-    private TalentTreeDB talentTreeDB;
+    private TalentTreeManager talentTreeManager;
+    private StatsManager statsManager;
 
     @Override
     public void onEnable() {
@@ -46,11 +48,12 @@ public final class Main extends JavaPlugin {
         this.itemManager = new ItemManager(this);
         this.rngManager = new RNGManager(this);
         this.playerDataDB = new PlayerDataDB(this, configManager);
-        this.talentTreeDB = new TalentTreeDB(this, playerDataDB, configManager);
+        this.statsManager = new StatsManager(this, playerDataDB, configManager);
+        this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil);
-        this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeDB);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager);
-        this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager);
+        this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
+        this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager, statsManager);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
         getServer().getPluginManager().registerEvents(blockBreakManager, this);
@@ -69,8 +72,14 @@ public final class Main extends JavaPlugin {
         CommandAPI.onDisable();
         if (playerDataManager != null) {
             playerDataManager.updateAllData();
+        } else {
+            getLogger().severe("[vArchaeology] Failed to save Player Data.");
         }
-        ConsoleMessageUtil.sendConsoleMessage("<#FFFF55>[vArchaeology] Closing database connections..");
+        if (talentTreeManager != null) {
+            talentTreeManager.updateAllData();
+        } else {
+            getLogger().severe("[vArchaeology] Failed to save Talent Data.");
+        }
         if (playerDataDB != null) {
             playerDataDB.closeConnection();
         } else {

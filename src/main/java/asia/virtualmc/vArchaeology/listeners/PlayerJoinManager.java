@@ -3,8 +3,9 @@ package asia.virtualmc.vArchaeology.listeners;
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
-import asia.virtualmc.vArchaeology.storage.TalentTreeDB;
 
+import asia.virtualmc.vArchaeology.storage.StatsManager;
+import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -16,13 +17,15 @@ public class PlayerJoinManager implements Listener {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final PlayerDataManager playerDataManager;
-    private final TalentTreeDB talentTreeDB;
+    private final TalentTreeManager talentTreeManager;
+    private final StatsManager statsManager;
 
-    public PlayerJoinManager(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeDB talentTreeDB) {
+    public PlayerJoinManager(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.playerDataManager = playerDataManager;
-        this.talentTreeDB = talentTreeDB;
+        this.talentTreeManager = talentTreeManager;
+        this.statsManager = statsManager;
     }
 
     @EventHandler
@@ -34,15 +37,15 @@ public class PlayerJoinManager implements Listener {
             try {
                 // Check if player exists in the database
                 if (playerDataDB.getPlayerData(playerUUID).next()) {
-                    // Load existing player data
                     playerDataManager.loadData(playerUUID);
                 } else {
-                    // Create new player data in the database
                     playerDataDB.createNewPlayerData(playerUUID, playerName);
-                    talentTreeDB.createNewPlayerTalent(playerUUID);
-                    // Load them into memory
                     playerDataManager.loadData(playerUUID);
+                    statsManager.loadData(playerUUID);
                 }
+                // Load other data since main data is loaded.
+                talentTreeManager.loadData(playerUUID);
+                statsManager.loadData(playerUUID);
             } catch (Exception e) {
                 plugin.getLogger().severe("Error loading player data for " + playerName + ": " + e.getMessage());
                 e.printStackTrace();
@@ -55,8 +58,9 @@ public class PlayerJoinManager implements Listener {
         UUID playerUUID = event.getPlayer().getUniqueId();
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             if (playerDataManager.getPlayerName(playerUUID) != null) {
-                playerDataManager.updateAllData();
                 playerDataManager.unloadData(playerUUID);
+                talentTreeManager.unloadData(playerUUID);
+                statsManager.unloadData(playerUUID);
             }
         });
     }

@@ -53,28 +53,16 @@ public class PlayerDataManager {
         double archADP;
         double archXPMul;
         int archBonusXP;
-        int blocksMined;
-        int artefactsFound;
-        int artefactsRestored;
-        int treasuresFound;
-        int obtainedT1;
-        int obtainedT2;
-        int obtainedT3;
-        int obtainedT4;
-        int obtainedT5;
-        int obtainedT6;
-        int obtainedT7;
         int wisdomTrait;
         int charismaTrait;
         int karmaTrait;
         int dexterityTrait;
+        int traitPoints;
+        int talentPoints;
 
-        PlayerStats(String name, double archEXP, int archLevel, int archApt, int archLuck,
-                    double archADP, double archXPMul, int archBonusXP,
-                    int blocksMined, int artefactsFound, int artefactsRestored, int treasuresFound,
-                    int obtainedT1, int obtainedT2, int obtainedT3, int obtainedT4, int obtainedT5,
-                    int obtainedT6, int obtainedT7, int wisdomTrait, int charismaTrait, int karmaTrait,
-                    int dexterityTrait
+        PlayerStats(String name, double archEXP, int archLevel, int archApt, int archLuck, double archADP,
+                    double archXPMul, int archBonusXP, int traitPoints, int talentPoints, int wisdomTrait,
+                    int charismaTrait, int karmaTrait, int dexterityTrait
                     ) {
             this.name = name;
             this.archEXP = archEXP;
@@ -84,21 +72,12 @@ public class PlayerDataManager {
             this.archADP = archADP;
             this.archXPMul = archXPMul;
             this.archBonusXP = archBonusXP;
-            this.blocksMined = blocksMined;
-            this.artefactsFound = artefactsFound;
-            this.artefactsRestored = artefactsRestored;
-            this.treasuresFound = treasuresFound;
-            this.obtainedT1 = obtainedT1;
-            this.obtainedT2 = obtainedT2;
-            this.obtainedT3 = obtainedT3;
-            this.obtainedT4 = obtainedT4;
-            this.obtainedT5 = obtainedT5;
-            this.obtainedT6 = obtainedT6;
-            this.obtainedT7 = obtainedT7;
             this.wisdomTrait = wisdomTrait;
             this.charismaTrait = charismaTrait;
             this.karmaTrait = karmaTrait;
             this.dexterityTrait = dexterityTrait;
+            this.traitPoints = traitPoints;
+            this.talentPoints = talentPoints;
         }
     }
 
@@ -111,17 +90,45 @@ public class PlayerDataManager {
         }.runTaskTimerAsynchronously(plugin, UPDATE_INTERVAL, UPDATE_INTERVAL);
     }
 
+    public void updatePlayerData(UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats == null) {
+            return;
+        }
+        try {
+            playerDataDB.savePlayerData(
+                    uuid,
+                    stats.name,
+                    stats.archEXP,
+                    stats.archLevel,
+                    stats.archApt,
+                    stats.archLuck,
+                    stats.archADP,
+                    stats.archXPMul,
+                    stats.archBonusXP,
+                    stats.traitPoints,
+                    stats.talentPoints,
+                    stats.wisdomTrait,
+                    stats.charismaTrait,
+                    stats.karmaTrait,
+                    stats.dexterityTrait
+            );
+        } catch (Exception e) {
+            plugin.getLogger().severe(
+                    "[vArchaeology] Failed to save data for player " + uuid + ": " + e.getMessage()
+            );
+        }
+    }
+
     public void updateAllData() {
         playerStatsMap.forEach((uuid, stats) -> {
             try {
                 playerDataDB.savePlayerData(
                         uuid, stats.name, stats.archEXP, stats.archLevel,
                         stats.archApt, stats.archLuck, stats.archADP,
-                        stats.archXPMul, stats.archBonusXP, stats.blocksMined,
-                        stats.artefactsFound, stats.artefactsRestored, stats.treasuresFound,
-                        stats.obtainedT1, stats.obtainedT2, stats.obtainedT3, stats.obtainedT4,
-                        stats.obtainedT5, stats.obtainedT6, stats.obtainedT7, stats.wisdomTrait,
-                        stats.charismaTrait, stats.karmaTrait, stats.dexterityTrait
+                        stats.archXPMul, stats.archBonusXP, stats.traitPoints,
+                        stats.talentPoints, stats.wisdomTrait, stats.charismaTrait,
+                        stats.karmaTrait, stats.dexterityTrait
                 );
             } catch (Exception e) {
                 plugin.getLogger().severe("[vArchaeology] Failed to save data for player " + uuid + ": " + e.getMessage());
@@ -141,17 +148,8 @@ public class PlayerDataManager {
                         rs.getDouble("archADP"),
                         rs.getDouble("archXPMul"),
                         rs.getInt("archBonusXP"),
-                        rs.getInt("blocksMined"),
-                        rs.getInt("artefactsFound"),
-                        rs.getInt("artefactsRestored"),
-                        rs.getInt("treasuresFound"),
-                        rs.getInt("obtainedT1"),
-                        rs.getInt("obtainedT2"),
-                        rs.getInt("obtainedT3"),
-                        rs.getInt("obtainedT4"),
-                        rs.getInt("obtainedT5"),
-                        rs.getInt("obtainedT6"),
-                        rs.getInt("obtainedT7"),
+                        rs.getInt("traitPoints"),
+                        rs.getInt("talentPoints"),
                         rs.getInt("wisdomTrait"),
                         rs.getInt("charismaTrait"),
                         rs.getInt("karmaTrait"),
@@ -165,7 +163,12 @@ public class PlayerDataManager {
     }
 
     public void unloadData(@NotNull UUID uuid) {
-        playerStatsMap.remove(uuid);
+        try {
+            updatePlayerData(uuid);
+            playerStatsMap.remove(uuid);
+        } catch (Exception e) {
+            plugin.getLogger().severe("[vArchaeology] Failed to save data for player " + uuid + ": " + e.getMessage());
+        }
     }
 
     public void updateExp(@NotNull UUID uuid, double exp, @NotNull String param) {
@@ -278,26 +281,26 @@ public class PlayerDataManager {
         ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Experience table has been loaded.");
     }
 
-    // Increment methods for achievements
-    public void incrementBlocksMined(@NotNull UUID uuid) {
+    public void incrementTraitPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.blocksMined++;
+        if (stats != null) stats.traitPoints++;
     }
 
-    public void incrementArtefactsFound(@NotNull UUID uuid) {
+    public void reduceTraitPoints(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.artefactsFound++;
+        if (stats != null) stats.traitPoints -= value;
     }
 
-    public void incrementArtefactsRestored(@NotNull UUID uuid) {
+    public void incrementTalentPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.artefactsRestored++;
+        if (stats != null) stats.talentPoints++;
     }
 
-    public void incrementTreasuresFound(@NotNull UUID uuid) {
+    public void reduceTalentPoints(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.treasuresFound++;
+        if (stats != null) stats.talentPoints -= value;
     }
+
 
     // Getter methods for player stats
     @Nullable
@@ -341,23 +344,13 @@ public class PlayerDataManager {
         return stats != null ? stats.archXPMul : 1.0;
     }
 
-    public int getBlocksMined(@NotNull UUID uuid) {
+    public int getTraitPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.blocksMined : 0;
+        return stats != null ? stats.traitPoints : 0;
     }
 
-    public int getArtefactsFound(@NotNull UUID uuid) {
+    public int getTalentPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.artefactsFound : 0;
-    }
-
-    public int getArtefactsRestored(@NotNull UUID uuid) {
-        PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.artefactsRestored : 0;
-    }
-
-    public int getTreasureFound(@NotNull UUID uuid) {
-        PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.treasuresFound : 0;
+        return stats != null ? stats.talentPoints : 0;
     }
 }

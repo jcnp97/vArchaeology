@@ -5,6 +5,7 @@ import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 
+import asia.virtualmc.vArchaeology.storage.StatsManager;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -28,14 +29,16 @@ public class BlockBreakManager implements Listener {
     private final PlayerDataManager playerDataManager;
     private final ItemManager itemManager;
     private final RNGManager rngManager;
+    private final StatsManager statsManager;
     private final Random random;
     private final Map<Material, Integer> blocksList;
 
-    public BlockBreakManager(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager) {
+    public BlockBreakManager(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
         this.rngManager = rngManager;
+        this.statsManager = statsManager;
         this.random = new Random();
         this.blocksList = new HashMap<>();
 
@@ -81,7 +84,7 @@ public class BlockBreakManager implements Listener {
 
         event.setDropItems(false); // Cancel vanilla drops
         playerDataManager.updateExp(uuid, (double) expValue * (playerDataManager.getArchXPMul(uuid)), "add");
-        playerDataManager.incrementBlocksMined(uuid);
+        statsManager.incrementStatistics(uuid, 8);
         itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
     }
 

@@ -4,6 +4,8 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 
+import asia.virtualmc.vArchaeology.storage.StatsManager;
+import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
@@ -23,13 +25,17 @@ public class CommandManager {
     private final Main plugin;
     private final PlayerDataManager playerDataManager;
     private final ItemManager itemManager;
+    private final TalentTreeManager talentTreeManager;
+    private final StatsManager statsManager;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
+        this.statsManager = statsManager;
+        this.talentTreeManager = talentTreeManager;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -42,6 +48,7 @@ public class CommandManager {
                 .withSubcommand(archSetXPMul())
                 .withSubcommand(archResetStats())
                 .withSubcommand(archGetItem())
+                .withSubcommand(archSetTalent())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -78,7 +85,7 @@ public class CommandManager {
                             .color(TextColor.color(255, 255, 255)));
                     sender.sendMessage(Component.text("Bonus XP: " + playerDataManager.getArchBonusXP(targetUUID))
                             .color(TextColor.color(255, 255, 255)));
-                    sender.sendMessage(Component.text("Blocks Mined: " + playerDataManager.getBlocksMined(targetUUID))
+                    sender.sendMessage(Component.text("Blocks Mined: " + statsManager.getStatistics(targetUUID, 8))
                             .color(TextColor.color(255, 255, 255)));
                 });
     }
@@ -199,5 +206,24 @@ public class CommandManager {
             case "quintessence" -> 7;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
+    }
+
+    private CommandAPICommand archSetTalent() {
+        return new CommandAPICommand("talent")
+                .withArguments(new MultiLiteralArgument("operation", "set"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("talentID", 0))
+                .withArguments(new IntegerArgument("level", 0))
+                .withPermission("varchaeology.command.settalent")
+                .executes((sender, args) -> {
+                    String operation = (String) args.get("operation");
+                    Player target = (Player) args.get("player");
+                    int talentID = (int) args.get("talentID");
+                    int level = (int) args.get("level");
+
+                    talentTreeManager.updateTalentLevel(target.getUniqueId(), talentID, level);
+                    sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Talent " + talentID + " to level " + level)
+                            .color(TextColor.color(0, 255, 162)));
+                });
     }
 }

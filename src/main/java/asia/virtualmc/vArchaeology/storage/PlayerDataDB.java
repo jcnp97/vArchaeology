@@ -86,38 +86,8 @@ public class PlayerDataDB {
                             "archADP DECIMAL(5,2) DEFAULT 0.00," +
                             "archXPMul DECIMAL(4,2) DEFAULT 1.00," +
                             "archBonusXP INT DEFAULT 0," +
-                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
-                            ")"
-            );
-            // Create achievementStats table
-            conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS archAchievements (" +
-                            "playerUUID VARCHAR(36) PRIMARY KEY," +
-                            "blocksMined INT DEFAULT 0," +
-                            "artefactsFound INT DEFAULT 0," +
-                            "artefactsRestored INT DEFAULT 0," +
-                            "treasuresFound INT DEFAULT 0," +
-                            "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
-                            ")"
-            );
-            // Create dropStats table
-            // obtainedT1 - Purpleheart Wood Obtained
-            // obtainedT2 - Imperial Steel Obtained
-            // obtainedT3 - Everlight Silvthril Obtained
-            // obtainedT4 - Chaotic Brimstone Obtained
-            // obtainedT5 - Hellfire Metal Obtained
-            // obtainedT6 - Aetherium Alloy Obtained
-            // obtainedT7 - Quintessence Obtained
-            conn.createStatement().execute(
-                    "CREATE TABLE IF NOT EXISTS archDropStats (" +
-                            "playerUUID VARCHAR(36) PRIMARY KEY," +
-                            "obtainedT1 INT DEFAULT 0," +
-                            "obtainedT2 INT DEFAULT 0," +
-                            "obtainedT3 INT DEFAULT 0," +
-                            "obtainedT4 INT DEFAULT 0," +
-                            "obtainedT5 INT DEFAULT 0," +
-                            "obtainedT6 INT DEFAULT 0," +
-                            "obtainedT7 INT DEFAULT 0," +
+                            "traitPoints INT DEFAULT 0," +
+                            "talentPoints INT DEFAULT 0," +
                             "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
                             ")"
             );
@@ -153,9 +123,8 @@ public class PlayerDataDB {
 
     public void savePlayerData(
             @NotNull UUID uuid, String name, double archExp, int archLevel, int archApt, int archLuck, double archADP,
-            double archXPMul, int archBonusXP, int blocksMined, int artFound, int artRestored, int treasuresFound,
-            int obtainedT1, int obtainedT2, int obtainedT3, int obtainedT4, int obtainedT5, int obtainedT6,
-            int obtainedT7, int wisdomTrait, int charismaTrait, int karmaTrait, int dexterityTrait
+            double archXPMul, int archBonusXP, int traitPoints, int talentPoints, int wisdomTrait, int charismaTrait,
+            int karmaTrait, int dexterityTrait
     ) {
         try (Connection conn = dataSource.getConnection()) {
             // Update playerStats database from latest HashMap data
@@ -181,51 +150,17 @@ public class PlayerDataDB {
                     "UPDATE archInternalStats SET " +
                             "archADP = ?, " +
                             "archXPMul = ?, " +
-                            "archBonusXP = ? " +
+                            "archBonusXP = ?, " +
+                            "traitPoints = ?, " +
+                            "talentPoints = ? " +
                             "WHERE playerUUID = ?"
             );
             ps.setDouble(1, archADP);
             ps.setDouble(2, archXPMul);
             ps.setInt(3, archBonusXP);
-            ps.setString(4, uuid.toString());
-            ps.executeUpdate();
-
-            // Update archAchievements database from latest HashMap data
-            ps = conn.prepareStatement(
-                    "UPDATE archAchievements SET " +
-                            "blocksMined = ?, " +
-                            "artefactsFound = ?, " +
-                            "artefactsRestored = ?, " +
-                            "treasuresFound = ? " +
-                            "WHERE playerUUID = ?"
-            );
-            ps.setInt(1, blocksMined);
-            ps.setInt(2, artFound);
-            ps.setInt(3, artRestored);
-            ps.setInt(4, treasuresFound);
-            ps.setString(5, uuid.toString());
-            ps.executeUpdate();
-
-            // Update archDropStats database from latest HashMap data
-            ps = conn.prepareStatement(
-                    "UPDATE archDropStats SET " +
-                            "obtainedT1 = ?, " +
-                            "obtainedT2 = ?, " +
-                            "obtainedT3 = ?, " +
-                            "obtainedT4 = ?, " +
-                            "obtainedT5 = ?, " +
-                            "obtainedT6 = ?, " +
-                            "obtainedT7 = ? " +
-                            "WHERE playerUUID = ?"
-            );
-            ps.setInt(1, obtainedT1);
-            ps.setInt(2, obtainedT2);
-            ps.setInt(3, obtainedT3);
-            ps.setInt(4, obtainedT4);
-            ps.setInt(5, obtainedT5);
-            ps.setInt(6, obtainedT6);
-            ps.setInt(7, obtainedT7);
-            ps.setString(8, uuid.toString());
+            ps.setInt(4, traitPoints);
+            ps.setInt(5, talentPoints);
+            ps.setString(6, uuid.toString());
             ps.executeUpdate();
 
             // Update archTraits database from latest HashMap data
@@ -261,7 +196,7 @@ public class PlayerDataDB {
                                 "archEXP, " +
                                 "archLevel, " +
                                 "archApt, " +
-                                "archLuck" +
+                                "archLuck " +
                                 ") VALUES (?, ?, ?, ?, ?, ?)"
                 );
                 ps.setString(1, uuid.toString());
@@ -277,51 +212,17 @@ public class PlayerDataDB {
                                 "playerUUID, " +
                                 "archADP, " +
                                 "archXPMul, " +
-                                "archBonusXP" +
-                                ") VALUES (?, ?, ?, ?)"
+                                "archBonusXP, " +
+                                "traitPoints, " +
+                                "talentPoints " +
+                                ") VALUES (?, ?, ?, ?, ?, ?)"
                 );
                 ps.setString(1, uuid.toString());
                 ps.setDouble(2, 0.0);
                 ps.setDouble(3, 1.0);
                 ps.setInt(4, 0);
-                ps.executeUpdate();
-                // archAchievements
-                ps = conn.prepareStatement(
-                        "INSERT INTO archAchievements (" +
-                                "playerUUID, " +
-                                "blocksMined, " +
-                                "artefactsFound, " +
-                                "artefactsRestored, " +
-                                "treasuresFound" +
-                                ") VALUES (?, ?, ?, ?, ?)"
-                );
-                ps.setString(1, uuid.toString());
-                ps.setInt(2, 0);
-                ps.setInt(3, 0);
-                ps.setInt(4, 0);
-                ps.setInt(5, 0);
-                ps.executeUpdate();
-                // archDropStats
-                ps = conn.prepareStatement(
-                        "INSERT INTO archDropStats (" +
-                                "playerUUID, " +
-                                "obtainedT1, " +
-                                "obtainedT2, " +
-                                "obtainedT3, " +
-                                "obtainedT4, " +
-                                "obtainedT5, " +
-                                "obtainedT6, " +
-                                "obtainedT7 " +
-                                ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-                );
-                ps.setString(1, uuid.toString());
-                ps.setInt(2, 0);
-                ps.setInt(3, 0);
-                ps.setInt(4, 0);
                 ps.setInt(5, 0);
                 ps.setInt(6, 0);
-                ps.setInt(7, 0);
-                ps.setInt(8, 0);
                 ps.executeUpdate();
                 // archTraits
                 ps = conn.prepareStatement(
@@ -375,14 +276,10 @@ public class PlayerDataDB {
             Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(
                     "SELECT p.*, " +
-                            "i.archADP, i.archXPMul, i.archBonusXP, " +
-                            "a.blocksMined, a.artefactsFound, a.artefactsRestored, a.treasuresFound, " +
-                            "d.obtainedT1, d.obtainedT2, d.obtainedT3, d.obtainedT4, d.obtainedT5, d.obtainedT6, d.obtainedT7, " +
+                            "i.archADP, i.archXPMul, i.archBonusXP, i.traitPoints, i.talentPoints," +
                             "t.wisdomTrait, t.charismaTrait, t.karmaTrait, t.dexterityTrait " +
                             "FROM archPlayerStats p " +
                             "LEFT JOIN archInternalStats i ON p.playerUUID = i.playerUUID " +
-                            "LEFT JOIN archAchievements a ON p.playerUUID = a.playerUUID " +
-                            "LEFT JOIN archDropStats d ON p.playerUUID = d.playerUUID " +
                             "LEFT JOIN archTraits t ON p.playerUUID = t.playerUUID " +
                             "WHERE p.playerUUID = ?"
             );
