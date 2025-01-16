@@ -215,7 +215,7 @@ public class PlayerDataDB {
                             "obtainedT4 = ?, " +
                             "obtainedT5 = ?, " +
                             "obtainedT6 = ?, " +
-                            "obtainedT7 = ?, " +
+                            "obtainedT7 = ? " +
                             "WHERE playerUUID = ?"
             );
             ps.setInt(1, obtainedT1);
@@ -234,7 +234,7 @@ public class PlayerDataDB {
                             "wisdomTrait = ?, " +
                             "charismaTrait = ?, " +
                             "karmaTrait = ?, " +
-                            "dexterityTrait = ?, " +
+                            "dexterityTrait = ? " +
                             "WHERE playerUUID = ?"
             );
             ps.setInt(1, wisdomTrait);
@@ -253,7 +253,6 @@ public class PlayerDataDB {
         try {
             conn = dataSource.getConnection();
             conn.setAutoCommit(false);
-
             try {
                 PreparedStatement ps = conn.prepareStatement(
                         "INSERT INTO archPlayerStats (" +
@@ -272,7 +271,7 @@ public class PlayerDataDB {
                 ps.setInt(5, 0);
                 ps.setInt(6, 0);
                 ps.executeUpdate();
-
+                // archInternalStats
                 ps = conn.prepareStatement(
                         "INSERT INTO archInternalStats (" +
                                 "playerUUID, " +
@@ -286,7 +285,7 @@ public class PlayerDataDB {
                 ps.setDouble(3, 1.0);
                 ps.setInt(4, 0);
                 ps.executeUpdate();
-
+                // archAchievements
                 ps = conn.prepareStatement(
                         "INSERT INTO archAchievements (" +
                                 "playerUUID, " +
@@ -302,7 +301,7 @@ public class PlayerDataDB {
                 ps.setInt(4, 0);
                 ps.setInt(5, 0);
                 ps.executeUpdate();
-
+                // archDropStats
                 ps = conn.prepareStatement(
                         "INSERT INTO archDropStats (" +
                                 "playerUUID, " +
@@ -312,7 +311,7 @@ public class PlayerDataDB {
                                 "obtainedT4, " +
                                 "obtainedT5, " +
                                 "obtainedT6, " +
-                                "obtainedT7, " +
+                                "obtainedT7 " +
                                 ") VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                 );
                 ps.setString(1, uuid.toString());
@@ -324,14 +323,14 @@ public class PlayerDataDB {
                 ps.setInt(7, 0);
                 ps.setInt(8, 0);
                 ps.executeUpdate();
-
+                // archTraits
                 ps = conn.prepareStatement(
                         "INSERT INTO archTraits (" +
                                 "playerUUID, " +
                                 "wisdomTrait, " +
                                 "charismaTrait, " +
                                 "karmaTrait, " +
-                                "dexterityTrait, " +
+                                "dexterityTrait " +
                                 ") VALUES (?, ?, ?, ?, ?)"
                 );
                 ps.setString(1, uuid.toString());
@@ -377,8 +376,8 @@ public class PlayerDataDB {
             PreparedStatement ps = conn.prepareStatement(
                     "SELECT p.*, " +
                             "i.archADP, i.archXPMul, i.archBonusXP, " +
-                            "a.blocksMined, a.artefactsFound, a.artefactsRestored, a.treasuresFound " +
-                            "d.obtainedT1, d.obtainedT2, d.obtainedT3, d.obtainedT4, d.obtainedT5, d.obtainedT6, d.obtainedT7 " +
+                            "a.blocksMined, a.artefactsFound, a.artefactsRestored, a.treasuresFound, " +
+                            "d.obtainedT1, d.obtainedT2, d.obtainedT3, d.obtainedT4, d.obtainedT5, d.obtainedT6, d.obtainedT7, " +
                             "t.wisdomTrait, t.charismaTrait, t.karmaTrait, t.dexterityTrait " +
                             "FROM archPlayerStats p " +
                             "LEFT JOIN archInternalStats i ON p.playerUUID = i.playerUUID " +
