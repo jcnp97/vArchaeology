@@ -2,6 +2,7 @@
 package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 
@@ -30,17 +31,16 @@ public class PlayerDataManager {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final BossBarUtil bossBarUtil;
-    private final Map<Integer, Integer> experienceTable;
+    private final ConfigManager configManager;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil) {
+    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.bossBarUtil = bossBarUtil;
-        this.experienceTable = new HashMap<>();
+        this.configManager = configManager;
         this.playerStatsMap = new ConcurrentHashMap<>();
 
-        loadExperienceTable();
         startUpdateTask();
     }
 
@@ -183,7 +183,7 @@ public class PlayerDataManager {
                 if (exp <= 0) return;
                 stats.archEXP = Math.min(MAX_EXP, stats.archEXP + exp);
                 if (stats.archLevel < 120) {
-                    bossBarUtil.bossBarUpdate(uuid, exp, stats.archEXP, experienceTable.get(stats.archLevel + 1), stats.archLevel);
+                    bossBarUtil.bossBarUpdate(uuid, exp, stats.archEXP, configManager.experienceTable.get(stats.archLevel + 1), stats.archLevel);
                     checkAndApplyLevelUp(uuid);
                 }
             }
@@ -233,52 +233,11 @@ public class PlayerDataManager {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats == null) return;
 
-        while (experienceTable.containsKey(stats.archLevel + 1) &&
-                stats.archEXP >= experienceTable.get(stats.archLevel + 1) &&
+        while (configManager.experienceTable.containsKey(stats.archLevel + 1) &&
+                stats.archEXP >= configManager.experienceTable.get(stats.archLevel + 1) &&
                 stats.archLevel < MAX_LEVEL) {
             stats.archLevel++;
         }
-    }
-
-    public void loadExperienceTable() {
-        File expTableFile = new File(plugin.getDataFolder(), "experience-table.yml");
-        if (!expTableFile.exists()) {
-            try {
-                plugin.saveResource("experience-table.yml", false);
-            } catch (Exception e) {
-                Bukkit.getLogger().severe("[vArchaeology] Experience table not found. Disabling the plugin..");
-                Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-                return;
-            }
-        }
-        FileConfiguration config = YamlConfiguration.loadConfiguration(expTableFile);
-        int previousExp = -1;
-
-        experienceTable.clear();
-        for (String key : config.getKeys(false)) {
-            try {
-                int level = Integer.parseInt(key);
-                String expString = config.getString(key, "0").replace(",", "");
-                int exp = Integer.parseInt(expString);
-
-                if (previousExp >= 0 && exp <= previousExp) {
-                    throw new IllegalStateException("[vArchaeology] Invalid progression: Level " + level +
-                            " has lower or equal EXP than previous level");
-                }
-
-                experienceTable.put(level, exp);
-                previousExp = exp;
-            } catch (NumberFormatException e) {
-                plugin.getLogger().severe("[vArchaeology] Invalid number format in experience table at level " + key);
-                Bukkit.getPluginManager().disablePlugin(plugin);
-                return;
-            } catch (IllegalStateException e) {
-                plugin.getLogger().severe(e.getMessage());
-                Bukkit.getPluginManager().disablePlugin(plugin);
-                return;
-            }
-        }
-        ConsoleMessageUtil.sendConsoleMessage("<#00FFA2>[vArchaeology] Experience table has been loaded.");
     }
 
     public void incrementTraitPoints(@NotNull UUID uuid) {
@@ -300,7 +259,6 @@ public class PlayerDataManager {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) stats.talentPoints -= value;
     }
-
 
     // Getter methods for player stats
     @Nullable

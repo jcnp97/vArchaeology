@@ -1,5 +1,7 @@
 package asia.virtualmc.vArchaeology.items;
 
+import asia.virtualmc.vArchaeology.Main;
+
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,7 +14,6 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.*;
@@ -21,7 +22,7 @@ import java.util.logging.Level;
 import java.util.Random;
 
 public class ItemManager {
-    private final JavaPlugin plugin;
+    private final Main plugin;
     private final File customItemsFile;
     private FileConfiguration customItemsConfig;
     private final Map<Integer, ItemStack> itemCache;
@@ -29,7 +30,7 @@ public class ItemManager {
     private static final String NBT_KEY = "VARCH_ITEM";
     private final Random random;
 
-    public ItemManager(JavaPlugin plugin) {
+    public ItemManager(Main plugin) {
         this.plugin = plugin;
         this.itemCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "custom-items.yml");

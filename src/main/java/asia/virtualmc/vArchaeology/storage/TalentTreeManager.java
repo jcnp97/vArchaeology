@@ -72,7 +72,7 @@ public class TalentTreeManager {
                     }
                 }
             }
-            ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully created TalentData table.");
+            ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully created talent data table.");
         } catch (SQLException e) {
             Bukkit.getLogger().severe("[vArchaeology] Failed to create talent tables: " + e.getMessage());
             e.printStackTrace();

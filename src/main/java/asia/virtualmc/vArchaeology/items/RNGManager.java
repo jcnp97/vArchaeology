@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.items;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -10,13 +11,15 @@ import java.util.Map;
 import java.util.UUID;
 
 public class RNGManager {
-    private final JavaPlugin plugin;
+    private final Main plugin;
     private final Random random;
+    private final ConfigManager configManager;
     private final Map<UUID, List<Integer>> playerDropTables;
 
-    public RNGManager(JavaPlugin plugin) {
+    public RNGManager(Main plugin, ConfigManager configManager) {
         this.plugin = plugin;
         this.random = new Random();
+        this.configManager = configManager;
         this.playerDropTables = new HashMap<>();
     }
 
@@ -27,13 +30,13 @@ public class RNGManager {
     public void initializeDropTable(UUID playerId, int archLevel) {
         if (hasDropTable(playerId)) return;
         List<Integer> dropTable = new ArrayList<>();
-        dropTable.add(50);
-        if (archLevel > 10) dropTable.add(35);
-        if (archLevel > 20) dropTable.add(20);
-        if (archLevel > 30) dropTable.add(15);
-        if (archLevel > 40) dropTable.add(8);
-        if (archLevel > 50) dropTable.add(4);
-        if (archLevel > 60) dropTable.add(1);
+        dropTable.add(configManager.commonWeight);
+        if (archLevel >= 10) dropTable.add(configManager.uncommonWeight);
+        if (archLevel >= 20) dropTable.add(configManager.rareWeight);
+        if (archLevel >= 30) dropTable.add(configManager.uniqueWeight);
+        if (archLevel >= 40) dropTable.add(configManager.specialWeight);
+        if (archLevel >= 50) dropTable.add(configManager.mythicalWeight);
+        if (archLevel >= 60) dropTable.add(configManager.exoticWeight);
         playerDropTables.put(playerId, dropTable);
     }
 

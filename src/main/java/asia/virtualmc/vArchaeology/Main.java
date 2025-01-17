@@ -46,11 +46,11 @@ public final class Main extends JavaPlugin {
         this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
         this.itemManager = new ItemManager(this);
-        this.rngManager = new RNGManager(this);
+        this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
-        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil);
+        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager);
         this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
         this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager, statsManager);

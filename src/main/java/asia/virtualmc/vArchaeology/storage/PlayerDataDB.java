@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.util.UUID;
 
 public class PlayerDataDB {
-    private Main plugin;
+    private final Main plugin;
     private final ConfigManager configManager;
     private HikariDataSource dataSource;
 
@@ -67,7 +67,7 @@ public class PlayerDataDB {
 
     public void createTables() {
         try (Connection conn = dataSource.getConnection()) {
-            ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully created PlayerData tables.");
+            ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Successfully created player data tables.");
             // Create playerStats table
             conn.createStatement().execute(
                     "CREATE TABLE IF NOT EXISTS archPlayerStats (" +

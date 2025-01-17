@@ -1,65 +1,86 @@
 # vArchaeology Items
 itemsList:
-  purpleheart_wood: # item_id for commands
-    id: 1
+  purpleheart_wood: # itemName for commands
+    id: 1 # internalID
     material: FLINT # base material
-    name: "&aPurpleheart Wood"
+    name: "&aPurpleheart Wood (Common)"
     custom-model-data: 100000
+    weight: 55
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
-  imperial_steel: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  imperial_steel:
     id: 2
-    material: FLINT # base material
-    name: "&6Imperial Steel"
+    material: FLINT
+    name: "&bImperial Steel (Uncommon)"
     custom-model-data: 100001
+    weight: 35
     lore:
-    - "&aThis line 1"
-    - "&bThis line 2"
-    - "&cThis line 3"
-  everlight_silvthril: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  everlight_silvthril:
     id: 3
-    material: FLINT # base material
-    name: "&6Everlight Silvthril"
+    material: FLINT
+    name: "&3Everlight Silvthril (Rare)"
     custom-model-data: 100002
+    weight: 25
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
-  chaotic_brimstone: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  chaotic_brimstone:
     id: 4
-    material: FLINT # base material
-    name: "&6Chaotic Brimstone"
+    material: FLINT
+    name: "&eChaotic Brimstone (Unique)"
     custom-model-data: 100003
+    weight: 15
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
-  hellfire_metal: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  hellfire_metal:
     id: 5
-    material: FLINT # base material
-    name: "&6Hellfire Metal"
+    material: FLINT
+    name: "&6Hellfire Metal (Special)"
     custom-model-data: 100004
+    weight: 8
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
-  aetherium_alloy: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  aetherium_alloy:
     id: 6
-    material: FLINT # base material
-    name: "&6Aetherium Alloy"
+    material: FLINT
+    name: "&5Aetherium Alloy (Mythical)"
     custom-model-data: 100005
+    weight: 4
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
-  quintessence: # item_id for commands
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
+  quintessence:
     id: 7
-    material: FLINT # base material
-    name: "&6Quintessence"
+    material: FLINT
+    name: "&4Quintessence (Exotic)"
     custom-model-data: 100006
+    weight: 1
     lore:
-      - "&aThis line 1"
-      - "&bThis line 2"
-      - "&cThis line 3"
+      - '&cArchaeology Item'
+      - ''
+      - '&7This is used as a crafting material for'
+      - '&7various archaeological purposes or can'
+      - '&7be sold through &b[/varch sell]&7.'
