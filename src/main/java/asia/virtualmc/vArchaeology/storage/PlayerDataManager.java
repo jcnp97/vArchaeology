@@ -5,19 +5,14 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
+import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitRunnable;
+import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,16 +27,16 @@ public class PlayerDataManager {
     private final PlayerDataDB playerDataDB;
     private final BossBarUtil bossBarUtil;
     private final ConfigManager configManager;
+    private final EffectsUtil effectsUtil;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager) {
+    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager, @NotNull EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.bossBarUtil = bossBarUtil;
         this.configManager = configManager;
+        this.effectsUtil = effectsUtil;
         this.playerStatsMap = new ConcurrentHashMap<>();
-
-        startUpdateTask();
     }
 
     private static class PlayerStats {
@@ -81,14 +76,14 @@ public class PlayerDataManager {
         }
     }
 
-    private void startUpdateTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                updateAllData();
-            }
-        }.runTaskTimerAsynchronously(plugin, UPDATE_INTERVAL, UPDATE_INTERVAL);
-    }
+//    private void startUpdateTask() {
+//        new BukkitRunnable() {
+//            @Override
+//            public void run() {
+//                updateAllData();
+//            }
+//        }.runTaskTimerAsynchronously(plugin, UPDATE_INTERVAL, UPDATE_INTERVAL);
+//    }
 
     public void updatePlayerData(UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
@@ -231,12 +226,32 @@ public class PlayerDataManager {
 
     private void checkAndApplyLevelUp(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
+        boolean levelUp = false;
         if (stats == null) return;
+        int previousLevel = stats.archLevel;
 
         while (configManager.experienceTable.containsKey(stats.archLevel + 1) &&
                 stats.archEXP >= configManager.experienceTable.get(stats.archLevel + 1) &&
                 stats.archLevel < MAX_LEVEL) {
             stats.archLevel++;
+            levelUp = true;
+        }
+        if (!levelUp) return;
+
+        if (stats.archLevel == 99 || stats.archLevel == 120) {
+            effectsUtil.spawnFireworks(uuid, 12, 3);
+            effectsUtil.playSound(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+            effectsUtil.sendTitleMessage(uuid,
+                    "<#4DFFBA>Archaeology",
+                    previousLevel + " ➛ " + stats.archLevel
+                    );
+        } else {
+            effectsUtil.spawnFireworks(uuid, 5, 5);
+            effectsUtil.playSound(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+            effectsUtil.sendTitleMessage(uuid,
+                    "<#4DFFBA>Archaeology",
+                    previousLevel + " ➛ " + stats.archLevel
+            );
         }
     }
 

@@ -95,7 +95,22 @@ toolsList:
     gathering-rate: 1.0
     ad-bonus: 0.08
     unbreaking: 0
-    efficiency: 1
+    required-level: 1
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7A mattock used to level up Archaeology skill.'
+      - '&7This item can only be repaired by using a'
+      - '&7repair kit on the item.'
+  iron_mattock:
+    id: 2 # internalID
+    material: STONE_SHOVEL # base material
+    name: "&eIron Mattock (Tier 15)" # custom name
+    custom-model-data: 100000
+    gathering-rate: 1.5
+    ad-bonus: 0.10
+    unbreaking: 1
+    required-level: 15
     lore:
       - '&cArchaeology Tool'
       - ''

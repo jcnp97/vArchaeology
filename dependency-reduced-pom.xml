@@ -44,10 +44,6 @@
                   <pattern>dev.jorel.commandapi</pattern>
                   <shadedPattern>asia.virtualmc.vArchaeology.libs.commandapi</shadedPattern>
                 </relocation>
-                <relocation>
-                  <pattern>de.tr7zw.changeme.nbtapi</pattern>
-                  <shadedPattern>asia.virtualmc.vArchaeology.libs.nbtapi</shadedPattern>
-                </relocation>
               </relocations>
             </configuration>
           </execution>

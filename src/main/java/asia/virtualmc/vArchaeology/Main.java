@@ -1,4 +1,3 @@
-// Main.class
 package asia.virtualmc.vArchaeology;
 
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
@@ -6,20 +5,20 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
 import asia.virtualmc.vArchaeology.listeners.CommandManager;
+import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
-import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
+import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
-import de.tr7zw.changeme.nbtapi.*;
-
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public final class Main extends JavaPlugin {
     private ItemManager itemManager;
@@ -33,30 +32,27 @@ public final class Main extends JavaPlugin {
     private PlayerDataDB playerDataDB;
     private TalentTreeManager talentTreeManager;
     private StatsManager statsManager;
+    private EffectsUtil effectsUtil;
 
     @Override
     public void onEnable() {
         CommandAPI.onEnable();
-        if (!NBT.preloadApi()) {
-            getLogger().warning("NBT-API wasn't initialized properly, disabling the plugin");
-            getPluginLoader().disablePlugin(this);
-            return;
-        }
-
         this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
+        this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
         this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
-        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager);
+        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
         this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager, statsManager);
 
         getServer().getPluginManager().registerEvents(playerJoinManager, this);
         getServer().getPluginManager().registerEvents(blockBreakManager, this);
+        startUpdateTask();
     }
 
     @Override
@@ -85,5 +81,18 @@ public final class Main extends JavaPlugin {
         } else {
             getLogger().severe("[vArchaeology] Failed to close database connections.");
         }
+    }
+
+    private void startUpdateTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Storing all data into database and cleaning up memory..");
+                playerDataManager.updateAllData();
+                statsManager.updateAllData();
+                talentTreeManager.updateAllData();
+                blockBreakManager.cleanupExpiredADPCooldowns();
+            }
+        }.runTaskTimerAsynchronously(this, 12000L, 12000L);
     }
 }

@@ -1,11 +1,10 @@
-// ItemManager.class
 package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 
-import de.tr7zw.changeme.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,40 +14,45 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.persistence.PersistentDataContainer;
 
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import java.util.Random;
 
 public class ItemManager {
     private final Main plugin;
     private final File customItemsFile;
     private FileConfiguration customItemsConfig;
 
-    // archItems & archTools maps
     private final Map<Integer, ItemStack> itemCache;
     private final Map<Integer, ItemStack> toolCache;
 
-    // constants for items
     private static final String ITEM_LIST_PATH = "itemsList";
-    private static final String NBT_KEY = "VARCH_ITEM";
-
-    // constants for tools
     private static final String TOOLS_LIST_PATH = "toolsList";
-    private static final String NBT_TOOL_KEY = "VARCH_TOOL";
-    private static final String NBT_GATHER_KEY = "VARCH_GATHER";
-    private static final String NBT_ADB_KEY = "VARCH_ADB";
 
-    private final Random random;
+    // NamespacedKeys for PersistentDataContainer
+    private final NamespacedKey ITEM_KEY;
+    private final NamespacedKey TOOL_KEY;
+    private final NamespacedKey GATHER_RATE_KEY;
+    private final NamespacedKey AD_BONUS_KEY;
+    private final NamespacedKey REQ_LEVEL_KEY;
 
     public ItemManager(Main plugin) {
         this.plugin = plugin;
         this.itemCache = new ConcurrentHashMap<>();
         this.toolCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "custom-items.yml");
-        this.random = new Random();
+
+        // Initialize NamespacedKeys
+        this.ITEM_KEY = new NamespacedKey(plugin, "varch_item");
+        this.TOOL_KEY = new NamespacedKey(plugin, "varch_tool");
+        this.GATHER_RATE_KEY = new NamespacedKey(plugin, "varch_gather");
+        this.AD_BONUS_KEY = new NamespacedKey(plugin, "varch_adb");
+        this.REQ_LEVEL_KEY = new NamespacedKey(plugin, "varch_level");
+
         createCustomItemsFile();
         loadItems();
         loadTools();
@@ -100,6 +104,7 @@ public class ItemManager {
                 plugin.getLogger().warning("Invalid configuration for item: " + itemName);
                 return null;
             }
+
             Material material = Material.valueOf(materialName.toUpperCase());
             ItemStack item = new ItemStack(material);
             ItemMeta meta = item.getItemMeta();
@@ -114,11 +119,14 @@ public class ItemManager {
                 meta.setCustomModelData(customModelData);
                 meta.addEnchant(Enchantment.UNBREAKING, 1, true);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+
+                // Set PersistentDataContainer data
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                container.set(ITEM_KEY, PersistentDataType.INTEGER, id);
+
                 item.setItemMeta(meta);
             }
-            NBTItem nbtItem = new NBTItem(item);
-            nbtItem.setInteger(NBT_KEY, id);
-            return nbtItem.getItem();
+            return item;
         } catch (IllegalArgumentException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to create item: " + itemName, e);
             return null;
@@ -141,6 +149,7 @@ public class ItemManager {
             double gatherRate = customItemsConfig.getDouble(path + ".gathering-rate", 0.0);
             double adBonus = customItemsConfig.getDouble(path + ".ad-bonus", 0.0);
             int unbreaking = customItemsConfig.getInt(path + ".unbreaking", 0);
+            int reqLevel = customItemsConfig.getInt(path + ".required-level", 1);
             List<String> lore = customItemsConfig.getStringList(path + ".lore");
 
             if (id == -1 || materialName == null || displayName == null) {
@@ -149,18 +158,17 @@ public class ItemManager {
             }
             ItemStack toolItem = createToolItemInternal(
                     id, materialName, displayName, customModelData,
-                    gatherRate, adBonus, unbreaking, lore
+                    gatherRate, adBonus, unbreaking, reqLevel, lore
             );
             if (toolItem != null) {
                 toolCache.put(id, toolItem.clone());
             }
         }
-        //plugin.getLogger().info("Loaded tool items into cache: " + toolCache.keySet());
     }
 
     private ItemStack createToolItemInternal(int id, String materialName, String displayName,
                                              int customModelData, double gatherRate,
-                                             double adBonus, int unbreaking, List<String> lore) {
+                                             double adBonus, int unbreaking, int reqLevel, List<String> lore) {
         try {
             Material material = Material.valueOf(materialName.toUpperCase());
             ItemStack item = new ItemStack(material);
@@ -182,15 +190,16 @@ public class ItemManager {
                 meta.addEnchant(Enchantment.UNBREAKING, unbreaking, true);
             }
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+
+            // Set PersistentDataContainer data
+            PersistentDataContainer container = meta.getPersistentDataContainer();
+            container.set(TOOL_KEY, PersistentDataType.INTEGER, id);
+            container.set(REQ_LEVEL_KEY, PersistentDataType.INTEGER, reqLevel);
+            container.set(GATHER_RATE_KEY, PersistentDataType.DOUBLE, gatherRate);
+            container.set(AD_BONUS_KEY, PersistentDataType.DOUBLE, adBonus);
+
             item.setItemMeta(meta);
-
-            // Add the custom NBT data
-            NBTItem nbtTool = new NBTItem(item);
-            nbtTool.setInteger(NBT_TOOL_KEY, id);
-            nbtTool.setDouble(NBT_GATHER_KEY, gatherRate);
-            nbtTool.setDouble(NBT_ADB_KEY, adBonus);
-
-            return nbtTool.getItem();
+            return item;
         } catch (IllegalArgumentException e) {
             plugin.getLogger().log(Level.WARNING, "Failed to create tool item with ID " + id, e);
             return null;
@@ -198,9 +207,54 @@ public class ItemManager {
     }
 
     public Integer getItemId(ItemStack item) {
-        if (item == null) return null;
-        NBTItem nbtItem = new NBTItem(item);
-        return nbtItem.hasKey(NBT_KEY) ? nbtItem.getInteger(NBT_KEY) : null;
+        if (item == null || !item.hasItemMeta()) return null;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.get(ITEM_KEY, PersistentDataType.INTEGER);
+    }
+
+    public Integer getToolId(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.get(TOOL_KEY, PersistentDataType.INTEGER);
+    }
+
+    public Integer getRequiredLevel(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.get(REQ_LEVEL_KEY, PersistentDataType.INTEGER);
+    }
+
+    public Double getGatherRate(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.get(GATHER_RATE_KEY, PersistentDataType.DOUBLE);
+    }
+
+    public Double getAdBonus(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.get(AD_BONUS_KEY, PersistentDataType.DOUBLE);
+    }
+
+    public boolean isArchTool(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return false;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.has(TOOL_KEY, PersistentDataType.INTEGER);
+    }
+
+    public Integer getDurability(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return null;
+
+        if (!(item.getItemMeta() instanceof org.bukkit.inventory.meta.Damageable)) {
+            return null;
+        }
+        org.bukkit.inventory.meta.Damageable itemMeta = (org.bukkit.inventory.meta.Damageable) item.getItemMeta();
+        int maxDurability = item.getType().getMaxDurability();
+
+        if (maxDurability == 0) {
+            return null;
+        }
+        return maxDurability - itemMeta.getDamage();
     }
 
     public void giveArchItem(UUID uuid, int id, int amount) {
@@ -237,12 +291,6 @@ public class ItemManager {
         blockLocation.getWorld().dropItemNaturally(blockLocation, item.clone());
     }
 
-    public Integer getToolId(ItemStack item) {
-        if (item == null) return null;
-        NBTItem nbtItem = new NBTItem(item);
-        return nbtItem.hasKey(NBT_TOOL_KEY) ? nbtItem.getInteger(NBT_TOOL_KEY) : null;
-    }
-
     public void giveArchTool(UUID uuid, int id) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
@@ -254,7 +302,7 @@ public class ItemManager {
             return;
         }
         ItemStack giveItem = toolItem.clone();
-        giveItem.setAmount(Math.min(1, giveItem.getMaxStackSize()));
+        giveItem.setAmount(1);
         Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
 
         if (!overflow.isEmpty()) {
@@ -266,8 +314,9 @@ public class ItemManager {
 
     public void reloadItems() {
         itemCache.clear();
+        toolCache.clear();
         customItemsConfig = YamlConfiguration.loadConfiguration(customItemsFile);
         loadItems();
-        loadItems();
+        loadTools();
     }
 }

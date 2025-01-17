@@ -6,11 +6,9 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
-import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.Component;
@@ -19,7 +17,6 @@ import net.kyori.adventure.text.format.TextColor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Set;
 
 public class CommandManager {
     private final Main plugin;
@@ -211,7 +208,7 @@ public class CommandManager {
 
     private CommandAPICommand archGetTool() {
         return new CommandAPICommand("gettool")
-                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock"))
+                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock", "iron_mattock"))
                 .withArguments(new PlayerArgument("player"))
                 .withPermission("varchaeology.command.gettool")
                 .executes((sender, args) -> {
@@ -227,7 +224,7 @@ public class CommandManager {
     private int getToolIdFromName(String name) {
         return switch (name.toLowerCase()) {
             case "bronze_mattock" -> 1;
-            case "iron_mattock" -> 1;
+            case "iron_mattock" -> 2;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

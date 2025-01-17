@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.utilities;
 
 import asia.virtualmc.vArchaeology.Main;
+
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
