@@ -48,6 +48,7 @@ public class CommandManager {
                 .withSubcommand(archSetXPMul())
                 .withSubcommand(archResetStats())
                 .withSubcommand(archGetItem())
+                .withSubcommand(archGetTool())
                 .withSubcommand(archSetTalent())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
@@ -204,6 +205,29 @@ public class CommandManager {
             case "hellfire_metal" -> 5;
             case "aetherium_alloy" -> 6;
             case "quintessence" -> 7;
+            default -> throw new IllegalArgumentException("Unknown item: " + name);
+        };
+    }
+
+    private CommandAPICommand archGetTool() {
+        return new CommandAPICommand("gettool")
+                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock"))
+                .withArguments(new PlayerArgument("player"))
+                .withPermission("varchaeology.command.gettool")
+                .executes((sender, args) -> {
+                    String toolName = (String) args.get("tool_name");
+                    Player target = (Player) args.get("player");
+
+                    int itemId = getToolIdFromName(toolName);
+                    sender.sendMessage("Attempting to give " + toolName + " to " + target.getName());
+                    itemManager.giveArchTool(target.getUniqueId(), itemId);
+                });
+    }
+
+    private int getToolIdFromName(String name) {
+        return switch (name.toLowerCase()) {
+            case "bronze_mattock" -> 1;
+            case "iron_mattock" -> 1;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

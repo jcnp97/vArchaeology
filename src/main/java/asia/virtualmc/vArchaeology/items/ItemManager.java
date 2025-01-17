@@ -1,3 +1,4 @@
+// ItemManager.class
 package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
@@ -25,18 +26,32 @@ public class ItemManager {
     private final Main plugin;
     private final File customItemsFile;
     private FileConfiguration customItemsConfig;
+
+    // archItems & archTools maps
     private final Map<Integer, ItemStack> itemCache;
+    private final Map<Integer, ItemStack> toolCache;
+
+    // constants for items
     private static final String ITEM_LIST_PATH = "itemsList";
     private static final String NBT_KEY = "VARCH_ITEM";
+
+    // constants for tools
+    private static final String TOOLS_LIST_PATH = "toolsList";
+    private static final String NBT_TOOL_KEY = "VARCH_TOOL";
+    private static final String NBT_GATHER_KEY = "VARCH_GATHER";
+    private static final String NBT_ADB_KEY = "VARCH_ADB";
+
     private final Random random;
 
     public ItemManager(Main plugin) {
         this.plugin = plugin;
         this.itemCache = new ConcurrentHashMap<>();
+        this.toolCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "custom-items.yml");
         this.random = new Random();
         createCustomItemsFile();
         loadItems();
+        loadTools();
     }
 
     private void createCustomItemsFile() {
@@ -110,6 +125,78 @@ public class ItemManager {
         }
     }
 
+    private void loadTools() {
+        ConfigurationSection toolsList = customItemsConfig.getConfigurationSection(TOOLS_LIST_PATH);
+        if (toolsList == null) {
+            plugin.getLogger().warning("No tools found in custom-items.yml under 'toolsList'.");
+            return;
+        }
+        for (String toolName : toolsList.getKeys(false)) {
+            String path = TOOLS_LIST_PATH + "." + toolName;
+
+            int id = customItemsConfig.getInt(path + ".id", -1);
+            String materialName = customItemsConfig.getString(path + ".material");
+            String displayName = customItemsConfig.getString(path + ".name");
+            int customModelData = customItemsConfig.getInt(path + ".custom-model-data", 0);
+            double gatherRate = customItemsConfig.getDouble(path + ".gathering-rate", 0.0);
+            double adBonus = customItemsConfig.getDouble(path + ".ad-bonus", 0.0);
+            int unbreaking = customItemsConfig.getInt(path + ".unbreaking", 0);
+            List<String> lore = customItemsConfig.getStringList(path + ".lore");
+
+            if (id == -1 || materialName == null || displayName == null) {
+                plugin.getLogger().warning("Invalid configuration for tool: " + toolName);
+                continue;
+            }
+            ItemStack toolItem = createToolItemInternal(
+                    id, materialName, displayName, customModelData,
+                    gatherRate, adBonus, unbreaking, lore
+            );
+            if (toolItem != null) {
+                toolCache.put(id, toolItem.clone());
+            }
+        }
+        //plugin.getLogger().info("Loaded tool items into cache: " + toolCache.keySet());
+    }
+
+    private ItemStack createToolItemInternal(int id, String materialName, String displayName,
+                                             int customModelData, double gatherRate,
+                                             double adBonus, int unbreaking, List<String> lore) {
+        try {
+            Material material = Material.valueOf(materialName.toUpperCase());
+            ItemStack item = new ItemStack(material);
+            ItemMeta meta = item.getItemMeta();
+
+            if (meta == null) {
+                return null;
+            }
+            meta.setDisplayName(displayName.replace("&", "§"));
+
+            List<String> coloredLore = new ArrayList<>();
+            for (String line : lore) {
+                coloredLore.add(line.replace("&", "§"));
+            }
+            meta.setLore(coloredLore);
+            meta.setCustomModelData(customModelData);
+
+            if (unbreaking > 0) {
+                meta.addEnchant(Enchantment.UNBREAKING, unbreaking, true);
+            }
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.setItemMeta(meta);
+
+            // Add the custom NBT data
+            NBTItem nbtTool = new NBTItem(item);
+            nbtTool.setInteger(NBT_TOOL_KEY, id);
+            nbtTool.setDouble(NBT_GATHER_KEY, gatherRate);
+            nbtTool.setDouble(NBT_ADB_KEY, adBonus);
+
+            return nbtTool.getItem();
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to create tool item with ID " + id, e);
+            return null;
+        }
+    }
+
     public Integer getItemId(ItemStack item) {
         if (item == null) return null;
         NBTItem nbtItem = new NBTItem(item);
@@ -150,9 +237,37 @@ public class ItemManager {
         blockLocation.getWorld().dropItemNaturally(blockLocation, item.clone());
     }
 
+    public Integer getToolId(ItemStack item) {
+        if (item == null) return null;
+        NBTItem nbtItem = new NBTItem(item);
+        return nbtItem.hasKey(NBT_TOOL_KEY) ? nbtItem.getInteger(NBT_TOOL_KEY) : null;
+    }
+
+    public void giveArchTool(UUID uuid, int id) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
+        ItemStack toolItem = toolCache.get(id);
+        if (toolItem == null) {
+            player.sendMessage("§cInvalid tool ID: " + id);
+            return;
+        }
+        ItemStack giveItem = toolItem.clone();
+        giveItem.setAmount(Math.min(1, giveItem.getMaxStackSize()));
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
+
+        if (!overflow.isEmpty()) {
+            overflow.values().forEach(overflowItem ->
+                    player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
+            player.sendMessage("§eYour inventory was full. Some tools were dropped at your feet.");
+        }
+    }
+
     public void reloadItems() {
         itemCache.clear();
         customItemsConfig = YamlConfiguration.loadConfiguration(customItemsFile);
+        loadItems();
         loadItems();
     }
 }

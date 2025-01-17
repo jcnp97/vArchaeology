@@ -1,4 +1,4 @@
-# vArchaeology Items
+# vArchaeology Drops
 itemsList:
   purpleheart_wood: # itemName for commands
     id: 1 # internalID
@@ -84,3 +84,21 @@ itemsList:
       - '&7This is used as a crafting material for'
       - '&7various archaeological purposes or can'
       - '&7be sold through &b[/varch sell]&7.'
+
+# vArchaeology Tools
+toolsList:
+  bronze_mattock:
+    id: 1 # internalID
+    material: STONE_SHOVEL # base material
+    name: "&eBronze Mattock (Tier 1)" # custom name
+    custom-model-data: 100000
+    gathering-rate: 1.0
+    ad-bonus: 0.08
+    unbreaking: 0
+    efficiency: 1
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7A mattock used to level up Archaeology skill.'
+      - '&7This item can only be repaired by using a'
+      - '&7repair kit on the item.'
