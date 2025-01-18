@@ -175,7 +175,6 @@ public class TalentTreeManager {
                 }
                 ps.executeBatch();
                 conn.commit();
-                // After successful save, remove from HashMap
                 playerTalents.remove(uuid);
             }
         } catch (SQLException e) {

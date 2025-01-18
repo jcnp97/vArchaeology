@@ -56,11 +56,17 @@ public class PlayerJoinListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         UUID playerUUID = event.getPlayer().getUniqueId();
+
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
-            if (playerDataManager.getPlayerName(playerUUID) != null) {
-                playerDataManager.unloadData(playerUUID);
-                talentTreeManager.unloadData(playerUUID);
-                statsManager.unloadData(playerUUID);
+            if (plugin.getServer().getPlayer(playerUUID) == null) {
+                try {
+                    playerDataManager.unloadData(playerUUID);
+                    talentTreeManager.unloadData(playerUUID);
+                    statsManager.unloadData(playerUUID);
+                } catch (Exception e) {
+                    plugin.getLogger().severe("Error unloading data for player: " + playerUUID);
+                    e.printStackTrace();
+                }
             }
         });
     }
