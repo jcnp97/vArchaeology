@@ -240,14 +240,14 @@ public class PlayerDataManager {
 
         if (stats.archLevel == 99 || stats.archLevel == 120) {
             effectsUtil.spawnFireworks(uuid, 12, 3);
-            effectsUtil.playSound(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+            effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
             effectsUtil.sendTitleMessage(uuid,
                     "<#4DFFBA>Archaeology",
                     previousLevel + " ➛ " + stats.archLevel
                     );
         } else {
             effectsUtil.spawnFireworks(uuid, 5, 5);
-            effectsUtil.playSound(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+            effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
             effectsUtil.sendTitleMessage(uuid,
                     "<#4DFFBA>Archaeology",
                     previousLevel + " ➛ " + stats.archLevel

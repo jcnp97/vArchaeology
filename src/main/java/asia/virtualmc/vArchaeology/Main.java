@@ -21,6 +21,8 @@ import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 // commands
 import asia.virtualmc.vArchaeology.commands.CommandManager;
+// guis
+import asia.virtualmc.vArchaeology.guis.SellGUIManager;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
@@ -45,6 +47,8 @@ public final class Main extends JavaPlugin {
     private PlayerJoinListener playerJoinListener;
     // exp
     private EXPManager expManager;
+    // guis
+    private SellGUIManager sellGUIManager;
 
     @Override
     public void onEnable() {
@@ -54,13 +58,14 @@ public final class Main extends JavaPlugin {
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
         this.miscListener = new MiscListener(this);
+        this.sellGUIManager = new SellGUIManager(this, effectsUtil);
         this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUIManager);
         this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
         this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
@@ -84,12 +89,17 @@ public final class Main extends JavaPlugin {
         if (playerDataManager != null) {
             playerDataManager.updateAllData();
         } else {
-            getLogger().severe("[vArchaeology] Failed to save Player Data.");
+            getLogger().severe("[vArchaeology] Failed to save player data.");
         }
         if (talentTreeManager != null) {
             talentTreeManager.updateAllData();
         } else {
-            getLogger().severe("[vArchaeology] Failed to save Talent Data.");
+            getLogger().severe("[vArchaeology] Failed to save talent data.");
+        }
+        if (statsManager != null) {
+            statsManager.updateAllData();
+        } else {
+            getLogger().severe("[vArchaeology] Failed to save statistics data.");
         }
         if (playerDataDB != null) {
             playerDataDB.closeConnection();
