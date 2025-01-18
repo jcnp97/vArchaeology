@@ -22,21 +22,29 @@ public class EXPManager {
     }
 
     public double getTotalBlockBreakEXP(UUID playerUUID, float blockEXP) {
-        int traitBonus = playerDataManager.getWisdomTrait(playerUUID) * 2;
-        int talentBonus = (talentTreeManager.getTalentLevel(playerUUID, 1) * 25) + talentTreeManager.getTalentLevel(playerUUID, 9);
-        int rankBonus = statsManager.getStatistics(playerUUID, 12) * 2;
-        double totalXP = (((double) (traitBonus + talentBonus + rankBonus)/100) + playerDataManager.getArchXPMul(playerUUID)) * blockEXP;
-        double bonusXP = 0.0;
+        int traitBonus = playerDataManager.getWisdomTrait(playerUUID);
+        int talentBonus1 = talentTreeManager.getTalentLevel(playerUUID, 1);
+        int talentBonus2 = talentTreeManager.getTalentLevel(playerUUID, 9);
+        int rankBonus = statsManager.getStatistics(playerUUID, 12);
+        double archXPMul = playerDataManager.getArchXPMul(playerUUID);
 
-        if (playerDataManager.getArchBonusXP(playerUUID) > 0) {
-            double currentBonus = playerDataManager.getArchBonusXP(playerUUID);
-            if (currentBonus >= totalXP) {
-                bonusXP = totalXP;
-                playerDataManager.reduceBonusXP(playerUUID, (int) totalXP);
-            } else {
-                bonusXP = currentBonus;
-                playerDataManager.resetBonusXP(playerUUID);
-            }
+        double baseMultiplier = ((traitBonus * 2 +
+                talentBonus1 * 25 +
+                talentBonus2 +
+                rankBonus * 2) / 100.0) + archXPMul;
+
+        double totalXP = baseMultiplier * blockEXP;
+        int currentBonus = playerDataManager.getArchBonusXP(playerUUID);
+
+        if (currentBonus <= 0) {
+            return totalXP;
+        }
+        double bonusXP = Math.min(currentBonus, totalXP);
+
+        if (bonusXP >= totalXP) {
+            playerDataManager.reduceBonusXP(playerUUID, (int) totalXP);
+        } else {
+            playerDataManager.resetBonusXP(playerUUID);
         }
         return totalXP + bonusXP;
     }
