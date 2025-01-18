@@ -58,7 +58,7 @@
                                 <!-- IF API relocation -->
                                 <relocation>
                                     <pattern>com.github.stefvanschie.inventoryframework</pattern>
-                                    <shadedPattern>[YOUR PACKAGE].inventoryframework</shadedPattern>
+                                    <shadedPattern>asia.virtualmc.vArchaeology.libs.inventoryframework</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>

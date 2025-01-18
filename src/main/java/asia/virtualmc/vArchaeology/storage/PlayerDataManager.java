@@ -58,7 +58,7 @@ public class PlayerDataManager {
         PlayerStats(String name, double archEXP, int archLevel, int archApt, int archLuck, double archADP,
                     double archXPMul, int archBonusXP, int traitPoints, int talentPoints, int wisdomTrait,
                     int charismaTrait, int karmaTrait, int dexterityTrait
-                    ) {
+        ) {
             this.name = name;
             this.archEXP = archEXP;
             this.archLevel = archLevel;
@@ -244,7 +244,7 @@ public class PlayerDataManager {
             effectsUtil.sendTitleMessage(uuid,
                     "<#4DFFBA>Archaeology",
                     previousLevel + " ➛ " + stats.archLevel
-                    );
+            );
         } else {
             effectsUtil.spawnFireworks(uuid, 5, 5);
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
