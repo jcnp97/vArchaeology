@@ -54,12 +54,6 @@
                                     <pattern>dev.jorel.commandapi</pattern>
                                     <shadedPattern>asia.virtualmc.vArchaeology.libs.commandapi</shadedPattern>
                                 </relocation>
-
-                                <!-- NBTAPI relocation -->
-<!--                                <relocation>-->
-<!--                                    <pattern>de.tr7zw.changeme.nbtapi</pattern>-->
-<!--                                    <shadedPattern>asia.virtualmc.vArchaeology.libs.nbtapi</shadedPattern>-->
-<!--                                </relocation>-->
                             </relocations>
                         </configuration>
                     </execution>
@@ -126,12 +120,5 @@
             <artifactId>commandapi-bukkit-shade</artifactId>
             <version>9.7.0</version>
         </dependency>
-
-<!--        &lt;!&ndash; NBT API &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>de.tr7zw</groupId>-->
-<!--            <artifactId>item-nbt-api</artifactId>-->
-<!--            <version>2.14.1</version>-->
-<!--        </dependency>-->
     </dependencies>
 </project>

@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BlockBreakManager implements Listener {
+public class BlockBreakListener implements Listener {
     private final Main plugin;
     private final PlayerDataManager playerDataManager;
     private final ItemManager itemManager;
@@ -33,7 +33,7 @@ public class BlockBreakManager implements Listener {
     private final Map<UUID, Long> adpCooldowns;
     private static final long ADP_COOLDOWN = 60_000;
 
-    public BlockBreakManager(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager) {
+    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;

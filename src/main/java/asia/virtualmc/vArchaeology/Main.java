@@ -1,18 +1,25 @@
 package asia.virtualmc.vArchaeology;
 
+// configs
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+// items
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
-import asia.virtualmc.vArchaeology.listeners.BlockBreakManager;
-import asia.virtualmc.vArchaeology.listeners.CommandManager;
-import asia.virtualmc.vArchaeology.listeners.PlayerJoinManager;
+// listeners
+import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
+import asia.virtualmc.vArchaeology.listeners.MiscListener;
+import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
+// storage
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
+// utilities
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
+// commands
+import asia.virtualmc.vArchaeology.commands.CommandManager;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
@@ -23,9 +30,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public final class Main extends JavaPlugin {
     private ItemManager itemManager;
     private PlayerDataManager playerDataManager;
-    private PlayerJoinManager playerJoinManager;
     private CommandManager commandManager;
-    private BlockBreakManager blockBreakManager;
     private BossBarUtil bossBarUtil;
     private RNGManager rngManager;
     private ConfigManager configManager;
@@ -33,6 +38,10 @@ public final class Main extends JavaPlugin {
     private TalentTreeManager talentTreeManager;
     private StatsManager statsManager;
     private EffectsUtil effectsUtil;
+    // listeners
+    private MiscListener miscListener;
+    private BlockBreakListener blockBreakListener;
+    private PlayerJoinListener playerJoinListener;
 
     @Override
     public void onEnable() {
@@ -46,12 +55,13 @@ public final class Main extends JavaPlugin {
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
-        this.playerJoinManager = new PlayerJoinManager(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
-        this.blockBreakManager = new BlockBreakManager(this, playerDataManager, itemManager, rngManager, statsManager);
+        this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager);
 
-        getServer().getPluginManager().registerEvents(playerJoinManager, this);
-        getServer().getPluginManager().registerEvents(blockBreakManager, this);
+        getServer().getPluginManager().registerEvents(playerJoinListener, this);
+        getServer().getPluginManager().registerEvents(blockBreakListener, this);
+        getServer().getPluginManager().registerEvents(miscListener, this);
         startUpdateTask();
     }
 
@@ -91,7 +101,7 @@ public final class Main extends JavaPlugin {
                 playerDataManager.updateAllData();
                 statsManager.updateAllData();
                 talentTreeManager.updateAllData();
-                blockBreakManager.cleanupExpiredADPCooldowns();
+                blockBreakListener.cleanupExpiredADPCooldowns();
             }
         }.runTaskTimerAsynchronously(this, 12000L, 12000L);
     }

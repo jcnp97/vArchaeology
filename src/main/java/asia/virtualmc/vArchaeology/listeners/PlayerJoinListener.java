@@ -13,14 +13,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
-public class PlayerJoinManager implements Listener {
+public class PlayerJoinListener implements Listener {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final PlayerDataManager playerDataManager;
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
 
-    public PlayerJoinManager(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
+    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.playerDataManager = playerDataManager;

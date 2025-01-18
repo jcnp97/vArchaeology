@@ -1,4 +1,4 @@
-package asia.virtualmc.vArchaeology.listeners;
+package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
