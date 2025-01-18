@@ -189,14 +189,6 @@ public class TalentTreeManager {
                 .getOrDefault(talentID, 0);
     }
 
-//    public int getTalentXP(UUID playerUUID) {
-//        Map<Integer, Integer> talents = playerTalents.get(playerUUID);
-//        if (talents == null) {
-//            return 0;
-//        }
-//        return (talents.getOrDefault(1, 0) * 25) + talents.getOrDefault(9, 0);
-//    }
-
     public void createNewPlayerTalent(UUID uuid) {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             conn.setAutoCommit(false);

@@ -3,10 +3,9 @@ package asia.virtualmc.vArchaeology.commands;
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
+
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
-import asia.virtualmc.vArchaeology.guis.SellGUIManager;
-
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 
@@ -25,17 +24,15 @@ public class CommandManager {
     private final ItemManager itemManager;
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
-    private final SellGUIManager sellGUIManager;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUIManager sellGUIManager) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
         this.statsManager = statsManager;
         this.talentTreeManager = talentTreeManager;
-        this.sellGUIManager = sellGUIManager;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -51,7 +48,6 @@ public class CommandManager {
                 .withSubcommand(archGetTool())
                 .withSubcommand(archSetTalent())
                 .withSubcommand(archAddBonusXP())
-                .withSubcommand(archSellGUI())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -277,18 +273,6 @@ public class CommandManager {
                     talentTreeManager.updateTalentLevel(target.getUniqueId(), talentID, level);
                     sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Talent " + talentID + " to level " + level)
                             .color(TextColor.color(0, 255, 162)));
-                });
-    }
-
-    private CommandAPICommand archSellGUI() {
-        return new CommandAPICommand("sell")
-                .withPermission("varchaeology.use")
-                .executes((sender, args) -> {
-                    if (sender instanceof Player player) {
-                        sellGUIManager.openSellGUI(player);
-                    } else {
-                        sender.sendMessage("This command can only be used by players.");
-                    }
                 });
     }
 }

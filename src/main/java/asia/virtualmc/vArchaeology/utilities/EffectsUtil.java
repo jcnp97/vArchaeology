@@ -65,25 +65,8 @@ public class EffectsUtil {
         }.runTaskTimer(plugin, 0, interval);
     }
 
-    public void playSoundUUID(UUID playerUUID, String soundKey, Sound.Source source, float volume, float pitch) {
+    public void playSound(UUID playerUUID, String soundKey, Sound.Source source, float volume, float pitch) {
         Player player = Bukkit.getPlayer(playerUUID);
-        if (player == null || !player.isOnline()) {
-            return;
-        }
-        String[] parts = soundKey.split(":", 2);
-        String namespace = parts.length > 1 ? parts[0] : "minecraft";
-        String key = parts.length > 1 ? parts[1] : parts[0];
-
-        Sound sound = Sound.sound()
-                .type(Key.key(namespace, key))
-                .source(source)
-                .volume(volume)
-                .pitch(pitch)
-                .build();
-        player.playSound(sound);
-    }
-
-    public void playSound(Player player, String soundKey, Sound.Source source, float volume, float pitch) {
         if (player == null || !player.isOnline()) {
             return;
         }

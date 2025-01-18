@@ -44,10 +44,6 @@
                   <pattern>dev.jorel.commandapi</pattern>
                   <shadedPattern>asia.virtualmc.vArchaeology.libs.commandapi</shadedPattern>
                 </relocation>
-                <relocation>
-                  <pattern>com.github.stefvanschie.inventoryframework</pattern>
-                  <shadedPattern>asia.virtualmc.vArchaeology.libs.inventoryframework</shadedPattern>
-                </relocation>
               </relocations>
             </configuration>
           </execution>
