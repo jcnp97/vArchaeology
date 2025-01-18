@@ -186,7 +186,9 @@ public class ItemManager {
             meta.setLore(coloredLore);
             meta.setCustomModelData(customModelData);
 
-            if (unbreaking > 0) {
+            if (unbreaking >= 10) {
+                meta.setUnbreakable(true);
+            } else if (unbreaking > 0) {
                 meta.addEnchant(Enchantment.UNBREAKING, unbreaking, true);
             }
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

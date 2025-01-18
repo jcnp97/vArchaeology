@@ -9,6 +9,7 @@ asia\virtualmc\vArchaeology\configs\ConfigManager.class
 asia\virtualmc\vArchaeology\Main$1.class
 asia\virtualmc\vArchaeology\storage\TalentTreeManager.class
 asia\virtualmc\vArchaeology\utilities\EffectsUtil$1.class
+asia\virtualmc\vArchaeology\exp\EXPManager.class
 asia\virtualmc\vArchaeology\listeners\BlockBreakListener.class
 asia\virtualmc\vArchaeology\utilities\BossBarUtil$1.class
 asia\virtualmc\vArchaeology\listeners\PlayerJoinListener.class

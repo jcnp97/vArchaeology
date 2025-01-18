@@ -99,14 +99,14 @@ toolsList:
     lore:
       - '&cArchaeology Tool'
       - ''
-      - '&7A mattock used to level up Archaeology skill.'
-      - '&7This item can only be repaired by using a'
-      - '&7repair kit on the item.'
+      - '&7Required Level: &e1'
+      - '&7Gathering Rate: &e1.0%'
+      - '&7Artefact Progress: &e0.08%'
   iron_mattock:
     id: 2 # internalID
     material: STONE_SHOVEL # base material
     name: "&eIron Mattock (Tier 15)" # custom name
-    custom-model-data: 100000
+    custom-model-data: 100001
     gathering-rate: 1.5
     ad-bonus: 0.10
     unbreaking: 1
@@ -114,6 +114,133 @@ toolsList:
     lore:
       - '&cArchaeology Tool'
       - ''
-      - '&7A mattock used to level up Archaeology skill.'
-      - '&7This item can only be repaired by using a'
-      - '&7repair kit on the item.'
+      - '&7Required Level: &e15'
+      - '&7Gathering Rate: &e1.5%'
+      - '&7Artefact Progress: &e0.10%'
+  steel_mattock:
+    id: 3 # internalID
+    material: STONE_SHOVEL # base material
+    name: "&eSteel Mattock (Tier 30)" # custom name
+    custom-model-data: 100002
+    gathering-rate: 2.0
+    ad-bonus: 0.12
+    unbreaking: 2
+    required-level: 30
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e30'
+      - '&7Gathering Rate: &e2.0%'
+      - '&7Artefact Progress: &e0.12%'
+  mithril_mattock:
+    id: 4 # internalID
+    material: STONE_SHOVEL # base material
+    name: "&eMithril Mattock (Tier 40)" # custom name
+    custom-model-data: 100003
+    gathering-rate: 2.5
+    ad-bonus: 0.14
+    unbreaking: 3
+    required-level: 40
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e40'
+      - '&7Gathering Rate: &e2.5%'
+      - '&7Artefact Progress: &e0.14%'
+  adamantium_mattock:
+    id: 5 # internalID
+    material: IRON_SHOVEL # base material
+    name: "&eAdamantium Mattock (Tier 50)" # custom name
+    custom-model-data: 100000
+    gathering-rate: 3.0
+    ad-bonus: 0.16
+    unbreaking: 1
+    required-level: 50
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e50'
+      - '&7Gathering Rate: &e3.0%'
+      - '&7Artefact Progress: &e0.16%'
+  runite_mattock:
+    id: 6 # internalID
+    material: IRON_SHOVEL # base material
+    name: "&eRunite Mattock (Tier 60)" # custom name
+    custom-model-data: 100001
+    gathering-rate: 3.5
+    ad-bonus: 0.18
+    unbreaking: 2
+    required-level: 60
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e60'
+      - '&7Gathering Rate: &e3.5%'
+      - '&7Artefact Progress: &e0.18%'
+  dragon_mattock:
+    id: 7 # internalID
+    material: IRON_SHOVEL # base material
+    name: "&eDragon Mattock (Tier 70)" # custom name
+    custom-model-data: 100002
+    gathering-rate: 4.0
+    ad-bonus: 0.20
+    unbreaking: 3
+    required-level: 70
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e70'
+      - '&7Gathering Rate: &e4.0%'
+      - '&7Artefact Progress: &e0.20%'
+  necronium_mattock:
+    id: 8 # internalID
+    material: DIAMOND_SHOVEL # base material
+    name: "&eNecronium Mattock (Tier 80)" # custom name
+    custom-model-data: 100000
+    gathering-rate: 4.5
+    ad-bonus: 0.22
+    unbreaking: 0
+    required-level: 80
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e80'
+      - '&7Gathering Rate: &e4.5%'
+      - '&7Artefact Progress: &e0.22%'
+  crystal_mattock:
+    id: 9 # internalID
+    material: NETHERITE_SHOVEL # base material
+    name: "&eCrystal Mattock (Tier 90)" # custom name
+    custom-model-data: 100000
+    gathering-rate: 5.0
+    ad-bonus: 0.25
+    unbreaking: 0
+    required-level: 90
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e90'
+      - '&7Gathering Rate: &e5.0%'
+      - '&7Artefact Progress: &e0.25%'
+  mattock_of_time_and_space:
+    id: 10 # internalID
+    material: NETHERITE_SHOVEL # base material
+    name: "&4Mattock of Time and Space (Tier 99)" # custom name
+    custom-model-data: 100001
+    gathering-rate: 6.0
+    ad-bonus: 0.30
+    unbreaking: 10
+    required-level: 99
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e99'
+      - '&7Gathering Rate: &e6.0%'
+      - '&7Artefact Progress: &e0.30%'
+      - ''
+      - '&5Time-Space Convergence&7: Every time you'
+      - '&7receive a material, there is a 10% chance'
+      - '&7to receive an extra material.'
+      - ''
+      - '&5Chronal Focus&7: There is a 1% chance to'
+      - '&7increase Artefact Discovery by 1%.'

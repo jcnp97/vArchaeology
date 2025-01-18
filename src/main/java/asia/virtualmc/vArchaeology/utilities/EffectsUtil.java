@@ -9,8 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -83,16 +81,6 @@ public class EffectsUtil {
                 .pitch(pitch)
                 .build();
         player.playSound(sound);
-    }
-
-    @EventHandler
-    public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Firework) {
-            Firework firework = (Firework) event.getDamager();
-            if (firework.hasMetadata("nodamage")) {
-                event.setCancelled(true);
-            }
-        }
     }
 
     public void sendTitleMessage(UUID uuid, String title, String subtitle) {

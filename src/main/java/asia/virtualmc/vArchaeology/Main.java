@@ -7,6 +7,7 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 // listeners
 import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
+import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.listeners.MiscListener;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 // storage
@@ -42,6 +43,8 @@ public final class Main extends JavaPlugin {
     private MiscListener miscListener;
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
+    // exp
+    private EXPManager expManager;
 
     @Override
     public void onEnable() {
@@ -50,6 +53,7 @@ public final class Main extends JavaPlugin {
         this.bossBarUtil = new BossBarUtil(this);
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
+        this.miscListener = new MiscListener(this);
         this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
@@ -57,7 +61,8 @@ public final class Main extends JavaPlugin {
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
         this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager);
-        this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager);
+        this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
+        this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
         getServer().getPluginManager().registerEvents(playerJoinListener, this);
         getServer().getPluginManager().registerEvents(blockBreakListener, this);

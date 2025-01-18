@@ -4,6 +4,7 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
+import asia.virtualmc.vArchaeology.exp.EXPManager;
 
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import org.bukkit.Material;
@@ -29,20 +30,21 @@ public class BlockBreakListener implements Listener {
     private final ItemManager itemManager;
     private final RNGManager rngManager;
     private final StatsManager statsManager;
+    private final EXPManager expManager;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
     private static final long ADP_COOLDOWN = 60_000;
 
-    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager) {
+    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager, EXPManager expManager) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
         this.rngManager = rngManager;
         this.statsManager = statsManager;
+        this.expManager = expManager;
         this.blocksList = new HashMap<>();
         this.adpCooldowns = new HashMap<>();
 
-        saveDefaultConfig();
         loadConfiguration();
     }
 
@@ -100,8 +102,8 @@ public class BlockBreakListener implements Listener {
             rngManager.initializeDropTable(uuid, playerDataManager.getArchLevel(uuid));
         }
 
-        event.setDropItems(false); // Cancel vanilla drops
-        playerDataManager.updateExp(uuid, (double) expValue * (playerDataManager.getArchXPMul(uuid)), "add");
+        event.setDropItems(false);
+        playerDataManager.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
         statsManager.incrementStatistics(uuid, 8);
         itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
 
@@ -126,30 +128,5 @@ public class BlockBreakListener implements Listener {
         long currentTime = System.currentTimeMillis();
         adpCooldowns.entrySet().removeIf(entry ->
                 currentTime - entry.getValue() >= ADP_COOLDOWN);
-    }
-
-    public void saveDefaultConfig() {
-        FileConfiguration config = plugin.getConfig();
-
-        if (!config.contains("settings.blocksList.SAND")) {
-            config.set("settings.blocksList.SAND", 1);
-        }
-
-        if (!config.contains("settings.blocksList.GRAVEL")) {
-            config.set("settings.blocksList.GRAVEL", 1);
-        }
-
-        if (!config.contains("settings.blocksList.GRASS_BLOCK")) {
-            config.set("settings.blocksList.GRASS_BLOCK", 1);
-        }
-
-        if (!config.contains("settings.blocksList.DIRT")) {
-            config.set("settings.blocksList.DIRT", 1);
-        }
-
-        if (!config.contains("settings.blocksList.CLAY_BLOCK")) {
-            config.set("settings.blocksList.CLAY_BLOCK", 1);
-        }
-        plugin.saveConfig();
     }
 }

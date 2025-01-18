@@ -47,6 +47,7 @@ public class CommandManager {
                 .withSubcommand(archGetItem())
                 .withSubcommand(archGetTool())
                 .withSubcommand(archSetTalent())
+                .withSubcommand(archAddBonusXP())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -139,6 +140,22 @@ public class CommandManager {
                 });
     }
 
+    private CommandAPICommand archAddBonusXP() {
+        return new CommandAPICommand("bonusxp")
+                .withArguments(new MultiLiteralArgument("operation", "add"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 0))
+                .withPermission("varchaeology.command.bonusxp")
+                .executes((sender, args) -> {
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    playerDataManager.addBonusXP(target.getUniqueId(), value);
+                    sender.sendMessage(Component.text("[vArchaeology] Successfully updated " + target.getName() + "'s Bonus XP!")
+                            .color(TextColor.color(0, 255, 162)));
+                });
+    }
+
     private CommandAPICommand archResetStats() {
         return new CommandAPICommand("reset")
                 .withArguments(new PlayerArgument("player"))
@@ -208,7 +225,10 @@ public class CommandManager {
 
     private CommandAPICommand archGetTool() {
         return new CommandAPICommand("gettool")
-                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock", "iron_mattock"))
+                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock", "iron_mattock",
+                        "steel_mattock", "mithril_mattock", "adamantium_mattock", "runite_mattock", "dragon_mattock",
+                        "necronium_mattock", "crystal_mattock", "mattock_of_time_and_space"
+                        ))
                 .withArguments(new PlayerArgument("player"))
                 .withPermission("varchaeology.command.gettool")
                 .executes((sender, args) -> {
@@ -225,6 +245,14 @@ public class CommandManager {
         return switch (name.toLowerCase()) {
             case "bronze_mattock" -> 1;
             case "iron_mattock" -> 2;
+            case "steel_mattock" -> 3;
+            case "mithril_mattock" -> 4;
+            case "adamantium_mattock" -> 5;
+            case "runite_mattock" -> 6;
+            case "dragon_mattock" -> 7;
+            case "necronium_mattock" -> 8;
+            case "crystal_mattock" -> 9;
+            case "mattock_of_time_and_space" -> 10;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

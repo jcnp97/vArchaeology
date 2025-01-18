@@ -275,6 +275,21 @@ public class PlayerDataManager {
         if (stats != null) stats.talentPoints -= value;
     }
 
+    public void addBonusXP(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.archBonusXP += value;
+    }
+
+    public void reduceBonusXP(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.archBonusXP -= value;
+    }
+
+    public void resetBonusXP(@NotNull UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.archBonusXP = 0;
+    }
+
     // Getter methods for player stats
     @Nullable
     public String getPlayerName(@NotNull UUID uuid) {
@@ -325,5 +340,10 @@ public class PlayerDataManager {
     public int getTalentPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
         return stats != null ? stats.talentPoints : 0;
+    }
+
+    public int getWisdomTrait(UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.wisdomTrait : 0;
     }
 }

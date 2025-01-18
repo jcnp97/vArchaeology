@@ -47,6 +47,7 @@ public class ConfigManager {
         readDatabase();
         readExperienceTable();
         readcustomDrops();
+        blocksEXPConfig();
     }
 
     public void readDatabase() {
@@ -132,5 +133,30 @@ public class ConfigManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void blocksEXPConfig() {
+        FileConfiguration config = plugin.getConfig();
+
+        if (!config.contains("settings.blocksList.SAND")) {
+            config.set("settings.blocksList.SAND", 1);
+        }
+
+        if (!config.contains("settings.blocksList.GRAVEL")) {
+            config.set("settings.blocksList.GRAVEL", 1);
+        }
+
+        if (!config.contains("settings.blocksList.GRASS_BLOCK")) {
+            config.set("settings.blocksList.GRASS_BLOCK", 1);
+        }
+
+        if (!config.contains("settings.blocksList.DIRT")) {
+            config.set("settings.blocksList.DIRT", 1);
+        }
+
+        if (!config.contains("settings.blocksList.CLAY")) {
+            config.set("settings.blocksList.CLAY", 1);
+        }
+        plugin.saveConfig();
     }
 }

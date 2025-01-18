@@ -17,3 +17,6 @@ permissions:
   varchaeology.command.reset:
     description: Allows resetting player archaeology data
     default: op
+  varchaeology.exp.doublexp:
+    description: Provides double XP bonus
+    default: op

@@ -67,10 +67,14 @@ public class BossBarUtil {
                             double totalExp = data.getNewExp();
 
                             float progress = (float) currentExp / nextLevelExp;
+                            String percentProgress = String.format("%.2f", progress * 100);
 
                             bossBar.name(Component.text()
                                     .append(Component.text("Archaeology Lv. " + data.getCurrentLevel(), NamedTextColor.WHITE))
-                                    .append(Component.text(" (+" + totalExp + " EXP)", NamedTextColor.GREEN))
+                                    .append(Component.text(" | ", NamedTextColor.GRAY))
+                                    .append(Component.text(percentProgress + "%", NamedTextColor.YELLOW))
+                                    .append(Component.text(" | ", NamedTextColor.GRAY))
+                                    .append(Component.text("+" + totalExp + " EXP", NamedTextColor.GREEN))
                                     .build());
                             bossBar.progress(Math.min(progress, 1.0f));
 
@@ -83,7 +87,7 @@ public class BossBarUtil {
                                     player.hideBossBar(bossBar);
                                     activeBossBars.remove(uuid);
                                 }
-                            }.runTaskLater(plugin, 60L); // 3 seconds
+                            }.runTaskLater(plugin, 80L);
                         }
                     });
                     expUpdates.clear();
