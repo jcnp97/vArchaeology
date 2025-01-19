@@ -76,15 +76,6 @@ public class PlayerDataManager {
         }
     }
 
-//    private void startUpdateTask() {
-//        new BukkitRunnable() {
-//            @Override
-//            public void run() {
-//                updateAllData();
-//            }
-//        }.runTaskTimerAsynchronously(plugin, UPDATE_INTERVAL, UPDATE_INTERVAL);
-//    }
-
     public void updatePlayerData(UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats == null) {

@@ -1,11 +1,11 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
-import asia.virtualmc.vArchaeology.guis.SellGUIManager;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
@@ -25,17 +25,17 @@ public class CommandManager {
     private final ItemManager itemManager;
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
-    private final SellGUIManager sellGUIManager;
+    private final SellGUI sellGUI;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUIManager sellGUIManager) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUI sellGUI) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
         this.statsManager = statsManager;
         this.talentTreeManager = talentTreeManager;
-        this.sellGUIManager = sellGUIManager;
+        this.sellGUI = sellGUI;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -285,7 +285,7 @@ public class CommandManager {
                 .withPermission("varchaeology.use")
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
-                        sellGUIManager.openSellGUI(player);
+                        sellGUI.openSellGUI(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

@@ -11,6 +11,7 @@ public class MiscListener implements Listener {
 
     public MiscListener(Main plugin) {
         this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

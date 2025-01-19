@@ -3,6 +3,8 @@ package asia.virtualmc.vArchaeology;
 // configs
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 // items
+import asia.virtualmc.vArchaeology.guis.SellGUI;
+import asia.virtualmc.vArchaeology.guis.TalentGUI;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 // listeners
@@ -22,7 +24,6 @@ import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 // commands
 import asia.virtualmc.vArchaeology.commands.CommandManager;
 // guis
-import asia.virtualmc.vArchaeology.guis.SellGUIManager;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
@@ -48,7 +49,8 @@ public final class Main extends JavaPlugin {
     // exp
     private EXPManager expManager;
     // guis
-    private SellGUIManager sellGUIManager;
+    private SellGUI sellGUI;
+    private TalentGUI talentGUI;
 
     @Override
     public void onEnable() {
@@ -58,20 +60,18 @@ public final class Main extends JavaPlugin {
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
         this.miscListener = new MiscListener(this);
-        this.sellGUIManager = new SellGUIManager(this, effectsUtil);
+        this.sellGUI = new SellGUI(this, effectsUtil);
+        this.talentGUI = new TalentGUI(this, effectsUtil);
         this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUIManager);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI);
         this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
         this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
-        getServer().getPluginManager().registerEvents(playerJoinListener, this);
-        getServer().getPluginManager().registerEvents(blockBreakListener, this);
-        getServer().getPluginManager().registerEvents(miscListener, this);
         startUpdateTask();
     }
 

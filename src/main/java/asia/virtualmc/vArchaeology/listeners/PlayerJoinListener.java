@@ -26,6 +26,7 @@ public class PlayerJoinListener implements Listener {
         this.playerDataManager = playerDataManager;
         this.talentTreeManager = talentTreeManager;
         this.statsManager = statsManager;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler

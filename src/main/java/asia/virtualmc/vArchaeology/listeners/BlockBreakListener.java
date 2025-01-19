@@ -44,6 +44,7 @@ public class BlockBreakListener implements Listener {
         this.expManager = expManager;
         this.blocksList = new HashMap<>();
         this.adpCooldowns = new HashMap<>();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         loadConfiguration();
     }
