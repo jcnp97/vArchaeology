@@ -6,3 +6,5 @@ settings:
     GRASS_BLOCK: 1
     DIRT: 1
     CLAY: 1
+  interactableBlocks:
+    salvage-station: "0, 0, 0"

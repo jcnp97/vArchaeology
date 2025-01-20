@@ -37,7 +37,6 @@ public class TalentGUI {
                     "Talent " + (i + 1),
                     Arrays.asList("Info about Talent " + (i + 1))
             );
-
             pane.addItem(new GuiItem(item, event -> {
                 event.setCancelled(true);
                 if (index == 12) {
@@ -47,7 +46,6 @@ public class TalentGUI {
                 }
             }), i % 9, i / 9);
         }
-
         ItemStack levelItem = createItem(
                 Material.EXPERIENCE_BOTTLE,
                 1,
