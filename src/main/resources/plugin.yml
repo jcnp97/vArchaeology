@@ -2,7 +2,7 @@ name: vArchaeology
 version: '1.0-BETA'
 main: asia.virtualmc.vArchaeology.Main
 api-version: '1.21'
-softdepend: [PlaceholderAPI, CommandAPI, NBTAPI, MythicMobs]
+softdepend: [PlaceholderAPI, CommandAPI, NBTAPI, DecentHolograms]
 
 permissions:
   varchaeology.command.get:

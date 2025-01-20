@@ -10,6 +10,7 @@ import asia.virtualmc.vArchaeology.items.RNGManager;
 // listeners
 import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
+import asia.virtualmc.vArchaeology.listeners.BlockInteractListener;
 import asia.virtualmc.vArchaeology.listeners.MiscListener;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 // storage
@@ -46,6 +47,7 @@ public final class Main extends JavaPlugin {
     private MiscListener miscListener;
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
+    private BlockInteractListener blockInteractListener;
     // exp
     private EXPManager expManager;
     // guis
@@ -60,6 +62,7 @@ public final class Main extends JavaPlugin {
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
         this.miscListener = new MiscListener(this);
+        this.blockInteractListener = new BlockInteractListener(this);
         this.sellGUI = new SellGUI(this, effectsUtil);
         this.talentGUI = new TalentGUI(this, effectsUtil);
         this.rngManager = new RNGManager(this, configManager);
@@ -68,7 +71,7 @@ public final class Main extends JavaPlugin {
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, blockInteractListener);
         this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
         this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
