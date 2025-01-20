@@ -1,0 +1,8 @@
+guiSettings:
+  confirm-material: PAPER
+  confirm-model_data: 10367
+  cancel-material: PAPER
+  cancel-model_data: 10367
+  salvage_station:
+    menuTitle: "§f𜺯"
+    soundOnClick: "minecraft:block.anvil.use"

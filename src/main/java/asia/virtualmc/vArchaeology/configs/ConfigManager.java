@@ -30,6 +30,13 @@ public class ConfigManager {
     public int specialWeight;
     public int mythicalWeight;
     public int exoticWeight;
+    // guis.yml
+    public String salvageMenu;
+    public String salvageSound;
+    public String confirmMaterial;
+    public int confirmModelData;
+    public String cancelMaterial;
+    public int cancelModelData;
     // others
     public String pluginPrefix = "<#0040FF>[vArch<#00FBFF>aeology] ";
 
@@ -47,6 +54,7 @@ public class ConfigManager {
         readDatabase();
         readExperienceTable();
         readcustomDrops();
+        readGUISettings();
         blocksEXPConfig();
     }
 
@@ -130,6 +138,29 @@ public class ConfigManager {
             specialWeight = drops.getInt("itemsList.hellfire_metal.weight", 8);
             mythicalWeight = drops.getInt("itemsList.aetherium_alloy.weight", 4);
             exoticWeight = drops.getInt("itemsList.quintessence.weight", 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readGUISettings() {
+        File dropsFile = new File(plugin.getDataFolder(), "guis.yml");
+        if (!dropsFile.exists()) {
+            try {
+                plugin.saveResource("guis.yml", false);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        FileConfiguration gui = YamlConfiguration.loadConfiguration(dropsFile);
+        try {
+            confirmMaterial = gui.getString("guiSettings.confirm-material", "EMERALD");
+            cancelMaterial = gui.getString("guiSettings.cancel-material", "REDSTONE_BLOCK");
+            confirmModelData = gui.getInt("guiSettings.confirm-model_data", 1);
+            cancelModelData = gui.getInt("guiSettings.cancel-model_data", 1);
+            salvageMenu = gui.getString("guiSettings.salvage_station.menuTitle", "Salvage GUI");
+            salvageSound = gui.getString("guiSettings.salvage_station.soundOnClick", "minecraft:block.anvil.use");
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,9 +1,8 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.blocks.SalvageStation;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
-import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
-import asia.virtualmc.vArchaeology.listeners.BlockInteractListener;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
@@ -28,18 +27,18 @@ public class CommandManager {
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
     private final SellGUI sellGUI;
-    private final BlockInteractListener blockInteractListener;
+    private final SalvageStation salvageStation;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUI sellGUI, BlockInteractListener blockInteractListener) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUI sellGUI, SalvageStation salvageStation) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
         this.statsManager = statsManager;
         this.talentTreeManager = talentTreeManager;
         this.sellGUI = sellGUI;
-        this.blockInteractListener = blockInteractListener;
+        this.salvageStation = salvageStation;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -303,7 +302,7 @@ public class CommandManager {
                 .withPermission("varchaeology.admin.salvage_station")
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
-                        blockInteractListener.createSalvageStation(player);
+                        salvageStation.createSalvageStation(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

@@ -50,10 +50,14 @@ public class StatsManager {
                             "ON DELETE CASCADE ON UPDATE CASCADE" +
                             ")"
             );
+            // 1 - 7: material drops
+            // 14 - 20: Components
             List<String> statList = Arrays.asList("commonGained", "uncommonGained", "rareGained",
                     "uniqueGained", "specialGained", "mythicalGained", "exoticGained",
                     "blocksMined", "artefactsFound", "artefactsRestored", "treasuresFound",
-                    "rankAchieved", "moneyEarned"
+                    "rankAchieved", "moneyEarned", "commonComponents", "uncommonComponents",
+                    "rareComponents", "uniqueComponents", "specialComponents", "mythicalComponents",
+                    "exoticComponents"
             );
             String checkQuery = "SELECT COUNT(*) FROM archStatistics WHERE statsName = ?";
             String insertQuery = "INSERT INTO archStatistics (statsName) VALUES (?)";
@@ -154,6 +158,12 @@ public class StatsManager {
     public void incrementStatistics(UUID playerUUID, int statsID) {
         playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
                 .merge(statsID, 1, Integer::sum);
+        updatePlayerData(playerUUID);
+    }
+
+    public void addStatistics(UUID playerUUID, int statsID, int value) {
+        playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
+                .merge(statsID, value, Integer::sum);
         updatePlayerData(playerUUID);
     }
 

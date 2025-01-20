@@ -1,4 +1,4 @@
-package asia.virtualmc.vArchaeology.listeners;
+package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
 
@@ -14,25 +14,32 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class BlockInteractListener implements Listener {
+public class CraftingStation implements Listener {
 
     private final Main plugin;
     private Location salvageStationLocation;
     private final Map<UUID, Hologram> activeHolograms;
     private final Map<UUID, BukkitRunnable> activeCraftingTasks;
+    private final Map<UUID, Long> cooldowns;
+    private final NamespacedKey archItemKey;
 
-    public BlockInteractListener(Main plugin) {
+    public CraftingStation(Main plugin) {
         this.plugin = plugin;
         this.activeHolograms = new HashMap<>();
         this.activeCraftingTasks = new HashMap<>();
-        loadSalvageStation();
+        this.cooldowns = new HashMap<>();
+        this.archItemKey = new NamespacedKey(plugin, "varch_item");
 
+        loadSalvageStation();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -95,15 +102,32 @@ public class BlockInteractListener implements Listener {
 
         Block clickedBlock = event.getClickedBlock();
         Player player = event.getPlayer();
+        UUID playerUUID = player.getUniqueId();
 
         if (salvageStationLocation != null && clickedBlock.getLocation().equals(salvageStationLocation)) {
             event.setCancelled(true);
 
-            if (activeCraftingTasks.containsKey(player.getUniqueId())) {
+            long currentTime = System.currentTimeMillis();
+            if (cooldowns.containsKey(playerUUID)) {
+                long lastInteraction = cooldowns.get(playerUUID);
+                if (currentTime - lastInteraction < 1000) {
+                    return;
+                }
+            }
+            if (activeCraftingTasks.containsKey(playerUUID)) {
                 player.sendMessage("You are already processing something!");
                 return;
             }
+            ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+            if (mainHandItem.getType() == Material.AIR) {
+                return;
+            }
 
+            if (!mainHandItem.hasItemMeta() ||
+                    !mainHandItem.getItemMeta().getPersistentDataContainer().has(archItemKey, PersistentDataType.INTEGER)) {
+                return; // No PDC data, silently ignore
+            }
+            cooldowns.put(playerUUID, currentTime);
             startCrafting(player);
         }
     }
@@ -123,7 +147,7 @@ public class BlockInteractListener implements Listener {
                 "\uE0F9"  // Stage 8
         };
         ArrayList<String> lines = new ArrayList<>();
-        lines.add(progressChars[0]); // Start with first character
+        lines.add(progressChars[0]);
 
         try {
             Hologram hologram = DHAPI.createHologram(holoName, holoLocation, lines);
@@ -172,7 +196,7 @@ public class BlockInteractListener implements Listener {
         }
     }
 
-    public void cleanup() {
+    public void cleanupAllCooldowns() {
         for (BukkitRunnable task : activeCraftingTasks.values()) {
             task.cancel();
         }
@@ -182,6 +206,7 @@ public class BlockInteractListener implements Listener {
             DHAPI.removeHologram(hologram.getName());
         }
         activeHolograms.clear();
+        cooldowns.clear();
     }
 
     private String formatLocation(Location location) {

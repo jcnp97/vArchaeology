@@ -1,8 +1,10 @@
 package asia.virtualmc.vArchaeology;
 
 // configs
+import asia.virtualmc.vArchaeology.blocks.SalvageStation;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 // items
+import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.guis.TalentGUI;
 import asia.virtualmc.vArchaeology.items.ItemManager;
@@ -10,7 +12,6 @@ import asia.virtualmc.vArchaeology.items.RNGManager;
 // listeners
 import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
-import asia.virtualmc.vArchaeology.listeners.BlockInteractListener;
 import asia.virtualmc.vArchaeology.listeners.MiscListener;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 // storage
@@ -47,12 +48,14 @@ public final class Main extends JavaPlugin {
     private MiscListener miscListener;
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
-    private BlockInteractListener blockInteractListener;
+    // blocks
+    private SalvageStation salvageStation;
     // exp
     private EXPManager expManager;
     // guis
     private SellGUI sellGUI;
     private TalentGUI talentGUI;
+    private SalvageGUI salvageGUI;
 
     @Override
     public void onEnable() {
@@ -62,16 +65,17 @@ public final class Main extends JavaPlugin {
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
         this.miscListener = new MiscListener(this);
-        this.blockInteractListener = new BlockInteractListener(this);
         this.sellGUI = new SellGUI(this, effectsUtil);
         this.talentGUI = new TalentGUI(this, effectsUtil);
         this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statsManager = new StatsManager(this, playerDataDB, configManager);
+        this.salvageGUI = new SalvageGUI(this, effectsUtil, statsManager, configManager);
+        this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, blockInteractListener);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, salvageStation);
         this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
         this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
@@ -89,6 +93,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         CommandAPI.onDisable();
+        salvageStation.cleanupAllCooldowns();
         if (playerDataManager != null) {
             playerDataManager.updateAllData();
         } else {
