@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.guis;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.logs.SalvageLogTransaction;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
@@ -21,19 +22,24 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SalvageGUI implements Listener {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final ConfigManager configManager;
     private final StatsManager statsManager;
+    private final SalvageLogTransaction salvageLogTransaction;
     private final NamespacedKey varchItemKey;
 
-    public SalvageGUI(Main plugin, EffectsUtil effectsUtil, StatsManager statsManager, ConfigManager configManager) {
+    public SalvageGUI(Main plugin, EffectsUtil effectsUtil, StatsManager statsManager, ConfigManager configManager, SalvageLogTransaction salvageLogTransaction) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.statsManager = statsManager;
         this.configManager = configManager;
+        this.salvageLogTransaction = salvageLogTransaction;
         this.varchItemKey = new NamespacedKey(plugin, "varch_item");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -41,7 +47,8 @@ public class SalvageGUI implements Listener {
     public void openSalvageGUI(Player player) {
         Map<Integer, Integer> initialValue = calculateInventoryValue(player);
 
-        ChestGui gui = new ChestGui(5, "§f\uE0F1\uE0F1\uE053\uE0FA");
+        //ChestGui gui = new ChestGui(5, "§f\uE0F1\uE0F1\uE053\uE0FA");
+        ChestGui gui = new ChestGui(5, configManager.salvageMenu);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane staticPane = createStaticPane(player, initialValue);
@@ -97,9 +104,9 @@ public class SalvageGUI implements Listener {
             };
             for (int i = 1; i <= 7; i++) {
                 if (currentValue.get(i) != 0) {
+                    salvageLogTransaction.logTransaction(player.getName(), componentName[i - 1], currentValue.get(i));
                     statsManager.addStatistics(playerUUID, i + 13, currentValue.get(i));
                     player.sendMessage("§aYou have obtained §a" + currentValue.get(i) + "x §e" + componentName[i - 1] + " Components.");
-                    //logTransaction(player, currentValue);
                 }
             }
             effectsUtil.playSound(player, "minecraft:block.anvil.use", Sound.Source.PLAYER, 1.0f, 1.0f);
@@ -213,19 +220,5 @@ public class SalvageGUI implements Listener {
                 player.getInventory().setItem(i, null);
             }
         }
-    }
-
-    private void logTransaction(Player player, int value) {
-        String itemDetails = Arrays.stream(player.getInventory().getContents())
-                .filter(item -> item != null && isSellable(item))
-                .map(item -> String.format("%dx ID:%d", item.getAmount(), getCustomId(item)))
-                .collect(Collectors.joining(", "));
-
-        plugin.getLogger().info(String.format(
-                "Transaction: Player=%s, Value=%d, Items=[%s]",
-                player.getName(),
-                value,
-                itemDetails
-        ));
     }
 }
