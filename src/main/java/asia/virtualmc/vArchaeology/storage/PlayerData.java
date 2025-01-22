@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PlayerDataManager {
+public class PlayerData {
     private static final long UPDATE_INTERVAL = 12000L;
     private static final int MAX_EXP = 1_000_000_000;
     private static final int MIN_LEVEL = 1;
@@ -30,7 +30,7 @@ public class PlayerDataManager {
     private final EffectsUtil effectsUtil;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerDataManager(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager, @NotNull EffectsUtil effectsUtil) {
+    public PlayerData(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager, @NotNull EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.bossBarUtil = bossBarUtil;
@@ -357,21 +357,45 @@ public class PlayerDataManager {
 
     public void addWisdomTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.wisdomTrait += value;
+        if (stats != null) {
+            if (stats.wisdomTrait + value >= 40) {
+                stats.wisdomTrait = 50;
+            } else {
+                stats.wisdomTrait += value;
+            }
+        }
     }
 
     public void addKarmaTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.karmaTrait += value;
+        if (stats != null) {
+            if (stats.karmaTrait + value >= 40) {
+                stats.karmaTrait = 50;
+            } else {
+                stats.karmaTrait += value;
+            }
+        }
     }
 
     public void addCharismaTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.charismaTrait += value;
+        if (stats != null) {
+            if (stats.charismaTrait + value >= 40) {
+                stats.charismaTrait = 50;
+            } else {
+                stats.charismaTrait += value;
+            }
+        }
     }
 
     public void addDexterityTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.dexterityTrait += value;
+        if (stats != null) {
+            if (stats.dexterityTrait + value >= 40) {
+                stats.dexterityTrait = 50;
+            } else {
+                stats.dexterityTrait += value;
+            }
+        }
     }
 }

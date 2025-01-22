@@ -155,18 +155,6 @@ public class StatsManager {
         }
     }
 
-    public void incrementStatistics(UUID playerUUID, int statsID) {
-        playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
-                .merge(statsID, 1, Integer::sum);
-        updatePlayerData(playerUUID);
-    }
-
-    public void addStatistics(UUID playerUUID, int statsID, int value) {
-        playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
-                .merge(statsID, value, Integer::sum);
-        updatePlayerData(playerUUID);
-    }
-
     public void unloadData(UUID uuid) {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             ConcurrentHashMap<Integer, Integer> playerData = playerStatistics.get(uuid);
@@ -191,11 +179,6 @@ public class StatsManager {
         }
     }
 
-    public int getStatistics(UUID playerUUID, int statsID) {
-        return playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>())
-                .getOrDefault(statsID, 0);
-    }
-
     public void createNewPlayerStats(UUID uuid) {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             conn.setAutoCommit(false);
@@ -215,5 +198,26 @@ public class StatsManager {
         } catch (SQLException e) {
             Bukkit.getLogger().severe("[vArchaeology] Failed to create new player statistics: " + e.getMessage());
         }
+    }
+
+    public int getStatistics(UUID playerUUID, int statsID) {
+        return playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>())
+                .getOrDefault(statsID, 0);
+    }
+
+    public Map<UUID, Map<Integer, Integer>> getPlayerStatistics() {
+        return new ConcurrentHashMap<>(playerStatistics);
+    }
+
+    public void incrementStatistics(UUID playerUUID, int statsID) {
+        playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
+                .merge(statsID, 1, Integer::sum);
+        updatePlayerData(playerUUID);
+    }
+
+    public void addStatistics(UUID playerUUID, int statsID, int value) {
+        playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
+                .merge(statsID, value, Integer::sum);
+        updatePlayerData(playerUUID);
     }
 }

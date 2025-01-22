@@ -1,12 +1,16 @@
 # vArchaeology Talent Trees
-talentList:
-  1: # talentID
-    name: "Sagacity"
-    material: FLINT # material icon for GUI display
+traitList:
+  1: # traitID
+    name: "Wisdom"
+    material: EMERALD
     custom-model-data: 100000
-    required-level: 60
+    block-break: 2
+    receive-material: 1
+    artefact-restoration: 0.50
+    lore:
+      - "§7• Provides §a{level*}% §7Archaeology XP when breaking blocks."
   2:
-    name: "Insightful Judgement"
+    name: "Charisma"
     material: FLINT
     custom-model-data: 100000
     required-level: 63

@@ -34,6 +34,7 @@ public class ConfigManager {
     public String salvageMenu;
     public String compMenu;
     public String traitMenu;
+    public String traitUp;
     public String salvageSound;
     public String confirmMaterial;
     public int confirmModelData;
@@ -163,7 +164,8 @@ public class ConfigManager {
             cancelModelData = gui.getInt("guiSettings.cancel-model_data", 1);
             salvageMenu = gui.getString("guiSettings.salvage_station.menuTitle", "Salvage GUI");
             compMenu = gui.getString("guiSettings.salvage_station.menuTitle-components", "Components GUI");
-            traitMenu = gui.getString("guiSettings.traitGUI.menuTitle", "Components GUI");
+            traitMenu = gui.getString("guiSettings.traitGUI.menuTitle", "Traits GUI");
+            traitUp = gui.getString("guiSettings.traitGUI.upgradeTitle", "Traits GUI");
             salvageSound = gui.getString("guiSettings.salvage_station.soundOnClick", "minecraft:block.anvil.use");
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,8 +1,8 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
-import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
@@ -16,14 +16,14 @@ import java.util.UUID;
 public class PlayerJoinListener implements Listener {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
-    private final PlayerDataManager playerDataManager;
+    private final PlayerData playerData;
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
 
-    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerDataManager playerDataManager, TalentTreeManager talentTreeManager, StatsManager statsManager) {
+    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerData playerData, TalentTreeManager talentTreeManager, StatsManager statsManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
-        this.playerDataManager = playerDataManager;
+        this.playerData = playerData;
         this.talentTreeManager = talentTreeManager;
         this.statsManager = statsManager;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -38,10 +38,10 @@ public class PlayerJoinListener implements Listener {
             try {
                 // Check if player exists in the database
                 if (playerDataDB.getPlayerData(playerUUID).next()) {
-                    playerDataManager.loadData(playerUUID);
+                    playerData.loadData(playerUUID);
                 } else {
                     playerDataDB.createNewPlayerData(playerUUID, playerName);
-                    playerDataManager.loadData(playerUUID);
+                    playerData.loadData(playerUUID);
                     statsManager.loadData(playerUUID);
                 }
                 // Load other data since main data is loaded.
@@ -61,7 +61,7 @@ public class PlayerJoinListener implements Listener {
         plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
             if (plugin.getServer().getPlayer(playerUUID) == null) {
                 try {
-                    playerDataManager.unloadData(playerUUID);
+                    playerData.unloadData(playerUUID);
                     talentTreeManager.unloadData(playerUUID);
                     statsManager.unloadData(playerUUID);
                 } catch (Exception e) {

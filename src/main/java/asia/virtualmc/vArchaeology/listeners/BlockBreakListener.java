@@ -1,7 +1,7 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
@@ -26,7 +26,7 @@ import java.util.UUID;
 
 public class BlockBreakListener implements Listener {
     private final Main plugin;
-    private final PlayerDataManager playerDataManager;
+    private final PlayerData playerData;
     private final ItemManager itemManager;
     private final RNGManager rngManager;
     private final StatsManager statsManager;
@@ -35,9 +35,9 @@ public class BlockBreakListener implements Listener {
     private final Map<UUID, Long> adpCooldowns;
     private static final long ADP_COOLDOWN = 60_000;
 
-    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerDataManager playerDataManager, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager, EXPManager expManager) {
+    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerData playerData, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager, EXPManager expManager) {
         this.plugin = plugin;
-        this.playerDataManager = playerDataManager;
+        this.playerData = playerData;
         this.itemManager = itemManager;
         this.rngManager = rngManager;
         this.statsManager = statsManager;
@@ -84,7 +84,7 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        if (itemManager.getRequiredLevel(mainHandItem) > playerDataManager.getArchLevel(playerUUID)) {
+        if (itemManager.getRequiredLevel(mainHandItem) > playerData.getArchLevel(playerUUID)) {
             event.setCancelled(true);
             player.sendMessage("§cYou do not have the required level to use this tool!");
             return;
@@ -100,11 +100,11 @@ public class BlockBreakListener implements Listener {
         UUID uuid = player.getUniqueId();
 
         if (!rngManager.hasDropTable(uuid)) {
-            rngManager.initializeDropTable(uuid, playerDataManager.getArchLevel(uuid));
+            rngManager.initializeDropTable(uuid, playerData.getArchLevel(uuid));
         }
 
         event.setDropItems(false);
-        playerDataManager.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
+        playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
         statsManager.incrementStatistics(uuid, 8);
         itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
 

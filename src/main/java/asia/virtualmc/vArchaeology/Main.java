@@ -1,6 +1,9 @@
 package asia.virtualmc.vArchaeology;
 
 import asia.virtualmc.vArchaeology.blocks.SalvageStation;
+import asia.virtualmc.vArchaeology.commands.GUICommands;
+import asia.virtualmc.vArchaeology.commands.PlayerDataCommands;
+import asia.virtualmc.vArchaeology.commands.ItemCommands;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
@@ -15,13 +18,11 @@ import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLogTransaction;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
-import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
+import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
 import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
-import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
-import asia.virtualmc.vArchaeology.commands.CommandManager;
 
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
@@ -30,9 +31,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public final class Main extends JavaPlugin {
+    // storage
+    private PlayerData playerData;
+    // items
     private ItemManager itemManager;
-    private PlayerDataManager playerDataManager;
-    private CommandManager commandManager;
+    private ItemCommands itemCommands;
+    private PlayerData PlayerData;
     private BossBarUtil bossBarUtil;
     private RNGManager rngManager;
     private ConfigManager configManager;
@@ -53,9 +57,12 @@ public final class Main extends JavaPlugin {
     private TalentGUI talentGUI;
     private SalvageGUI salvageGUI;
     private TraitGUI traitGUI;
+    private GUICommands guiCommands;
     // logs
     private LogManager logManager;
     private SalvageLogTransaction salvageLogTransaction;
+    // commands
+    private PlayerDataCommands playerDataCommands;
 
     @Override
     public void onEnable() {
@@ -64,6 +71,7 @@ public final class Main extends JavaPlugin {
         this.bossBarUtil = new BossBarUtil(this);
         this.effectsUtil = new EffectsUtil(this);
         this.itemManager = new ItemManager(this);
+        this.itemCommands = new ItemCommands(this, itemManager);
         this.miscListener = new MiscListener(this);
         this.logManager = new LogManager(this);
         this.salvageLogTransaction = new SalvageLogTransaction(this, logManager);
@@ -75,12 +83,13 @@ public final class Main extends JavaPlugin {
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statsManager, configManager, salvageLogTransaction);
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
-        this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
-        this.traitGUI = new TraitGUI(this, effectsUtil, playerDataManager, configManager);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, salvageStation, salvageGUI, traitGUI);
-        this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
-        this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
+        this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
+        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTreeManager);
+        this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
+        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTreeManager, statsManager);
+        this.expManager = new EXPManager(this, statsManager, playerData, talentTreeManager);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statsManager, expManager);
 
         startUpdateTask();
     }
@@ -97,8 +106,8 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         CommandAPI.onDisable();
         salvageStation.cleanupAllCooldowns();
-        if (playerDataManager != null) {
-            playerDataManager.updateAllData();
+        if (PlayerData != null) {
+            PlayerData.updateAllData();
         } else {
             getLogger().severe("[vArchaeology] Failed to save player data.");
         }
@@ -124,7 +133,7 @@ public final class Main extends JavaPlugin {
             @Override
             public void run() {
                 try {
-                    playerDataManager.updateAllData();
+                    PlayerData.updateAllData();
                     statsManager.updateAllData();
                     talentTreeManager.updateAllData();
                     blockBreakListener.cleanupExpiredADPCooldowns();

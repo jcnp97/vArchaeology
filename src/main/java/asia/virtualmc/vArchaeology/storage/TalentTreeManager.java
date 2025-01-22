@@ -208,4 +208,9 @@ public class TalentTreeManager {
             Bukkit.getLogger().severe("[vArchaeology] Failed to create new player talent: " + e.getMessage());
         }
     }
+
+    // beware, this returns a hashmap that can be
+    public ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> getPlayerTalents() {
+        return playerTalents;
+    }
 }
