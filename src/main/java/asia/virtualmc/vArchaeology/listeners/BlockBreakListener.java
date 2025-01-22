@@ -6,7 +6,7 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 
-import asia.virtualmc.vArchaeology.storage.StatsManager;
+import asia.virtualmc.vArchaeology.storage.Statistics;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -29,18 +29,18 @@ public class BlockBreakListener implements Listener {
     private final PlayerData playerData;
     private final ItemManager itemManager;
     private final RNGManager rngManager;
-    private final StatsManager statsManager;
+    private final Statistics statistics;
     private final EXPManager expManager;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
     private static final long ADP_COOLDOWN = 60_000;
 
-    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerData playerData, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, StatsManager statsManager, EXPManager expManager) {
+    public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerData playerData, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, Statistics statistics, EXPManager expManager) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.itemManager = itemManager;
         this.rngManager = rngManager;
-        this.statsManager = statsManager;
+        this.statistics = statistics;
         this.expManager = expManager;
         this.blocksList = new HashMap<>();
         this.adpCooldowns = new HashMap<>();
@@ -105,7 +105,7 @@ public class BlockBreakListener implements Listener {
 
         event.setDropItems(false);
         playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
-        statsManager.incrementStatistics(uuid, 8);
+        statistics.incrementStatistics(uuid, 8);
         itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
 
         // Artefact Discovery Progress

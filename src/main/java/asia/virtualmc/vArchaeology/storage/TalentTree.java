@@ -17,13 +17,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
 import java.util.List;
 
-public class TalentTreeManager {
+public class TalentTree {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final ConfigManager configManager;
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> playerTalents;
 
-    public TalentTreeManager(Main plugin, PlayerDataDB playerDataDB, ConfigManager configManager) {
+    public TalentTree(Main plugin, PlayerDataDB playerDataDB, ConfigManager configManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.configManager = configManager;

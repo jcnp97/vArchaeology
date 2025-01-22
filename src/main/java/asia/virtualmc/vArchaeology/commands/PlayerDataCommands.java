@@ -2,7 +2,7 @@ package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
-import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
+import asia.virtualmc.vArchaeology.storage.TalentTree;
 
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
@@ -19,14 +19,14 @@ import java.util.UUID;
 public class PlayerDataCommands {
     private final Main plugin;
     private final PlayerData playerData;
-    private final TalentTreeManager talentTreeManager;
+    private final TalentTree talentTree;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public PlayerDataCommands(Main plugin, PlayerData playerData, TalentTreeManager talentTreeManager) {
+    public PlayerDataCommands(Main plugin, PlayerData playerData, TalentTree talentTree) {
         this.plugin = plugin;
         this.playerData = playerData;
-        this.talentTreeManager = talentTreeManager;
+        this.talentTree = talentTree;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -193,7 +193,7 @@ public class PlayerDataCommands {
                     int talentID = (int) args.get("talentID");
                     int level = (int) args.get("level");
 
-                    talentTreeManager.updateTalentLevel(target.getUniqueId(), talentID, level);
+                    talentTree.updateTalentLevel(target.getUniqueId(), talentID, level);
                     sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Talent " + talentID + " to level " + level)
                             .color(TextColor.color(0, 255, 162)));
                 });

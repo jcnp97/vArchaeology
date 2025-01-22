@@ -11,12 +11,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.io.*;
 
-public class SalvageLogTransaction {
+public class SalvageLog {
     private final Main plugin;
     private final LogManager logManager;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public SalvageLogTransaction(Main plugin, LogManager logManager) {
+    public SalvageLog(Main plugin, LogManager logManager) {
         this.plugin = plugin;
         this.logManager = logManager;
     }

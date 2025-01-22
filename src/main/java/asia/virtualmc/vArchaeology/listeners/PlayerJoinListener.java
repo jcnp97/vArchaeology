@@ -4,8 +4,8 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
 
-import asia.virtualmc.vArchaeology.storage.StatsManager;
-import asia.virtualmc.vArchaeology.storage.TalentTreeManager;
+import asia.virtualmc.vArchaeology.storage.Statistics;
+import asia.virtualmc.vArchaeology.storage.TalentTree;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -17,15 +17,15 @@ public class PlayerJoinListener implements Listener {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final PlayerData playerData;
-    private final TalentTreeManager talentTreeManager;
-    private final StatsManager statsManager;
+    private final TalentTree talentTree;
+    private final Statistics statistics;
 
-    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerData playerData, TalentTreeManager talentTreeManager, StatsManager statsManager) {
+    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerData playerData, TalentTree talentTree, Statistics statistics) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.playerData = playerData;
-        this.talentTreeManager = talentTreeManager;
-        this.statsManager = statsManager;
+        this.talentTree = talentTree;
+        this.statistics = statistics;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -42,11 +42,11 @@ public class PlayerJoinListener implements Listener {
                 } else {
                     playerDataDB.createNewPlayerData(playerUUID, playerName);
                     playerData.loadData(playerUUID);
-                    statsManager.loadData(playerUUID);
+                    statistics.loadData(playerUUID);
                 }
                 // Load other data since main data is loaded.
-                talentTreeManager.loadData(playerUUID);
-                statsManager.loadData(playerUUID);
+                talentTree.loadData(playerUUID);
+                statistics.loadData(playerUUID);
             } catch (Exception e) {
                 plugin.getLogger().severe("Error loading player data for " + playerName + ": " + e.getMessage());
                 e.printStackTrace();
@@ -62,8 +62,8 @@ public class PlayerJoinListener implements Listener {
             if (plugin.getServer().getPlayer(playerUUID) == null) {
                 try {
                     playerData.unloadData(playerUUID);
-                    talentTreeManager.unloadData(playerUUID);
-                    statsManager.unloadData(playerUUID);
+                    talentTree.unloadData(playerUUID);
+                    statistics.unloadData(playerUUID);
                 } catch (Exception e) {
                     plugin.getLogger().severe("Error unloading data for player: " + playerUUID);
                     e.printStackTrace();

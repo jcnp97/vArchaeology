@@ -2,8 +2,8 @@ package asia.virtualmc.vArchaeology.guis;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
-import asia.virtualmc.vArchaeology.logs.SalvageLogTransaction;
-import asia.virtualmc.vArchaeology.storage.StatsManager;
+import asia.virtualmc.vArchaeology.logs.SalvageLog;
+import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
@@ -26,16 +26,16 @@ public class SalvageGUI implements Listener {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final ConfigManager configManager;
-    private final StatsManager statsManager;
-    private final SalvageLogTransaction salvageLogTransaction;
+    private final Statistics statistics;
+    private final SalvageLog salvageLog;
     private final NamespacedKey varchItemKey;
 
-    public SalvageGUI(Main plugin, EffectsUtil effectsUtil, StatsManager statsManager, ConfigManager configManager, SalvageLogTransaction salvageLogTransaction) {
+    public SalvageGUI(Main plugin, EffectsUtil effectsUtil, Statistics statistics, ConfigManager configManager, SalvageLog salvageLog) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
-        this.statsManager = statsManager;
+        this.statistics = statistics;
         this.configManager = configManager;
-        this.salvageLogTransaction = salvageLogTransaction;
+        this.salvageLog = salvageLog;
         this.varchItemKey = new NamespacedKey(plugin, "varch_item");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -103,7 +103,7 @@ public class SalvageGUI implements Listener {
             meta.setDisplayName("§e" + componentName + " Component");
             meta.setCustomModelData(index + 99999);
             meta.setLore(List.of(
-                    "§7Amount: §a" + statsManager.getStatistics(playerUUID, index + 13)
+                    "§7Amount: §a" + statistics.getStatistics(playerUUID, index + 13)
             ));
             button.setItemMeta(meta);
         }
@@ -179,8 +179,8 @@ public class SalvageGUI implements Listener {
             };
             for (int i = 1; i <= 7; i++) {
                 if (currentValue.get(i) != 0) {
-                    salvageLogTransaction.logTransaction(player.getName(), componentName[i - 1], currentValue.get(i));
-                    statsManager.addStatistics(playerUUID, i + 13, currentValue.get(i));
+                    salvageLog.logTransaction(player.getName(), componentName[i - 1], currentValue.get(i));
+                    statistics.addStatistics(playerUUID, i + 13, currentValue.get(i));
                     player.sendMessage("§aYou have obtained §a" + currentValue.get(i) + "x §e" + componentName[i - 1] + " Components.");
                 }
             }
