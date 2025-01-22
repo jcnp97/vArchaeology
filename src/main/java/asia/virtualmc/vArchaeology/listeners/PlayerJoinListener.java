@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.storage.*;
 
 import org.bukkit.event.EventHandler;
@@ -18,8 +19,9 @@ public class PlayerJoinListener implements Listener {
     private final Statistics statistics;
     private final CollectionLog collectionLog;
     private final ItemEquipListener itemEquipListener;
+    private final RNGManager rngManager;
 
-    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerData playerData, TalentTree talentTree, Statistics statistics, CollectionLog collectionLog, ItemEquipListener itemEquipListener) {
+    public PlayerJoinListener(Main plugin, PlayerDataDB playerDataDB, PlayerData playerData, TalentTree talentTree, Statistics statistics, CollectionLog collectionLog, ItemEquipListener itemEquipListener, RNGManager rngManager) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.playerData = playerData;
@@ -27,6 +29,8 @@ public class PlayerJoinListener implements Listener {
         this.statistics = statistics;
         this.collectionLog = collectionLog;
         this.itemEquipListener = itemEquipListener;
+        this.rngManager = rngManager;
+
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -70,6 +74,10 @@ public class PlayerJoinListener implements Listener {
                     statistics.unloadData(playerUUID);
                     collectionLog.unloadData(playerUUID);
                     itemEquipListener.unloadData(playerUUID);
+
+                    if (rngManager.hasDropTable(playerUUID)) {
+                        rngManager.unloadData(playerUUID);
+                    }
                 } catch (Exception e) {
                     plugin.getLogger().severe("Error unloading data for player: " + playerUUID);
                     e.printStackTrace();

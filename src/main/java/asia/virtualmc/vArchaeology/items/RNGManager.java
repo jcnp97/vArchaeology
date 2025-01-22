@@ -27,8 +27,8 @@ public class RNGManager {
         return playerDropTables.containsKey(playerId);
     }
 
-    public void initializeDropTable(UUID playerId, int archLevel) {
-        if (hasDropTable(playerId)) return;
+    public void initializeDropTable(UUID uuid, int archLevel) {
+        if (hasDropTable(uuid)) return;
         List<Integer> dropTable = new ArrayList<>();
         dropTable.add(configManager.commonWeight);
         if (archLevel >= 10) dropTable.add(configManager.uncommonWeight);
@@ -37,7 +37,12 @@ public class RNGManager {
         if (archLevel >= 40) dropTable.add(configManager.specialWeight);
         if (archLevel >= 50) dropTable.add(configManager.mythicalWeight);
         if (archLevel >= 60) dropTable.add(configManager.exoticWeight);
-        playerDropTables.put(playerId, dropTable);
+        playerDropTables.put(uuid, dropTable);
+    }
+
+    public void unloadData(UUID uuid) {
+        if (!hasDropTable(uuid)) return;
+        playerDropTables.remove(uuid);
     }
 
     public Integer rollDropTable(UUID playerId) {

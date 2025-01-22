@@ -33,6 +33,7 @@ public class BlockBreakListener implements Listener {
     private final ItemEquipListener itemEquipListener;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
+    private final Random random;
     private static final long ADP_COOLDOWN = 60_000;
 
     public BlockBreakListener(@NotNull Main plugin, @NotNull PlayerData playerData, @NotNull ItemManager itemManager, @NotNull RNGManager rngManager, Statistics statistics, EXPManager expManager, ConfigManager configManager, ItemEquipListener itemEquipListener) {
@@ -46,6 +47,7 @@ public class BlockBreakListener implements Listener {
         this.itemEquipListener = itemEquipListener;
         this.blocksList = new HashMap<>(configManager.loadBlocksList());
         this.adpCooldowns = new HashMap<>();
+        this.random = new Random();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -74,19 +76,17 @@ public class BlockBreakListener implements Listener {
         Location blockLocation = event.getBlock().getLocation();
         UUID uuid = player.getUniqueId();
 
-        if (!rngManager.hasDropTable(uuid)) {
-            rngManager.initializeDropTable(uuid, playerData.getArchLevel(uuid));
-        }
-
         event.setDropItems(false);
         playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
         statistics.incrementStatistics(uuid, 9);
-        //itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
-        player.sendMessage("Your ADB: " + itemEquipListener.getAdbValue(uuid));
-        player.sendMessage("Your GR: " + itemEquipListener.getGatherValue(uuid));
+
+        // Material Drops
+        if (random.nextDouble() < itemEquipListener.getGatherValue(uuid) / 100) {
+            itemManager.dropArchItem(uuid, rngManager.rollDropTable(uuid), blockLocation);
+        }
 
         // Artefact Discovery Progress
-        if (!canProgressAD(playerUUID)) {
+        if (canProgressAD(playerUUID)) {
             return;
         }
     }

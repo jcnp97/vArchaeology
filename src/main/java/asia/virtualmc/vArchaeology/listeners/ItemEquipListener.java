@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.items.ItemManager;
+import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 import org.bukkit.Material;
@@ -14,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
@@ -24,16 +26,18 @@ public class ItemEquipListener implements Listener {
     private final ItemManager itemManager;
     private final TalentTree talentTree;
     private final PlayerData playerData;
+    private final RNGManager rngManager;
     private final Map<UUID, Double> gatherMap;
     private final Map<UUID, Double> adbMap;
     private final NamespacedKey gatherKey;
     private final NamespacedKey adbKey;
 
-    public ItemEquipListener(Main plugin, ItemManager itemManager, PlayerData playerData, TalentTree talentTree) {
+    public ItemEquipListener(Main plugin, ItemManager itemManager, PlayerData playerData, TalentTree talentTree, RNGManager rngManager) {
         this.plugin = plugin;
         this.itemManager = itemManager;
         this.talentTree = talentTree;
         this.playerData = playerData;
+        this.rngManager = rngManager;
         this.gatherMap = new ConcurrentHashMap<>();
         this.adbMap = new ConcurrentHashMap<>();
         this.gatherKey = new NamespacedKey(plugin, "varch_gather");
@@ -44,16 +48,21 @@ public class ItemEquipListener implements Listener {
     @EventHandler
     public void onPlayerItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-        ItemStack mainHandItem = player.getInventory().getItemInMainHand();
 
-        unloadData(uuid);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline()) return;
+                UUID uuid = player.getUniqueId();
+                ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+                unloadData(uuid);
 
-        if (!isValidItem(mainHandItem)) {
-            return;
-        }
-
-        calculateAndUpdateValues(player, mainHandItem);
+                if (!isValidItem(mainHandItem)) {
+                    return;
+                }
+                calculateAndUpdateValues(player, mainHandItem);
+            }
+        }.runTaskLater(plugin, 10L);
     }
 
     private boolean isValidItem(ItemStack item) {
@@ -79,6 +88,10 @@ public class ItemEquipListener implements Listener {
         }
         if (adbValue > 0) {
             adbMap.put(uuid, adbValue + totalAdbBonus);
+        }
+
+        if (!rngManager.hasDropTable(uuid)) {
+            rngManager.initializeDropTable(uuid, playerData.getArchLevel(uuid));
         }
     }
 
