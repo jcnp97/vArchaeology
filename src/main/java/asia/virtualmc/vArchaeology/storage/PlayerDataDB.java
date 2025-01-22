@@ -86,7 +86,7 @@ public class PlayerDataDB {
                             "archADP DECIMAL(5,2) DEFAULT 0.00," +
                             "archXPMul DECIMAL(4,2) DEFAULT 1.00," +
                             "archBonusXP INT DEFAULT 0," +
-                            "traitPoints INT DEFAULT 0," +
+                            "traitPoints INT DEFAULT 1," +
                             "talentPoints INT DEFAULT 0," +
                             "FOREIGN KEY (playerUUID) REFERENCES archPlayerStats(playerUUID)" +
                             ")"
@@ -221,7 +221,7 @@ public class PlayerDataDB {
                 ps.setDouble(2, 0.0);
                 ps.setDouble(3, 1.0);
                 ps.setInt(4, 0);
-                ps.setInt(5, 0);
+                ps.setInt(5, 1);
                 ps.setInt(6, 0);
                 ps.executeUpdate();
                 // archTraits

@@ -5,4 +5,7 @@ guiSettings:
   cancel-model_data: 10367
   salvage_station:
     menuTitle: "§f𜺯"
+    menuTitle-components: "§f"
     soundOnClick: "minecraft:block.anvil.use"
+  traitGUI:
+    menuTitle: ""

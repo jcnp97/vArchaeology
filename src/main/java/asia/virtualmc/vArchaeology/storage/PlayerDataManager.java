@@ -225,6 +225,7 @@ public class PlayerDataManager {
                 stats.archEXP >= configManager.experienceTable.get(stats.archLevel + 1) &&
                 stats.archLevel < MAX_LEVEL) {
             stats.archLevel++;
+            stats.traitPoints++;
             levelUp = true;
         }
         if (!levelUp) return;
@@ -234,15 +235,16 @@ public class PlayerDataManager {
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
             effectsUtil.sendTitleMessage(uuid,
                     "<#4DFFBA>Archaeology",
-                    previousLevel + " ➛ " + stats.archLevel
-            );
+                    previousLevel + " ➛ " + stats.archLevel);
+            effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" + stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
+
         } else {
             effectsUtil.spawnFireworks(uuid, 5, 5);
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
             effectsUtil.sendTitleMessage(uuid,
                     "<#4DFFBA>Archaeology",
-                    previousLevel + " ➛ " + stats.archLevel
-            );
+                    previousLevel + " ➛ " + stats.archLevel);
+            effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" + stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
         }
     }
 
@@ -325,7 +327,7 @@ public class PlayerDataManager {
 
     public int getTraitPoints(@NotNull UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        return stats != null ? stats.traitPoints : 0;
+        return stats != null ? stats.traitPoints : 1;
     }
 
     public int getTalentPoints(@NotNull UUID uuid) {
@@ -336,5 +338,40 @@ public class PlayerDataManager {
     public int getWisdomTrait(UUID uuid) {
         PlayerStats stats = playerStatsMap.get(uuid);
         return stats != null ? stats.wisdomTrait : 0;
+    }
+
+    public int getKarmaTrait(UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.karmaTrait : 0;
+    }
+
+    public int getCharismaTrait(UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.charismaTrait : 0;
+    }
+
+    public int getDexterityTrait(UUID uuid) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        return stats != null ? stats.dexterityTrait : 0;
+    }
+
+    public void addWisdomTrait(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.wisdomTrait += value;
+    }
+
+    public void addKarmaTrait(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.karmaTrait += value;
+    }
+
+    public void addCharismaTrait(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.charismaTrait += value;
+    }
+
+    public void addDexterityTrait(@NotNull UUID uuid, int value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) stats.dexterityTrait += value;
     }
 }

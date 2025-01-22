@@ -21,10 +21,6 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class SalvageGUI implements Listener {
     private final Main plugin;
@@ -42,6 +38,76 @@ public class SalvageGUI implements Listener {
         this.salvageLogTransaction = salvageLogTransaction;
         this.varchItemKey = new NamespacedKey(plugin, "varch_item");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
+
+    public void openComponentsGUI(Player player) {
+        ChestGui gui = new ChestGui(5, configManager.compMenu);
+        gui.setOnGlobalClick(event -> event.setCancelled(true));
+
+        StaticPane staticPane = createStaticPaneComponents(player);
+
+        gui.addPane(staticPane);
+        gui.show(player);
+    }
+
+    private StaticPane createStaticPaneComponents(Player player) {
+        StaticPane staticPane = new StaticPane(0, 0, 9, 5);
+        UUID playerUUID = player.getUniqueId();
+
+        ItemStack salvageButton = buttonToSalvageGUI();
+        GuiItem guiItem = new GuiItem(salvageButton, event -> openSalvageGUI(player));
+        staticPane.addItem(guiItem, 4, 2);
+
+        String[] componentName = {
+                "Common",
+                "Uncommon",
+                "Rare",
+                "Unique",
+                "Special",
+                "Mythical",
+                "Exotic"
+        };
+        for (int x = 1; x <= 7; x++) {
+            ItemStack compButton = createComponentButton(x, componentName[x - 1], playerUUID);
+            staticPane.addItem(new GuiItem(compButton), x, 1);
+        }
+        return staticPane;
+    }
+
+    private ItemStack buttonToSalvageGUI() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+
+        if (meta != null) {
+            meta.setDisplayName("§eInformation");
+            meta.setCustomModelData(configManager.confirmModelData);
+            meta.setLore(List.of(
+                    "§7Components are typically used to",
+                    "§7craft tools, augments, or restore",
+                    "§7unidentified artefacts.",
+                    "",
+                    "§7To obtain components, you need to",
+                    "§7disassemble or salvage archaeology",
+                    "§7items through §b[/varch salvage]§7."
+            ));
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private ItemStack createComponentButton(int index, String componentName, UUID playerUUID) {
+        ItemStack button = new ItemStack(Material.FLINT);
+        ItemMeta meta = button.getItemMeta();
+
+        if (meta != null) {
+            meta.setDisplayName("§e" + componentName + " Component");
+            meta.setCustomModelData(index + 99999);
+            meta.setLore(List.of(
+                    "§7Amount: §a" + statsManager.getStatistics(playerUUID, index + 13)
+            ));
+            button.setItemMeta(meta);
+        }
+        return button;
     }
 
     public void openSalvageGUI(Player player) {
@@ -62,22 +128,31 @@ public class SalvageGUI implements Listener {
     private StaticPane createStaticPane(Player player, Map<Integer, Integer> initialValue) {
         StaticPane staticPane = new StaticPane(0, 0, 9, 5);
 
-        for (int x = 0; x <= 2; x++) {
+        for (int x = 1; x <= 3; x++) {
             ItemStack sellButton = createSalvageButton(initialValue);
             GuiItem guiItem = new GuiItem(sellButton, event -> processSalvageAction(player, initialValue));
             staticPane.addItem(guiItem, x, 4);
         }
-        for (int x = 6; x <= 8; x++) {
+        for (int x = 5; x <= 7; x++) {
             ItemStack closeButton = createCloseButton();
             staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 4);
         }
-        ItemStack infoButton = createInfoButton(player);
-        staticPane.addItem(new GuiItem(infoButton), 4, 4);
         return staticPane;
     }
 
     private void processSalvageAction(Player player, Map<Integer, Integer> initialValue) {
-        if (initialValue.isEmpty()) {
+        // Check if the map is null or empty
+        if (initialValue == null || initialValue.isEmpty()) {
+            player.sendMessage("§cNo items to salvage!");
+            player.closeInventory();
+            return;
+        }
+
+        // Check if all values in the map are zero
+        boolean hasNonZeroValue = initialValue.values().stream()
+                .anyMatch(value -> value > 0);
+
+        if (!hasNonZeroValue) {
             player.sendMessage("§cNo items to salvage!");
             player.closeInventory();
             return;
@@ -141,27 +216,27 @@ public class SalvageGUI implements Listener {
         return button;
     }
 
-    private ItemStack createInfoButton(Player player) {
-        UUID playerUUID = player.getUniqueId();
-        ItemStack button = new ItemStack(Material.PAPER);
-        ItemMeta meta = button.getItemMeta();
-
-        if (meta != null) {
-            meta.setDisplayName("§cYour Storage:");
-            meta.setCustomModelData(configManager.confirmModelData);
-            meta.setLore(List.of(
-                    "§7• §aCommon Components: " + statsManager.getStatistics(playerUUID, 14),
-                    "§7• §aUncommon Components: " + statsManager.getStatistics(playerUUID, 15),
-                    "§7• §aRare Components: " + statsManager.getStatistics(playerUUID, 16),
-                    "§7• §aUnique Components: " + statsManager.getStatistics(playerUUID, 17),
-                    "§7• §aSpecial Components: " + statsManager.getStatistics(playerUUID, 18),
-                    "§7• §aMythical Components: " + statsManager.getStatistics(playerUUID, 19),
-                    "§7• §aExotic Components: " + statsManager.getStatistics(playerUUID, 20)
-            ));
-            button.setItemMeta(meta);
-        }
-        return button;
-    }
+//    private ItemStack createInfoButton(Player player) {
+//        UUID playerUUID = player.getUniqueId();
+//        ItemStack button = new ItemStack(Material.PAPER);
+//        ItemMeta meta = button.getItemMeta();
+//
+//        if (meta != null) {
+//            meta.setDisplayName("§cYour Storage:");
+//            meta.setCustomModelData(configManager.confirmModelData);
+//            meta.setLore(List.of(
+//                    "§7• §eCommon Components: " + "§a" + statsManager.getStatistics(playerUUID, 14),
+//                    "§7• §eUncommon Components: " + "§a" + statsManager.getStatistics(playerUUID, 15),
+//                    "§7• §eRare Components: " + "§a" + statsManager.getStatistics(playerUUID, 16),
+//                    "§7• §eUnique Components: " + "§a" + statsManager.getStatistics(playerUUID, 17),
+//                    "§7• §eSpecial Components: " + "§a" + statsManager.getStatistics(playerUUID, 18),
+//                    "§7• §eMythical Components: " + "§a" + statsManager.getStatistics(playerUUID, 19),
+//                    "§7• §eExotic Components: " + "§a" + statsManager.getStatistics(playerUUID, 20)
+//            ));
+//            button.setItemMeta(meta);
+//        }
+//        return button;
+//    }
 
     private ItemStack createCloseButton() {
         ItemStack button = new ItemStack(Material.PAPER);

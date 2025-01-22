@@ -5,6 +5,7 @@ import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.guis.TalentGUI;
+import asia.virtualmc.vArchaeology.guis.TraitGUI;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
@@ -51,6 +52,7 @@ public final class Main extends JavaPlugin {
     private SellGUI sellGUI;
     private TalentGUI talentGUI;
     private SalvageGUI salvageGUI;
+    private TraitGUI traitGUI;
     // logs
     private LogManager logManager;
     private SalvageLogTransaction salvageLogTransaction;
@@ -74,8 +76,9 @@ public final class Main extends JavaPlugin {
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTreeManager = new TalentTreeManager(this, playerDataDB, configManager);
         this.playerDataManager = new PlayerDataManager(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
+        this.traitGUI = new TraitGUI(this, effectsUtil, playerDataManager, configManager);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerDataManager, talentTreeManager, statsManager);
-        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, salvageStation);
+        this.commandManager = new CommandManager(this, playerDataManager, itemManager, talentTreeManager, statsManager, sellGUI, salvageStation, salvageGUI, traitGUI);
         this.expManager = new EXPManager(this, statsManager, playerDataManager, talentTreeManager);
         this.blockBreakListener = new BlockBreakListener(this, playerDataManager, itemManager, rngManager, statsManager, expManager);
 
@@ -120,11 +123,14 @@ public final class Main extends JavaPlugin {
         new BukkitRunnable() {
             @Override
             public void run() {
-                ConsoleMessageUtil.sendConsoleMessage(configManager.pluginPrefix + "<#7CFEA7>Storing all data into database and cleaning up memory..");
-                playerDataManager.updateAllData();
-                statsManager.updateAllData();
-                talentTreeManager.updateAllData();
-                blockBreakListener.cleanupExpiredADPCooldowns();
+                try {
+                    playerDataManager.updateAllData();
+                    statsManager.updateAllData();
+                    talentTreeManager.updateAllData();
+                    blockBreakListener.cleanupExpiredADPCooldowns();
+                } catch (Exception e) {
+                    getLogger().severe("[vArchaeology] An error occurred while updating data to database.");
+                }
             }
         }.runTaskTimerAsynchronously(this, 12000L, 12000L);
     }

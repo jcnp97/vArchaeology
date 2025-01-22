@@ -111,4 +111,13 @@ public class EffectsUtil {
         Title fullTitle = Title.title(titleComponent, subtitleComponent);
         player.showTitle(fullTitle);
     }
+
+    public void sendPlayerMessage(UUID uuid, String message) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+        Component messageComponent = MiniMessage.miniMessage().deserialize(message);
+        player.sendMessage(messageComponent);
+    }
 }

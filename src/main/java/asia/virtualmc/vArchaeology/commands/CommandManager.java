@@ -2,7 +2,9 @@ package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.blocks.SalvageStation;
+import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
+import asia.virtualmc.vArchaeology.guis.TraitGUI;
 import asia.virtualmc.vArchaeology.storage.PlayerDataManager;
 import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.storage.StatsManager;
@@ -27,11 +29,14 @@ public class CommandManager {
     private final TalentTreeManager talentTreeManager;
     private final StatsManager statsManager;
     private final SellGUI sellGUI;
+    private final SalvageGUI salvageGUI;
+    private final TraitGUI traitGUI;
     private final SalvageStation salvageStation;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
+    private final Map<UUID, Long> commandCooldowns;
 
-    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUI sellGUI, SalvageStation salvageStation) {
+    public CommandManager(Main plugin, PlayerDataManager playerDataManager, ItemManager itemManager, TalentTreeManager talentTreeManager, StatsManager statsManager, SellGUI sellGUI, SalvageStation salvageStation, SalvageGUI salvageGUI, TraitGUI traitGUI) {
         this.plugin = plugin;
         this.playerDataManager = playerDataManager;
         this.itemManager = itemManager;
@@ -39,7 +44,10 @@ public class CommandManager {
         this.talentTreeManager = talentTreeManager;
         this.sellGUI = sellGUI;
         this.salvageStation = salvageStation;
+        this.salvageGUI = salvageGUI;
+        this.traitGUI = traitGUI;
         this.resetConfirmations = new HashMap<>();
+        this.commandCooldowns = new HashMap<>();
         registerCommands();
     }
 
@@ -55,7 +63,9 @@ public class CommandManager {
                 .withSubcommand(archSetTalent())
                 .withSubcommand(archAddBonusXP())
                 .withSubcommand(archSellGUI())
-                .withSubcommand(archCreateSalvageStation())
+                .withSubcommand(archSalvageGUI())
+                .withSubcommand(archComponentsGUI())
+                .withSubcommand(archTraitGUI())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -289,6 +299,18 @@ public class CommandManager {
                 .withPermission("varchaeology.use")
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
+                        UUID playerUUID = player.getUniqueId();
+                        long currentTime = System.currentTimeMillis();
+
+                        if (commandCooldowns.containsKey(playerUUID)) {
+                            long lastUsageTime = commandCooldowns.get(playerUUID);
+                            if (currentTime - lastUsageTime < 2000) { // 1000 ms = 1 second
+                                sender.sendMessage(Component.text("You can only use this command every 2 seconds.")
+                                        .color(TextColor.color(255, 0, 0)));
+                                return;
+                            }
+                        }
+                        commandCooldowns.put(playerUUID, currentTime);
                         sellGUI.openSellGUI(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
@@ -296,16 +318,64 @@ public class CommandManager {
                 });
     }
 
-    private CommandAPICommand archCreateSalvageStation() {
+    private CommandAPICommand archSalvageGUI() {
         return new CommandAPICommand("salvage")
-                .withArguments(new MultiLiteralArgument("operation", "create", "delete"))
-                .withPermission("varchaeology.admin.salvage_station")
+                .withPermission("varchaeology.use")
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
-                        salvageStation.createSalvageStation(player);
+                        UUID playerUUID = player.getUniqueId();
+                        long currentTime = System.currentTimeMillis();
+
+                        if (commandCooldowns.containsKey(playerUUID)) {
+                            long lastUsageTime = commandCooldowns.get(playerUUID);
+                            if (currentTime - lastUsageTime < 2000) { // 1000 ms = 1 second
+                                sender.sendMessage(Component.text("You can only use this command every 2 seconds.")
+                                        .color(TextColor.color(255, 0, 0)));
+                                return;
+                            }
+                        }
+                        commandCooldowns.put(playerUUID, currentTime);
+                        salvageGUI.openSalvageGUI(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }
                 });
     }
+
+    private CommandAPICommand archComponentsGUI() {
+        return new CommandAPICommand("comp")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        salvageGUI.openComponentsGUI(player);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+    private CommandAPICommand archTraitGUI() {
+        return new CommandAPICommand("trait")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        traitGUI.openInfoMode(player);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+//    private CommandAPICommand archCreateSalvageStation() {
+//        return new CommandAPICommand("salvage")
+//                .withArguments(new MultiLiteralArgument("operation", "create", "delete"))
+//                .withPermission("varchaeology.admin.salvage_station")
+//                .executes((sender, args) -> {
+//                    if (sender instanceof Player player) {
+//                        salvageStation.createSalvageStation(player);
+//                    } else {
+//                        sender.sendMessage("This command can only be used by players.");
+//                    }
+//                });
+//    }
 }
