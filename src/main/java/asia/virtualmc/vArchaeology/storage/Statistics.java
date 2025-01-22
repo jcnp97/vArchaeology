@@ -50,14 +50,12 @@ public class Statistics {
                             "ON DELETE CASCADE ON UPDATE CASCADE" +
                             ")"
             );
-            // 1 - 7: material drops
-            // 14 - 20: Components
-            List<String> statList = Arrays.asList("commonGained", "uncommonGained", "rareGained",
-                    "uniqueGained", "specialGained", "mythicalGained", "exoticGained",
-                    "blocksMined", "artefactsFound", "artefactsRestored", "treasuresFound",
-                    "rankAchieved", "moneyEarned", "commonComponents", "uncommonComponents",
+            // 1: Rank
+            // 2 - 8: Components
+            List<String> statList = Arrays.asList("rankAchieved", "commonComponents", "uncommonComponents",
                     "rareComponents", "uniqueComponents", "specialComponents", "mythicalComponents",
-                    "exoticComponents"
+                    "exoticComponents", "blocksMined", "artefactsFound", "artefactsRestored",
+                    "treasuresFound", "moneyEarned"
             );
             String checkQuery = "SELECT COUNT(*) FROM archStatistics WHERE statsName = ?";
             String insertQuery = "INSERT INTO archStatistics (statsName) VALUES (?)";

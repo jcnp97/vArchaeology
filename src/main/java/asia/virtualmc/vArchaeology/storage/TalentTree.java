@@ -11,7 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.UUID;
@@ -53,10 +53,11 @@ public class TalentTree {
                             ")"
             );
             // Add all Talent into Talent Tree table
-            List<String> talentData = Arrays.asList("Sagacity", "Prosperity", "Insightful Judgement",
-                    "Extraction", "Adept Restoration", "Archaeological Prowess", "Divine Opulence",
-                    "Rapid Discovery", "Prudence", "Blessed Treatment", "Stroke of Luck"
-            );
+            List<String> talentData = new ArrayList<>(configManager.loadTalentNames());
+//            List<String> talentData = Arrays.asList("Sagacity", "Insightful Judgement", "Extraction",
+//                    "Extraction", "Adept Restoration", "Archaeological Prowess", "Divine Opulence",
+//                    "Rapid Discovery", "Prudence", "Blessed Treatment", "Stroke of Luck"
+//            );
             String checkQuery = "SELECT COUNT(*) FROM archTalentTree WHERE talentName = ?";
             String insertQuery = "INSERT INTO archTalentTree (talentName) VALUES (?)";
 
@@ -153,12 +154,6 @@ public class TalentTree {
         }
     }
 
-    public void updateTalentLevel(UUID playerUUID, int talentID, int newLevel) {
-        playerTalents.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
-                .put(talentID, newLevel);
-        updatePlayerData(playerUUID);
-    }
-
     public void unloadData(UUID uuid) {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             ConcurrentHashMap<Integer, Integer> playerData = playerTalents.get(uuid);
@@ -183,11 +178,6 @@ public class TalentTree {
         }
     }
 
-    public int getTalentLevel(UUID playerUUID, int talentID) {
-        return playerTalents.getOrDefault(playerUUID, new ConcurrentHashMap<>())
-                .getOrDefault(talentID, 0);
-    }
-
     public void createNewPlayerTalent(UUID uuid) {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             conn.setAutoCommit(false);
@@ -209,8 +199,19 @@ public class TalentTree {
         }
     }
 
-    // beware, this returns a hashmap that can be
-    public ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> getPlayerTalents() {
-        return playerTalents;
+    public int getTalentLevel(UUID playerUUID, int statsID) {
+        return playerTalents.getOrDefault(playerUUID, new ConcurrentHashMap<>())
+                .getOrDefault(statsID, 0);
+    }
+
+    public Map<UUID, Map<Integer, Integer>> getTalentMap() {
+        return new ConcurrentHashMap<>(playerTalents);
+    }
+
+
+    public void updateTalentLevel(UUID playerUUID, int talentID, int newLevel) {
+        playerTalents.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
+                .put(talentID, newLevel);
+        updatePlayerData(playerUUID);
     }
 }

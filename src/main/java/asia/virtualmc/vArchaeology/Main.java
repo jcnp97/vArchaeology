@@ -13,14 +13,12 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
+import asia.virtualmc.vArchaeology.listeners.ItemEquipListener;
 import asia.virtualmc.vArchaeology.listeners.MiscListener;
 import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLog;
-import asia.virtualmc.vArchaeology.storage.PlayerDataDB;
-import asia.virtualmc.vArchaeology.storage.PlayerData;
-import asia.virtualmc.vArchaeology.storage.Statistics;
-import asia.virtualmc.vArchaeology.storage.TalentTree;
+import asia.virtualmc.vArchaeology.storage.*;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
@@ -34,20 +32,24 @@ public final class Main extends JavaPlugin {
     // storage
     private PlayerData playerData;
     private Statistics statistics;
+    private PlayerDataDB playerDataDB;
+    private TalentTree talentTree;
+    private CollectionLog collectionLog;
     // items
     private ItemManager itemManager;
     private ItemCommands itemCommands;
-    private PlayerData PlayerData;
+    // utils
     private BossBarUtil bossBarUtil;
-    private RNGManager rngManager;
-    private ConfigManager configManager;
-    private PlayerDataDB playerDataDB;
-    private TalentTree talentTree;
     private EffectsUtil effectsUtil;
+    // items
+    private RNGManager rngManager;
+    // configs
+    private ConfigManager configManager;
     // listeners
     private MiscListener miscListener;
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
+    private ItemEquipListener itemEquipListener;
     // blocks
     private SalvageStation salvageStation;
     // exp
@@ -84,12 +86,14 @@ public final class Main extends JavaPlugin {
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
+        this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics);
+        this.itemEquipListener = new ItemEquipListener(this, itemManager, playerData, talentTree);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree);
-        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, expManager);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, expManager, configManager, itemEquipListener);
 
         startUpdateTask();
     }
@@ -106,8 +110,8 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         CommandAPI.onDisable();
         salvageStation.cleanupAllCooldowns();
-        if (PlayerData != null) {
-            PlayerData.updateAllData();
+        if (playerData != null) {
+            playerData.updateAllData();
         } else {
             getLogger().severe("[vArchaeology] Failed to save player data.");
         }
@@ -118,6 +122,11 @@ public final class Main extends JavaPlugin {
         }
         if (statistics != null) {
             statistics.updateAllData();
+        } else {
+            getLogger().severe("[vArchaeology] Failed to save statistics data.");
+        }
+        if (collectionLog != null) {
+            collectionLog.updateAllData();
         } else {
             getLogger().severe("[vArchaeology] Failed to save statistics data.");
         }
@@ -133,9 +142,10 @@ public final class Main extends JavaPlugin {
             @Override
             public void run() {
                 try {
-                    PlayerData.updateAllData();
+                    playerData.updateAllData();
                     statistics.updateAllData();
                     talentTree.updateAllData();
+                    collectionLog.updateAllData();
                     blockBreakListener.cleanupExpiredADPCooldowns();
                 } catch (Exception e) {
                     getLogger().severe("[vArchaeology] An error occurred while updating data to database.");

@@ -24,13 +24,11 @@ public class EXPManager {
     public double getTotalBlockBreakEXP(UUID playerUUID, float blockEXP) {
         int traitBonus = playerData.getWisdomTrait(playerUUID);
         int talentBonus1 = talentTree.getTalentLevel(playerUUID, 1);
-        int talentBonus2 = talentTree.getTalentLevel(playerUUID, 9);
         int rankBonus = statistics.getStatistics(playerUUID, 12);
         double archXPMul = playerData.getArchXPMul(playerUUID);
 
         double baseMultiplier = ((traitBonus * 2 +
-                talentBonus1 * 25 +
-                talentBonus2 +
+                talentBonus1 * 15 +
                 rankBonus * 2) / 100.0) + archXPMul;
 
         double totalXP = baseMultiplier * blockEXP;

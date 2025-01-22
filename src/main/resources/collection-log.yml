@@ -1,0 +1,12 @@
+# vArchaeology Collection Log
+globalSettings:
+  material: FLINT
+  starting-model-data: 100000
+collectionList:
+  - "Purpleheart Wood"
+  - "Imperial Steel"
+  - "Everlight Silvthril"
+  - "Chaotic Brimstone"
+  - "Hellfire Metal"
+  - "Aetherium Alloy"
+  - "Quintessence"

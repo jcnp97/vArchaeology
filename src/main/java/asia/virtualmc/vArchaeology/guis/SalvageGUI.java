@@ -103,7 +103,7 @@ public class SalvageGUI implements Listener {
             meta.setDisplayName("§e" + componentName + " Component");
             meta.setCustomModelData(index + 99999);
             meta.setLore(List.of(
-                    "§7Amount: §a" + statistics.getStatistics(playerUUID, index + 13)
+                    "§7Amount: §a" + statistics.getStatistics(playerUUID, index + 1)
             ));
             button.setItemMeta(meta);
         }
@@ -180,7 +180,7 @@ public class SalvageGUI implements Listener {
             for (int i = 1; i <= 7; i++) {
                 if (currentValue.get(i) != 0) {
                     salvageLog.logTransaction(player.getName(), componentName[i - 1], currentValue.get(i));
-                    statistics.addStatistics(playerUUID, i + 13, currentValue.get(i));
+                    statistics.addStatistics(playerUUID, i + 1, currentValue.get(i));
                     player.sendMessage("§aYou have obtained §a" + currentValue.get(i) + "x §e" + componentName[i - 1] + " Components.");
                 }
             }
@@ -215,28 +215,6 @@ public class SalvageGUI implements Listener {
         }
         return button;
     }
-
-//    private ItemStack createInfoButton(Player player) {
-//        UUID playerUUID = player.getUniqueId();
-//        ItemStack button = new ItemStack(Material.PAPER);
-//        ItemMeta meta = button.getItemMeta();
-//
-//        if (meta != null) {
-//            meta.setDisplayName("§cYour Storage:");
-//            meta.setCustomModelData(configManager.confirmModelData);
-//            meta.setLore(List.of(
-//                    "§7• §eCommon Components: " + "§a" + statsManager.getStatistics(playerUUID, 14),
-//                    "§7• §eUncommon Components: " + "§a" + statsManager.getStatistics(playerUUID, 15),
-//                    "§7• §eRare Components: " + "§a" + statsManager.getStatistics(playerUUID, 16),
-//                    "§7• §eUnique Components: " + "§a" + statsManager.getStatistics(playerUUID, 17),
-//                    "§7• §eSpecial Components: " + "§a" + statsManager.getStatistics(playerUUID, 18),
-//                    "§7• §eMythical Components: " + "§a" + statsManager.getStatistics(playerUUID, 19),
-//                    "§7• §eExotic Components: " + "§a" + statsManager.getStatistics(playerUUID, 20)
-//            ));
-//            button.setItemMeta(meta);
-//        }
-//        return button;
-//    }
 
     private ItemStack createCloseButton() {
         ItemStack button = new ItemStack(Material.PAPER);

@@ -4,6 +4,8 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConfigManager {
     private Main plugin;
@@ -195,5 +199,51 @@ public class ConfigManager {
             config.set("settings.blocksList.CLAY", 1);
         }
         plugin.saveConfig();
+    }
+
+    public List<String> loadTalentNames() {
+        File talentFile = new File(plugin.getDataFolder(), "talent-trees.yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(talentFile);
+        List<String> talentNames = new ArrayList<>();
+
+        if (config.isConfigurationSection("talentList")) {
+            for (String key : config.getConfigurationSection("talentList").getKeys(false)) {
+                String name = config.getString("talentList." + key + ".name");
+                if (name != null) {
+                    talentNames.add(name);
+                }
+            }
+        }
+        return talentNames;
+    }
+
+    public List<String> loadCollections() {
+        File collectionFile = new File(plugin.getDataFolder(), "collection-log.yml");
+        FileConfiguration config = YamlConfiguration.loadConfiguration(collectionFile);
+        List<String> collectionList = new ArrayList<>();
+
+        if (config.isList("collectionList")) {
+            collectionList.addAll(config.getStringList("collectionList"));
+        }
+        return collectionList;
+    }
+
+    public Map<Material, Integer> loadBlocksList() {
+        FileConfiguration config = plugin.getConfig();
+        ConfigurationSection blocksSection = config.getConfigurationSection("settings.blocksList");
+        Map<Material, Integer> blocksList = new HashMap<>();
+
+        if (blocksSection != null) {
+            for (String key : blocksSection.getKeys(false)) {
+                try {
+                    Material material = Material.valueOf(key.toUpperCase());
+                    int expValue = blocksSection.getInt(key);
+                    blocksList.put(material, expValue);
+                } catch (IllegalArgumentException e) {
+                    plugin.getLogger().warning("Invalid material in config: " + key);
+                }
+            }
+        }
+        return blocksList;
     }
 }
