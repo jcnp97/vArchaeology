@@ -8,9 +8,10 @@ charmsList:
     lore:
       - '&cArchaeology Charm'
       - ''
-      - '&7When held on your off-hand during excavation,'
-      - '&7your next drop is a guaranteed &acommon material&7,'
-      - '&7and consumes this charm in the process.'
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &acommon material &7and'
+      - '&7this is consumed in the process.'
   uncommon: # itemName for commands
     id: 2 # internalID
     material: NETHER_STAR # base material
@@ -20,9 +21,9 @@ charmsList:
       - '&cArchaeology Charm'
       - ''
       - '&7When held on your off-hand during'
-      - '&7excavation, your next drop'
-      - '&7is a guaranteed &b&lUncommon&7, consuming'
-      - '&7one charm every time it triggers.'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &buncommon material &7and'
+      - '&7this is consumed on the process.'
   rare: # itemName for commands
     id: 3 # internalID
     material: NETHER_STAR # base material
@@ -31,9 +32,10 @@ charmsList:
     lore:
       - '&cArchaeology Charm'
       - ''
-      - '&7When held on your off-hand during excavation,'
-      - '&7your next material drop will be a guaranteed'
-      - '&7rarity based on the quality of the charm.'
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &3rare material &7and'
+      - '&7this is consumed on the process.'
   unique: # itemName for commands
     id: 4 # internalID
     material: NETHER_STAR # base material
@@ -42,9 +44,10 @@ charmsList:
     lore:
       - '&cArchaeology Charm'
       - ''
-      - '&7When held on your off-hand during excavation,'
-      - '&7your next material drop will be a guaranteed'
-      - '&7rarity based on the quality of the charm.'
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &eunique material &7and'
+      - '&7this is consumed on the process.'
   special: # itemName for commands
     id: 5 # internalID
     material: NETHER_STAR # base material
@@ -53,9 +56,10 @@ charmsList:
     lore:
       - '&cArchaeology Charm'
       - ''
-      - '&7When held on your off-hand during excavation,'
-      - '&7your next material drop will be a guaranteed'
-      - '&7rarity based on the quality of the charm.'
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &6special material &7and'
+      - '&7this is consumed on the process.'
   mythical: # itemName for commands
     id: 6 # internalID
     material: NETHER_STAR # base material
@@ -64,9 +68,10 @@ charmsList:
     lore:
       - '&cArchaeology Charm'
       - ''
-      - '&7When held on your off-hand during excavation,'
-      - '&7your next material drop will be a guaranteed'
-      - '&7rarity based on the quality of the charm.'
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop is a'
+      - '&7guaranteed &acommon material &7and'
+      - '&7this is consumed on the process.'
   exotic: # itemName for commands
     id: 7 # internalID
     material: NETHER_STAR # base material

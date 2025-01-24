@@ -5,17 +5,17 @@ import asia.virtualmc.vArchaeology.commands.GUICommands;
 import asia.virtualmc.vArchaeology.commands.PlayerDataCommands;
 import asia.virtualmc.vArchaeology.commands.ItemCommands;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
 import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.guis.TalentGUI;
 import asia.virtualmc.vArchaeology.guis.TraitGUI;
-import asia.virtualmc.vArchaeology.items.ItemManager;
-import asia.virtualmc.vArchaeology.items.RNGManager;
-import asia.virtualmc.vArchaeology.listeners.BlockBreakListener;
+import asia.virtualmc.vArchaeology.items.CustomCharms;
+import asia.virtualmc.vArchaeology.items.CustomItems;
+import asia.virtualmc.vArchaeology.items.CustomTools;
+import asia.virtualmc.vArchaeology.items.MiscItems;
+import asia.virtualmc.vArchaeology.listeners.*;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
-import asia.virtualmc.vArchaeology.listeners.ItemEquipListener;
-import asia.virtualmc.vArchaeology.listeners.MiscListener;
-import asia.virtualmc.vArchaeology.listeners.PlayerJoinListener;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLog;
 import asia.virtualmc.vArchaeology.storage.*;
@@ -36,13 +36,16 @@ public final class Main extends JavaPlugin {
     private TalentTree talentTree;
     private CollectionLog collectionLog;
     // items
-    private ItemManager itemManager;
+    private CustomTools customTools;
+    private CustomCharms customCharms;
+    private CustomItems customItems;
+    private MiscItems miscItems;
     private ItemCommands itemCommands;
     // utils
     private BossBarUtil bossBarUtil;
     private EffectsUtil effectsUtil;
-    // items
-    private RNGManager rngManager;
+    // droptables
+    private ItemsDropTable itemsDropTable;
     // configs
     private ConfigManager configManager;
     // listeners
@@ -50,6 +53,7 @@ public final class Main extends JavaPlugin {
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
     private ItemEquipListener itemEquipListener;
+    private PlayerInteractListener playerInteractListener;
     // blocks
     private SalvageStation salvageStation;
     // exp
@@ -72,8 +76,11 @@ public final class Main extends JavaPlugin {
         this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
         this.effectsUtil = new EffectsUtil(this);
-        this.itemManager = new ItemManager(this);
-        this.itemCommands = new ItemCommands(this, itemManager);
+        this.customTools = new CustomTools(this);
+        this.customCharms = new CustomCharms(this);
+        this.customItems = new CustomItems(this);
+        this.miscItems = new MiscItems(this);
+        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems);
         this.miscListener = new MiscListener(this);
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
@@ -84,16 +91,17 @@ public final class Main extends JavaPlugin {
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statistics, configManager, salvageLog);
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
-        this.rngManager = new RNGManager(this, configManager, talentTree);
+        this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI);
-        this.itemEquipListener = new ItemEquipListener(this, itemManager, playerData, talentTree, rngManager);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, rngManager);
-        this.expManager = new EXPManager(this, statistics, playerData, talentTree);
-        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
+        this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable);
+        this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil);
+        this.playerInteractListener = new PlayerInteractListener(this, miscItems, expManager);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
 
         startUpdateTask();
     }

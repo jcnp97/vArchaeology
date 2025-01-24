@@ -1,8 +1,10 @@
-package asia.virtualmc.vArchaeology.items;
+package asia.virtualmc.vArchaeology.droptables;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
+import org.checkerframework.checker.units.qual.N;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -11,14 +13,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class RNGManager {
+public class ItemsDropTable {
     private final Main plugin;
     private final Random random;
     private final ConfigManager configManager;
     private final Map<UUID, List<Integer>> playerDropTables;
     private final TalentTree talentTree;
 
-    public RNGManager(Main plugin, ConfigManager configManager, TalentTree talentTree) {
+    public ItemsDropTable(@NotNull Main plugin,
+                          @NotNull ConfigManager configManager,
+                          @NotNull TalentTree talentTree) {
         this.plugin = plugin;
         this.random = new Random();
         this.configManager = configManager;
@@ -26,8 +30,8 @@ public class RNGManager {
         this.playerDropTables = new HashMap<>();
     }
 
-    public boolean hasDropTable(UUID playerId) {
-        return playerDropTables.containsKey(playerId);
+    public boolean hasDropTable(UUID uuid) {
+        return playerDropTables.containsKey(uuid);
     }
 
     public void initializeDropTable(UUID uuid, int archLevel) {

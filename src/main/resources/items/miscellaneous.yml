@@ -1,0 +1,105 @@
+# vArchaeology Lamps
+lampsList:
+  small_lamp: # itemName for commands
+    id: 1 # internalID
+    material: LANTERN # base material
+    name: "&aSmall XP Lamp"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Lamp'
+      - ''
+      - '&7Provides instant XP to your Archaeology'
+      - '&7skill based on your current level.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  medium_lamp: # itemName for commands
+    id: 2 # internalID
+    material: LANTERN # base material
+    name: "&bMedium XP Lamp"
+    custom-model-data: 100001
+    lore:
+      - '&cArchaeology Lamp'
+      - ''
+      - '&7Provides instant XP to your Archaeology'
+      - '&7skill based on your current level.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  large_lamp: # itemName for commands
+    id: 3 # internalID
+    material: LANTERN # base material
+    name: "&5Large XP Lamp"
+    custom-model-data: 100002
+    lore:
+      - '&cArchaeology Lamp'
+      - ''
+      - '&7Provides instant XP to your Archaeology'
+      - '&7skill based on your current level.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  huge_lamp: # itemName for commands
+    id: 4 # internalID
+    material: LANTERN # base material
+    name: "&4Huge XP Lamp"
+    custom-model-data: 100003
+    lore:
+      - '&cArchaeology Lamp'
+      - ''
+      - '&7Provides instant XP to your Archaeology'
+      - '&7skill based on your current level.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+
+# vArchaeology Stars
+starsList:
+  small_star: # itemName for commands
+    id: 1 # internalID
+    material: AMETHYST_SHARD # base material
+    name: "&aSmall XP Star"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Star'
+      - ''
+      - '&7Provides bonus XP based on your current'
+      - '&7Archaeology level. Bonus XP doubles your'
+      - '&7XP gain on a 1:1 ratio.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  medium_star: # itemName for commands
+    id: 2 # internalID
+    material: AMETHYST_SHARD # base material
+    name: "&bMedium XP Star"
+    custom-model-data: 100001
+    lore:
+      - '&cArchaeology Star'
+      - ''
+      - '&7Provides bonus XP based on your current'
+      - '&7Archaeology level. Bonus XP doubles your'
+      - '&7XP gain on a 1:1 ratio.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  large_star: # itemName for commands
+    id: 3 # internalID
+    material: AMETHYST_SHARD # base material
+    name: "&5Large XP Star"
+    custom-model-data: 100002
+    lore:
+      - '&cArchaeology Star'
+      - ''
+      - '&7Provides bonus XP based on your current'
+      - '&7Archaeology level. Bonus XP doubles your'
+      - '&7XP gain on a 1:1 ratio.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'
+  huge_star: # itemName for commands
+    id: 4 # internalID
+    material: AMETHYST_SHARD # base material
+    name: "&4Huge XP Star"
+    custom-model-data: 100003
+    lore:
+      - '&cArchaeology Star'
+      - ''
+      - '&7Provides bonus XP based on your current'
+      - '&7Archaeology level. Bonus XP doubles your'
+      - '&7XP gain on a 1:1 ratio.'
+      - ''
+      - '&7[&e&l!&7] &2Right-click to consume'

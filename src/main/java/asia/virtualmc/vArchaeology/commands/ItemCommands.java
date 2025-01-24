@@ -1,8 +1,11 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.items.ItemManager;
 
+import asia.virtualmc.vArchaeology.items.CustomCharms;
+import asia.virtualmc.vArchaeology.items.CustomItems;
+import asia.virtualmc.vArchaeology.items.CustomTools;
+import asia.virtualmc.vArchaeology.items.MiscItems;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 
@@ -10,11 +13,21 @@ import org.bukkit.entity.Player;
 
 public class ItemCommands {
     private final Main plugin;
-    private final ItemManager itemManager;
+    private final CustomTools customTools;
+    private final CustomCharms customCharms;
+    private final CustomItems customItems;
+    private final MiscItems miscItems;
 
-    public ItemCommands(Main plugin, ItemManager itemManager) {
+    public ItemCommands(Main plugin,
+                        CustomItems customItems,
+                        CustomTools customTools,
+                        CustomCharms customCharms,
+                        MiscItems miscItems) {
         this.plugin = plugin;
-        this.itemManager = itemManager;
+        this.customItems = customItems;
+        this.customTools = customTools;
+        this.customCharms = customCharms;
+        this.miscItems = miscItems;
         registerCommands();
     }
 
@@ -23,6 +36,8 @@ public class ItemCommands {
                 .withSubcommand(archGetItem())
                 .withSubcommand(archGetTool())
                 .withSubcommand(archGetCharm())
+                .withSubcommand(archGetLamps())
+                .withSubcommand(archGetStars())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -40,7 +55,7 @@ public class ItemCommands {
 
                     int itemId = getItemIdFromName(itemName);
                     sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
-                    itemManager.giveArchItem(target.getUniqueId(), itemId, value);
+                    customItems.giveArchItem(target.getUniqueId(), itemId, value);
                 });
     }
 
@@ -71,7 +86,7 @@ public class ItemCommands {
 
                     int itemId = getToolIdFromName(toolName);
                     sender.sendMessage("Attempting to give " + toolName + " to " + target.getName());
-                    itemManager.giveArchTool(target.getUniqueId(), itemId);
+                    customTools.giveArchTool(target.getUniqueId(), itemId);
                 });
     }
 
@@ -104,7 +119,7 @@ public class ItemCommands {
 
                     int itemId = getCharmIdFromName(itemName);
                     sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
-                    itemManager.giveArchCharm(target.getUniqueId(), itemId, value);
+                    customCharms.giveCharm(target.getUniqueId(), itemId, value);
                 });
     }
 
@@ -117,6 +132,60 @@ public class ItemCommands {
             case "special" -> 5;
             case "mythical" -> 6;
             case "exotic" -> 7;
+            default -> throw new IllegalArgumentException("Unknown item: " + name);
+        };
+    }
+
+    private CommandAPICommand archGetLamps() {
+        return new CommandAPICommand("getlamp")
+                .withArguments(new MultiLiteralArgument("item_name", "small", "medium", "large", "huge"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getlamp")
+                .executes((sender, args) -> {
+                    String itemName = (String) args.get("item_name");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    int itemId = getLampIDFromName(itemName);
+                    sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
+                    miscItems.giveLamp(target.getUniqueId(), itemId, value);
+                });
+    }
+
+    private int getLampIDFromName(String name) {
+        return switch (name.toLowerCase()) {
+            case "small" -> 1;
+            case "medium" -> 2;
+            case "large" -> 3;
+            case "huge" -> 4;
+            default -> throw new IllegalArgumentException("Unknown item: " + name);
+        };
+    }
+
+    private CommandAPICommand archGetStars() {
+        return new CommandAPICommand("getstar")
+                .withArguments(new MultiLiteralArgument("item_name", "small", "medium", "large", "huge"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getstar")
+                .executes((sender, args) -> {
+                    String itemName = (String) args.get("item_name");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    int itemId = getStarIDFromName(itemName);
+                    sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
+                    miscItems.giveStar(target.getUniqueId(), itemId, value);
+                });
+    }
+
+    private int getStarIDFromName(String name) {
+        return switch (name.toLowerCase()) {
+            case "small" -> 1;
+            case "medium" -> 2;
+            case "large" -> 3;
+            case "huge" -> 4;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

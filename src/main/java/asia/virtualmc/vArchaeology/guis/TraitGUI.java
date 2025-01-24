@@ -23,9 +23,9 @@ public class TraitGUI implements Listener {
     private final EffectsUtil effectsUtil;
     private final ConfigManager configManager;
     private final PlayerData PlayerData;
-    private final Map<String, Integer> traitPoints = new HashMap<>();
+    private final Map<String, Integer> traitPoints = new LinkedHashMap<>();
     private int remainingPoints = 0;
-    private final int maxTraitLevel = 40;
+    private final int maxTraitLevel = 50;
 
     public TraitGUI(Main plugin, EffectsUtil effectsUtil, PlayerData PlayerData, ConfigManager configManager) {
         this.plugin = plugin;
@@ -36,8 +36,8 @@ public class TraitGUI implements Listener {
 
         // Initialize trait points map
         traitPoints.put("Wisdom", 0);
-        traitPoints.put("Karma", 0);
         traitPoints.put("Charisma", 0);
+        traitPoints.put("Karma", 0);
         traitPoints.put("Dexterity", 0);
     }
 
@@ -174,11 +174,11 @@ public class TraitGUI implements Listener {
         // Static pane for attributes and buttons
         StaticPane staticPane = new StaticPane(0, 0, 9, 3);
 
-        // Add attribute items
+        // Add trait items
         int[] positions = {1, 3, 5, 7};
         int i = 0;
         for (Map.Entry<String, Integer> entry : traitPoints.entrySet()) {
-            addAttributeItem(staticPane, positions[i++], 0, entry.getKey(), player, gui);
+            addTraitItem(staticPane, positions[i++], 0, entry.getKey(), player, gui);
         }
         // Add control buttons
         addUpgradeControlButtons(staticPane, player);
@@ -218,8 +218,8 @@ public class TraitGUI implements Listener {
         }
     }
 
-    private void addAttributeItem(StaticPane pane, int x, int y, String attributeName, Player player, ChestGui gui) {
-        int points = traitPoints.get(attributeName);
+    private void addTraitItem(StaticPane pane, int x, int y, String traitName, Player player, ChestGui gui) {
+        int points = traitPoints.get(traitName);
         ItemStack item = new ItemStack(
                 points > 0 ? Material.LIME_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE,
                 Math.max(1, points)
@@ -227,9 +227,9 @@ public class TraitGUI implements Listener {
 
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GOLD + attributeName + " §7(§a+" + points + "§7)");
+            meta.setDisplayName(ChatColor.GOLD + traitName + " §7(§a+" + points + "§7)");
 
-            int currentLevel = getCurrentTraitLevel(player.getUniqueId(), attributeName);
+            int currentLevel = getCurrentTraitLevel(player.getUniqueId(), traitName);
 
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.YELLOW + "Left-click to add point");
@@ -242,15 +242,15 @@ public class TraitGUI implements Listener {
 
         pane.addItem(new GuiItem(item, event -> {
             if (event.isLeftClick() && remainingPoints > 0) {
-                int currentLevel = getCurrentTraitLevel(player.getUniqueId(), attributeName);
-                if (currentLevel + traitPoints.get(attributeName) < maxTraitLevel) {
-                    traitPoints.compute(attributeName, (k, v) -> v + 1);
+                int currentLevel = getCurrentTraitLevel(player.getUniqueId(), traitName);
+                if (currentLevel + traitPoints.get(traitName) < maxTraitLevel) {
+                    traitPoints.compute(traitName, (k, v) -> v + 1);
                     remainingPoints--;
                 } else {
                     player.sendMessage(ChatColor.RED + "This trait has reached its maximum level of " + maxTraitLevel + "!");
                 }
-            } else if (event.isRightClick() && traitPoints.get(attributeName) > 0) {
-                traitPoints.compute(attributeName, (k, v) -> v - 1);
+            } else if (event.isRightClick() && traitPoints.get(traitName) > 0) {
+                traitPoints.compute(traitName, (k, v) -> v - 1);
                 remainingPoints++;
             }
             updateGUI(player, gui);

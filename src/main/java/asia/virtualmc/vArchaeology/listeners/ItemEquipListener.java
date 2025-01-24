@@ -1,8 +1,8 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.items.ItemManager;
-import asia.virtualmc.vArchaeology.items.RNGManager;
+import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
+import asia.virtualmc.vArchaeology.items.CustomTools;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 
@@ -24,24 +24,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemEquipListener implements Listener {
 
-    private record GatherAdbData(double gather, double adb) {}
+    private record ToolData(double gather, double adb, boolean hasTier99) {}
     private final Main plugin;
-    private final ItemManager itemManager;
+    private final CustomTools customTools;
     private final TalentTree talentTree;
     private final PlayerData playerData;
-    private final RNGManager rngManager;
-    private final Map<UUID, GatherAdbData> gatherAdbMap;
+    private final ItemsDropTable itemsDropTable;
+    private final Map<UUID, ToolData> toolDataMap;
     private final NamespacedKey gatherKey;
     private final NamespacedKey adbKey;
 
-    public ItemEquipListener(Main plugin, ItemManager itemManager, PlayerData playerData,
-                             TalentTree talentTree, RNGManager rngManager) {
+    public ItemEquipListener(Main plugin,
+                             CustomTools customTools,
+                             PlayerData playerData,
+                             TalentTree talentTree,
+                             ItemsDropTable itemsDropTable) {
         this.plugin = plugin;
-        this.itemManager = itemManager;
+        this.customTools = customTools;
         this.talentTree = talentTree;
         this.playerData = playerData;
-        this.rngManager = rngManager;
-        this.gatherAdbMap = new ConcurrentHashMap<>();
+        this.itemsDropTable = itemsDropTable;
+        this.toolDataMap = new ConcurrentHashMap<>();
         this.gatherKey = new NamespacedKey(plugin, "varch_gather");
         this.adbKey = new NamespacedKey(plugin, "varch_adb");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -72,7 +75,7 @@ public class ItemEquipListener implements Listener {
     private boolean isValidItem(ItemStack item) {
         return item != null
                 && item.getType() != Material.AIR
-                && itemManager.isArchTool(item)
+                && customTools.isArchTool(item)
                 && item.hasItemMeta();
     }
 
@@ -85,11 +88,11 @@ public class ItemEquipListener implements Listener {
         double adbProgress = calculateADB(uuid, pdc);
 
         if (gatherRate > 0 || adbProgress > 0) {
-            gatherAdbMap.put(uuid, new GatherAdbData(gatherRate, adbProgress));
+            toolDataMap.put(uuid, new ToolData(gatherRate, adbProgress, hasTier99(item)));
         }
 
-        if (!rngManager.hasDropTable(uuid)) {
-            rngManager.initializeDropTable(uuid, playerData.getArchLevel(uuid));
+        if (!itemsDropTable.hasDropTable(uuid)) {
+            itemsDropTable.initializeDropTable(uuid, playerData.getArchLevel(uuid));
         }
     }
 
@@ -117,21 +120,30 @@ public class ItemEquipListener implements Listener {
         return adbProgress;
     }
 
+    private boolean hasTier99(ItemStack mainHandItem) {
+        return customTools.getToolId(mainHandItem) == 10;
+    }
+
     public void unloadData(UUID uuid) {
-        gatherAdbMap.remove(uuid);
+        toolDataMap.remove(uuid);
     }
 
     public double getGatherValue(UUID uuid) {
-        GatherAdbData data = gatherAdbMap.get(uuid);
+        ToolData data = toolDataMap.get(uuid);
         return (data == null) ? 0.0 : data.gather();
     }
 
     public double getAdbValue(UUID uuid) {
-        GatherAdbData data = gatherAdbMap.get(uuid);
+        ToolData data = toolDataMap.get(uuid);
         return (data == null) ? 0.0 : data.adb();
     }
 
-    public boolean hasGatherAndADBData(UUID uuid) {
-        return gatherAdbMap.containsKey(uuid);
+    public boolean hasTier99Value(UUID uuid) {
+        ToolData data = toolDataMap.get(uuid);
+        return data != null && data.hasTier99();
+    }
+
+    public boolean hasToolData(UUID uuid) {
+        return toolDataMap.containsKey(uuid);
     }
 }

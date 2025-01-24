@@ -2,10 +2,12 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.items.CustomCharms;
+import asia.virtualmc.vArchaeology.items.CustomItems;
+import asia.virtualmc.vArchaeology.items.CustomTools;
 import asia.virtualmc.vArchaeology.storage.CollectionLog;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
-import asia.virtualmc.vArchaeology.items.ItemManager;
-import asia.virtualmc.vArchaeology.items.RNGManager;
+import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -18,9 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,8 +28,10 @@ import java.util.*;
 public class BlockBreakListener implements Listener {
     private final Main plugin;
     private final PlayerData playerData;
-    private final ItemManager itemManager;
-    private final RNGManager rngManager;
+    private final CustomTools customTools;
+    private final CustomCharms customCharms;
+    private final CustomItems customItems;
+    private final ItemsDropTable itemsDropTable;
     private final Statistics statistics;
     private final CollectionLog collectionLog;
     private final EXPManager expManager;
@@ -44,8 +45,10 @@ public class BlockBreakListener implements Listener {
 
     public BlockBreakListener(@NotNull Main plugin,
                               @NotNull PlayerData playerData,
-                              @NotNull ItemManager itemManager,
-                              @NotNull RNGManager rngManager,
+                              @NotNull CustomItems customItems,
+                              @NotNull CustomTools customTools,
+                              @NotNull CustomCharms customCharms,
+                              @NotNull ItemsDropTable itemsDropTable,
                               @NotNull Statistics statistics,
                               @NotNull CollectionLog collectionLog,
                               EXPManager expManager,
@@ -54,8 +57,10 @@ public class BlockBreakListener implements Listener {
                               EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.playerData = playerData;
-        this.itemManager = itemManager;
-        this.rngManager = rngManager;
+        this.customItems = customItems;
+        this.customTools = customTools;
+        this.customCharms = customCharms;
+        this.itemsDropTable = itemsDropTable;
         this.statistics = statistics;
         this.collectionLog = collectionLog;
         this.expManager = expManager;
@@ -74,7 +79,7 @@ public class BlockBreakListener implements Listener {
         UUID playerUUID = player.getUniqueId();
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
 
-        if (!itemManager.isArchTool(mainHandItem)) {
+        if (!customTools.isArchTool(mainHandItem)) {
             return;
         }
 
@@ -94,7 +99,7 @@ public class BlockBreakListener implements Listener {
         event.setDropItems(false);
         statistics.incrementStatistics(uuid, 9);
 
-        if (!itemEquipListener.hasGatherAndADBData(uuid)) {
+        if (!itemEquipListener.hasToolData(uuid)) {
             itemEquipListener.addPlayerData(player, mainHandItem);
         }
 
@@ -103,13 +108,29 @@ public class BlockBreakListener implements Listener {
             Location blockLocation = event.getBlock().getLocation();
             int dropTable = calculateDropTable(uuid, player);
             // item drop
-            itemManager.dropArchItem(uuid, dropTable, blockLocation);
+            customItems.dropArchItem(uuid, dropTable, blockLocation);
             // experience
             playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue) + expManager.getTotalMaterialGetEXP(uuid, dropTable), "add");
             // statistics
             collectionLog.incrementCollection(uuid, dropTable);
         } else {
             playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
+        }
+
+        // Tier 99 Passive
+        if (itemEquipListener.hasTier99Value(uuid)) {
+            if (random.nextInt(10) < 1) {
+                int dropTable = calculateDropTable(uuid, player);
+                customItems.dropArchItem(uuid, dropTable, event.getBlock().getLocation());
+                collectionLog.incrementCollection(uuid, dropTable);
+                effectsUtil.sendPlayerMessage(uuid, "<green>Your Time-Space Convergence has been activated.");
+            }
+
+            if (random.nextInt(100) < 1) {
+                playerData.addArtefactDiscovery(uuid, 1.0);
+                effectsUtil.sendADBProgressBarTitle(uuid, playerData.getArchADP(uuid) / 100.0, 1.0);
+                effectsUtil.sendPlayerMessage(uuid, "<green>Your Chronal Focus has been activated.");
+            }
         }
 
         // Artefact Discovery Progress
@@ -123,13 +144,13 @@ public class BlockBreakListener implements Listener {
 
     private int calculateDropTable(UUID uuid, Player player) {
         ItemStack offHandItem = player.getInventory().getItemInOffHand();
-        int charmID = itemManager.getCharmID(offHandItem);
+        int charmID = customCharms.getCharmID(offHandItem);
 
         if (charmID > 0) {
             offHandItem.setAmount(offHandItem.getAmount() - 1);
             return charmID;
         }
-        return rngManager.rollDropTable(uuid);
+        return itemsDropTable.rollDropTable(uuid);
     }
 
     public boolean canProgressAD(UUID playerUUID) {
@@ -150,12 +171,12 @@ public class BlockBreakListener implements Listener {
     }
 
     public boolean canBreakBlocks(Player player, UUID uuid, ItemStack mainHandItem) {
-        if (itemManager.getDurability(mainHandItem) <= 10) {
+        if (customTools.getDurability(mainHandItem) <= 10) {
             player.sendMessage("§cYour tool's durability is too low to break this block!");
             return false;
         }
 
-        if (itemManager.getRequiredLevel(mainHandItem) > playerData.getArchLevel(uuid)) {
+        if (customTools.getRequiredLevel(mainHandItem) > playerData.getArchLevel(uuid)) {
             player.sendMessage("§cYou do not have the required level to use this tool!");
             return false;
         }

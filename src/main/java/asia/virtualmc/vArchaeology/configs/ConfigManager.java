@@ -26,7 +26,7 @@ public class ConfigManager {
     public int port;
     // experience-table.yml
     public final Map<Integer, Integer> experienceTable;
-    // custom-items.yml
+    // items.yml
     public int commonWeight;
     public int uncommonWeight;
     public int rareWeight;
@@ -127,10 +127,10 @@ public class ConfigManager {
     }
 
     public void readcustomDrops() {
-        File dropsFile = new File(plugin.getDataFolder(), "custom-items.yml");
+        File dropsFile = new File(plugin.getDataFolder(), "items/items.yml");
         if (!dropsFile.exists()) {
             try {
-                plugin.saveResource("custom-items.yml", false);
+                plugin.saveResource("items/items.yml", false);
             } catch (Exception e) {
                 e.printStackTrace();
                 return;
