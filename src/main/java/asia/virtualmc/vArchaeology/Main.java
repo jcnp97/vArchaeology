@@ -79,12 +79,12 @@ public final class Main extends JavaPlugin {
         this.salvageLog = new SalvageLog(this, logManager);
         this.sellGUI = new SellGUI(this, effectsUtil);
         this.talentGUI = new TalentGUI(this, effectsUtil);
-        this.rngManager = new RNGManager(this, configManager);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statistics = new Statistics(this, playerDataDB, configManager);
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statistics, configManager, salvageLog);
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
+        this.rngManager = new RNGManager(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
@@ -93,7 +93,7 @@ public final class Main extends JavaPlugin {
         this.itemEquipListener = new ItemEquipListener(this, itemManager, playerData, talentTree, rngManager);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, rngManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree);
-        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, expManager, configManager, itemEquipListener);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, expManager, configManager, itemEquipListener, effectsUtil);
 
         startUpdateTask();
     }

@@ -2,6 +2,8 @@ package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.guis.TalentGUI;
+import asia.virtualmc.vArchaeology.storage.TalentTree;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -15,11 +17,13 @@ public class RNGManager {
     private final Random random;
     private final ConfigManager configManager;
     private final Map<UUID, List<Integer>> playerDropTables;
+    private final TalentTree talentTree;
 
-    public RNGManager(Main plugin, ConfigManager configManager) {
+    public RNGManager(Main plugin, ConfigManager configManager, TalentTree talentTree) {
         this.plugin = plugin;
         this.random = new Random();
         this.configManager = configManager;
+        this.talentTree = talentTree;
         this.playerDropTables = new HashMap<>();
     }
 
@@ -37,6 +41,7 @@ public class RNGManager {
         if (archLevel >= 40) dropTable.add(configManager.specialWeight);
         if (archLevel >= 50) dropTable.add(configManager.mythicalWeight);
         if (archLevel >= 60) dropTable.add(configManager.exoticWeight);
+        if (talentTree.getTalentLevel(uuid, 10) == 1) dropTable.set(6, configManager.exoticWeight + 3);
         playerDropTables.put(uuid, dropTable);
     }
 

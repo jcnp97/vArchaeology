@@ -54,10 +54,7 @@ public class TalentTree {
             );
             // Add all Talent into Talent Tree table
             List<String> talentData = new ArrayList<>(configManager.loadTalentNames());
-//            List<String> talentData = Arrays.asList("Sagacity", "Insightful Judgement", "Extraction",
-//                    "Extraction", "Adept Restoration", "Archaeological Prowess", "Divine Opulence",
-//                    "Rapid Discovery", "Prudence", "Blessed Treatment", "Stroke of Luck"
-//            );
+
             String checkQuery = "SELECT COUNT(*) FROM archTalentTree WHERE talentName = ?";
             String insertQuery = "INSERT INTO archTalentTree (talentName) VALUES (?)";
 

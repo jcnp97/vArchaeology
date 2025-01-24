@@ -225,7 +225,11 @@ public class PlayerData {
                 stats.archEXP >= configManager.experienceTable.get(stats.archLevel + 1) &&
                 stats.archLevel < MAX_LEVEL) {
             stats.archLevel++;
-            stats.traitPoints++;
+            if (stats.archLevel > 100) {
+                stats.traitPoints += 3;
+            } else {
+                stats.traitPoints++;
+            }
             levelUp = true;
         }
         if (!levelUp) return;
@@ -358,44 +362,35 @@ public class PlayerData {
     public void addWisdomTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
-            if (stats.wisdomTrait + value >= 40) {
-                stats.wisdomTrait = 50;
-            } else {
-                stats.wisdomTrait += value;
-            }
+            stats.wisdomTrait += value;
         }
     }
 
     public void addKarmaTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
-            if (stats.karmaTrait + value >= 40) {
-                stats.karmaTrait = 50;
-            } else {
-                stats.karmaTrait += value;
-            }
+            stats.karmaTrait += value;
         }
     }
 
     public void addCharismaTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
-            if (stats.charismaTrait + value >= 40) {
-                stats.charismaTrait = 50;
-            } else {
-                stats.charismaTrait += value;
-            }
+            stats.charismaTrait += value;
         }
     }
 
     public void addDexterityTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
-            if (stats.dexterityTrait + value >= 40) {
-                stats.dexterityTrait = 50;
-            } else {
-                stats.dexterityTrait += value;
-            }
+            stats.dexterityTrait += value;
+        }
+    }
+
+    public void addArtefactDiscovery(@NotNull UUID uuid, double value) {
+        PlayerStats stats = playerStatsMap.get(uuid);
+        if (stats != null) {
+            stats.archADP = Math.min(stats.archADP + value,  100.0);
         }
     }
 }

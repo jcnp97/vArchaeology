@@ -19,6 +19,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
+import me.clip.placeholderapi.PlaceholderAPI;
+
 import java.util.UUID;
 
 public class EffectsUtil {
@@ -119,5 +121,42 @@ public class EffectsUtil {
         }
         Component messageComponent = MiniMessage.miniMessage().deserialize(message);
         player.sendMessage(messageComponent);
+    }
+
+    public void sendADBProgressBarTitle(UUID playerUUID, double adbProgress, double adbAdd) {
+        if (adbProgress < 0.0 || adbProgress > 1.0) {
+            throw new IllegalArgumentException("Progress must be between 0.0 and 1.0");
+        }
+
+        Player player = Bukkit.getPlayer(playerUUID);
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        int totalBars = 30;
+        int filledBars = (int) Math.round(adbProgress * totalBars);
+        int emptyBars = totalBars - filledBars;
+
+        StringBuilder barBuilder = new StringBuilder();
+        barBuilder.append("§2");
+        barBuilder.append("❙".repeat(filledBars));
+        barBuilder.append("§8");
+        barBuilder.append("❙".repeat(emptyBars));
+        barBuilder
+                .append(" §e(")
+                .append(String.format("%.2f", adbProgress * 100.0))
+                .append("%)");
+        barBuilder.append(" §7| ");
+        barBuilder
+                .append("§a(")
+                .append(String.format("%.2f", adbAdd))
+                .append("%)");
+
+        String progressBarMiniMsg = barBuilder.toString();
+        Component title = MiniMessage.miniMessage().deserialize("<gradient:#EBD197:#B48811>Artefact Discovery</gradient>");
+        Component subtitle = MiniMessage.miniMessage().deserialize(progressBarMiniMsg);
+
+        Title fullTitle = Title.title(title, subtitle);
+        player.showTitle(fullTitle);
     }
 }

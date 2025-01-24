@@ -62,7 +62,7 @@ public class ItemEquipListener implements Listener {
                 }
                 calculateAndUpdateValues(player, mainHandItem);
             }
-        }.runTaskLater(plugin, 10L);
+        }.runTaskLater(plugin, 5L);
     }
 
     private boolean isValidItem(ItemStack item) {
@@ -125,13 +125,5 @@ public class ItemEquipListener implements Listener {
 
     public void setAdbValue(UUID uuid, double value) {
         adbMap.put(uuid, value);
-    }
-
-    public void incrementGatherValue(UUID uuid, double increment) {
-        gatherMap.compute(uuid, (key, value) -> (value == null ? 0.0 : value) + increment);
-    }
-
-    public void incrementAdbValue(UUID uuid, double increment) {
-        adbMap.compute(uuid, (key, value) -> (value == null ? 0.0 : value) + increment);
     }
 }

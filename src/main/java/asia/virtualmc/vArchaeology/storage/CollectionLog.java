@@ -48,9 +48,6 @@ public class CollectionLog {
                             ")"
             );
             List<String> collectionData = new ArrayList<>(configManager.loadCollections());
-//            List<String> statList = Arrays.asList("commonGained", "uncommonGained", "rareGained",
-//                    "uniqueGained", "specialGained", "mythicalGained", "exoticGained"
-//            );
 
             String checkQuery = "SELECT COUNT(*) FROM archCollections WHERE itemName = ?";
             String insertQuery = "INSERT INTO archCollections (itemName) VALUES (?)";
