@@ -22,6 +22,7 @@ public class ItemCommands {
         new CommandAPICommand("varch")
                 .withSubcommand(archGetItem())
                 .withSubcommand(archGetTool())
+                .withSubcommand(archGetCharm())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -86,6 +87,36 @@ public class ItemCommands {
             case "necronium_mattock" -> 8;
             case "crystal_mattock" -> 9;
             case "mattock_of_time_and_space" -> 10;
+            default -> throw new IllegalArgumentException("Unknown item: " + name);
+        };
+    }
+
+    private CommandAPICommand archGetCharm() {
+        return new CommandAPICommand("getcharm")
+                .withArguments(new MultiLiteralArgument("item_name", "common", "uncommon", "rare", "unique", "special", "mythical", "exotic"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getcharm")
+                .executes((sender, args) -> {
+                    String itemName = (String) args.get("item_name");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    int itemId = getCharmIdFromName(itemName);
+                    sender.sendMessage("Attempting to give " + value + " of " + itemName + " to " + target.getName());
+                    itemManager.giveArchCharm(target.getUniqueId(), itemId, value);
+                });
+    }
+
+    private int getCharmIdFromName(String name) {
+        return switch (name.toLowerCase()) {
+            case "common" -> 1;
+            case "uncommon" -> 2;
+            case "rare" -> 3;
+            case "unique" -> 4;
+            case "special" -> 5;
+            case "mythical" -> 6;
+            case "exotic" -> 7;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

@@ -5,11 +5,12 @@ import asia.virtualmc.vArchaeology.items.ItemManager;
 import asia.virtualmc.vArchaeology.items.RNGManager;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
+
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -17,29 +18,30 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ItemEquipListener implements Listener {
+
+    private record GatherAdbData(double gather, double adb) {}
     private final Main plugin;
     private final ItemManager itemManager;
     private final TalentTree talentTree;
     private final PlayerData playerData;
     private final RNGManager rngManager;
-    private final Map<UUID, Double> gatherMap;
-    private final Map<UUID, Double> adbMap;
+    private final Map<UUID, GatherAdbData> gatherAdbMap;
     private final NamespacedKey gatherKey;
     private final NamespacedKey adbKey;
 
-    public ItemEquipListener(Main plugin, ItemManager itemManager, PlayerData playerData, TalentTree talentTree, RNGManager rngManager) {
+    public ItemEquipListener(Main plugin, ItemManager itemManager, PlayerData playerData,
+                             TalentTree talentTree, RNGManager rngManager) {
         this.plugin = plugin;
         this.itemManager = itemManager;
         this.talentTree = talentTree;
         this.playerData = playerData;
         this.rngManager = rngManager;
-        this.gatherMap = new ConcurrentHashMap<>();
-        this.adbMap = new ConcurrentHashMap<>();
+        this.gatherAdbMap = new ConcurrentHashMap<>();
         this.gatherKey = new NamespacedKey(plugin, "varch_gather");
         this.adbKey = new NamespacedKey(plugin, "varch_adb");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -48,46 +50,42 @@ public class ItemEquipListener implements Listener {
     @EventHandler
     public void onPlayerItemHeld(PlayerItemHeldEvent event) {
         Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
 
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (!player.isOnline()) return;
-                UUID uuid = player.getUniqueId();
-                ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+
                 unloadData(uuid);
 
+                ItemStack mainHandItem = player.getInventory().getItemInMainHand();
                 if (!isValidItem(mainHandItem)) {
                     return;
                 }
-                calculateAndUpdateValues(player, mainHandItem);
+
+                addPlayerData(player, mainHandItem);
             }
         }.runTaskLater(plugin, 5L);
     }
 
     private boolean isValidItem(ItemStack item) {
-        return item != null &&
-                item.getType() != Material.AIR &&
-                itemManager.isArchTool(item) &&
-                item.hasItemMeta();
+        return item != null
+                && item.getType() != Material.AIR
+                && itemManager.isArchTool(item)
+                && item.hasItemMeta();
     }
 
-    private void calculateAndUpdateValues(Player player, ItemStack item) {
+    public void addPlayerData(Player player, ItemStack item) {
         UUID uuid = player.getUniqueId();
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
 
-        double gatherValue = pdc.getOrDefault(gatherKey, PersistentDataType.DOUBLE, 0.0);
-        double adbValue = pdc.getOrDefault(adbKey, PersistentDataType.DOUBLE, 0.0);
+        double gatherRate = calculateGatherRate(uuid, pdc);
+        double adbProgress = calculateADB(uuid, pdc);
 
-        double totalGatherBonus = calculateGatherBonus(uuid);
-        double totalAdbBonus = calculateAdbBonus(uuid);
-
-        if (gatherValue > 0) {
-            gatherMap.put(uuid, gatherValue + totalGatherBonus);
-        }
-        if (adbValue > 0) {
-            adbMap.put(uuid, adbValue + totalAdbBonus);
+        if (gatherRate > 0 || adbProgress > 0) {
+            gatherAdbMap.put(uuid, new GatherAdbData(gatherRate, adbProgress));
         }
 
         if (!rngManager.hasDropTable(uuid)) {
@@ -95,35 +93,45 @@ public class ItemEquipListener implements Listener {
         }
     }
 
-    private double calculateGatherBonus(UUID uuid) {
-        return (talentTree.getTalentLevel(uuid, 3) * 0.1) +
-                (playerData.getKarmaTrait(uuid) * 0.05);
+    private double calculateGatherRate(UUID uuid, PersistentDataContainer pdc) {
+        // Tool Gather Rate
+        double gatherRate = pdc.getOrDefault(gatherKey, PersistentDataType.DOUBLE, 0.0);
+        // Talent ID 3
+        gatherRate += talentTree.getTalentLevel(uuid, 3) * 0.1;
+        // Karma Trait
+        gatherRate += playerData.getKarmaTrait(uuid) * 0.05;
+
+        return gatherRate;
     }
 
-    private double calculateAdbBonus(UUID uuid) {
-        return (talentTree.getTalentLevel(uuid, 8) * 0.01) +
-                (talentTree.getTalentLevel(uuid, 17) * 0.15) +
-                (playerData.getDexterityTrait(uuid) * 0.005);
+    private double calculateADB(UUID uuid, PersistentDataContainer pdc) {
+        // Tool ADB
+        double adbProgress = pdc.getOrDefault(adbKey, PersistentDataType.DOUBLE, 0.0);
+        // Talent ID 8
+        adbProgress += talentTree.getTalentLevel(uuid, 8) * 0.01;
+        // Talent ID 17
+        adbProgress += talentTree.getTalentLevel(uuid, 17) * 0.15;
+        // Dexterity Trait
+        adbProgress += playerData.getDexterityTrait(uuid) * 0.005;
+
+        return adbProgress;
     }
 
     public void unloadData(UUID uuid) {
-        gatherMap.remove(uuid);
-        adbMap.remove(uuid);
+        gatherAdbMap.remove(uuid);
     }
 
-    public Double getGatherValue(UUID uuid) {
-        return gatherMap.getOrDefault(uuid, 0.0);
+    public double getGatherValue(UUID uuid) {
+        GatherAdbData data = gatherAdbMap.get(uuid);
+        return (data == null) ? 0.0 : data.gather();
     }
 
-    public Double getAdbValue(UUID uuid) {
-        return adbMap.getOrDefault(uuid, 0.0);
+    public double getAdbValue(UUID uuid) {
+        GatherAdbData data = gatherAdbMap.get(uuid);
+        return (data == null) ? 0.0 : data.adb();
     }
 
-    public void setGatherValue(UUID uuid, double value) {
-        gatherMap.put(uuid, value);
-    }
-
-    public void setAdbValue(UUID uuid, double value) {
-        adbMap.put(uuid, value);
+    public boolean hasGatherAndADBData(UUID uuid) {
+        return gatherAdbMap.containsKey(uuid);
     }
 }

@@ -133,28 +133,29 @@ public class EffectsUtil {
             return;
         }
 
-        int totalBars = 30;
+        int totalBars = 25;
         int filledBars = (int) Math.round(adbProgress * totalBars);
         int emptyBars = totalBars - filledBars;
 
-        StringBuilder barBuilder = new StringBuilder();
-        barBuilder.append("§2");
-        barBuilder.append("❙".repeat(filledBars));
-        barBuilder.append("§8");
-        barBuilder.append("❙".repeat(emptyBars));
-        barBuilder
-                .append(" §e(")
+        StringBuilder progressBar = new StringBuilder();
+        progressBar.append("<dark_green>");
+        progressBar.append("❙".repeat(filledBars));
+        progressBar.append("<dark_gray>");
+        progressBar.append("❙".repeat(emptyBars));
+
+        StringBuilder subtitleString = new StringBuilder();
+        subtitleString.append("<gradient:#EBD197:#B48811>Artefact Discovery: ");
+        subtitleString
                 .append(String.format("%.2f", adbProgress * 100.0))
-                .append("%)");
-        barBuilder.append(" §7| ");
-        barBuilder
-                .append("§a(")
+                .append("%")
+                .append("</gradient>");
+        subtitleString
+                .append(" <green>(+")
                 .append(String.format("%.2f", adbAdd))
                 .append("%)");
 
-        String progressBarMiniMsg = barBuilder.toString();
-        Component title = MiniMessage.miniMessage().deserialize("<gradient:#EBD197:#B48811>Artefact Discovery</gradient>");
-        Component subtitle = MiniMessage.miniMessage().deserialize(progressBarMiniMsg);
+        Component title = MiniMessage.miniMessage().deserialize(progressBar.toString());
+        Component subtitle = MiniMessage.miniMessage().deserialize(subtitleString.toString());
 
         Title fullTitle = Title.title(title, subtitle);
         player.showTitle(fullTitle);

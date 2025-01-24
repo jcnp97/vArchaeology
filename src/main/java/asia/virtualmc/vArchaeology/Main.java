@@ -93,7 +93,7 @@ public final class Main extends JavaPlugin {
         this.itemEquipListener = new ItemEquipListener(this, itemManager, playerData, talentTree, rngManager);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, rngManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree);
-        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, expManager, configManager, itemEquipListener, effectsUtil);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, itemManager, rngManager, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
 
         startUpdateTask();
     }

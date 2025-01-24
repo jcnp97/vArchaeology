@@ -18,6 +18,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,6 +32,7 @@ public class BlockBreakListener implements Listener {
     private final ItemManager itemManager;
     private final RNGManager rngManager;
     private final Statistics statistics;
+    private final CollectionLog collectionLog;
     private final EXPManager expManager;
     private final ConfigManager configManager;
     private final ItemEquipListener itemEquipListener;
@@ -43,6 +47,7 @@ public class BlockBreakListener implements Listener {
                               @NotNull ItemManager itemManager,
                               @NotNull RNGManager rngManager,
                               @NotNull Statistics statistics,
+                              @NotNull CollectionLog collectionLog,
                               EXPManager expManager,
                               ConfigManager configManager,
                               ItemEquipListener itemEquipListener,
@@ -52,6 +57,7 @@ public class BlockBreakListener implements Listener {
         this.itemManager = itemManager;
         this.rngManager = rngManager;
         this.statistics = statistics;
+        this.collectionLog = collectionLog;
         this.expManager = expManager;
         this.configManager = configManager;
         this.itemEquipListener = itemEquipListener;
@@ -88,27 +94,42 @@ public class BlockBreakListener implements Listener {
         event.setDropItems(false);
         statistics.incrementStatistics(uuid, 9);
 
+        if (!itemEquipListener.hasGatherAndADBData(uuid)) {
+            itemEquipListener.addPlayerData(player, mainHandItem);
+        }
+
         // Material Drops
         if (random.nextDouble() < itemEquipListener.getGatherValue(uuid) / 100) {
             Location blockLocation = event.getBlock().getLocation();
-            int dropTable = rngManager.rollDropTable(uuid);
+            int dropTable = calculateDropTable(uuid, player);
             // item drop
             itemManager.dropArchItem(uuid, dropTable, blockLocation);
             // experience
             playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue) + expManager.getTotalMaterialGetEXP(uuid, dropTable), "add");
+            // statistics
+            collectionLog.incrementCollection(uuid, dropTable);
         } else {
             playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
         }
 
         // Artefact Discovery Progress
-//        if (canProgressAD(playerUUID)) {
-//            playerData.addArtefactDiscovery(uuid, itemEquipListener.getAdbValue(uuid));
-//        }
-        double adbAdd = itemEquipListener.getAdbValue(uuid);
-        playerData.addArtefactDiscovery(uuid, adbAdd);
-        double adbProgress = playerData.getArchADP(uuid);
+        if (canProgressAD(playerUUID)) {
+            double adbAdd = itemEquipListener.getAdbValue(uuid);
+            playerData.addArtefactDiscovery(uuid, adbAdd);
+            double adbProgress = playerData.getArchADP(uuid);
+            effectsUtil.sendADBProgressBarTitle(uuid, adbProgress / 100.0, adbAdd);
+        }
+    }
 
-        effectsUtil.sendADBProgressBarTitle(uuid, adbProgress / 100.0, adbAdd);
+    private int calculateDropTable(UUID uuid, Player player) {
+        ItemStack offHandItem = player.getInventory().getItemInOffHand();
+        int charmID = itemManager.getCharmID(offHandItem);
+
+        if (charmID > 0) {
+            offHandItem.setAmount(offHandItem.getAmount() - 1);
+            return charmID;
+        }
+        return rngManager.rollDropTable(uuid);
     }
 
     public boolean canProgressAD(UUID playerUUID) {

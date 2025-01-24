@@ -28,13 +28,16 @@ public class ItemManager {
     private FileConfiguration customItemsConfig;
 
     private final Map<Integer, ItemStack> itemCache;
+    private final Map<Integer, ItemStack> charmCache;
     private final Map<Integer, ItemStack> toolCache;
 
     private static final String ITEM_LIST_PATH = "itemsList";
+    private static final String CHARM_LIST_PATH = "charmsList";
     private static final String TOOLS_LIST_PATH = "toolsList";
 
     // NamespacedKeys for PersistentDataContainer
     private final NamespacedKey ITEM_KEY;
+    private final NamespacedKey CHARM_KEY;
     private final NamespacedKey TOOL_KEY;
     private final NamespacedKey GATHER_RATE_KEY;
     private final NamespacedKey AD_BONUS_KEY;
@@ -43,11 +46,13 @@ public class ItemManager {
     public ItemManager(Main plugin) {
         this.plugin = plugin;
         this.itemCache = new ConcurrentHashMap<>();
+        this.charmCache = new ConcurrentHashMap<>();
         this.toolCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "custom-items.yml");
 
         // Initialize NamespacedKeys
         this.ITEM_KEY = new NamespacedKey(plugin, "varch_item");
+        this.CHARM_KEY = new NamespacedKey(plugin, "varch_charm");
         this.TOOL_KEY = new NamespacedKey(plugin, "varch_tool");
         this.GATHER_RATE_KEY = new NamespacedKey(plugin, "varch_gather");
         this.AD_BONUS_KEY = new NamespacedKey(plugin, "varch_adb");
@@ -55,6 +60,7 @@ public class ItemManager {
 
         createCustomItemsFile();
         loadItems();
+        loadCharms();
         loadTools();
     }
 
@@ -123,6 +129,67 @@ public class ItemManager {
                 // Set PersistentDataContainer data
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 container.set(ITEM_KEY, PersistentDataType.INTEGER, id);
+
+                item.setItemMeta(meta);
+            }
+            return item;
+        } catch (IllegalArgumentException e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to create item: " + itemName, e);
+            return null;
+        }
+    }
+
+    private void loadCharms() {
+        ConfigurationSection itemsList = customItemsConfig.getConfigurationSection(CHARM_LIST_PATH);
+        if (itemsList == null) {
+            plugin.getLogger().warning("No items found in custom-items.yml");
+            return;
+        }
+        for (String itemName : itemsList.getKeys(false)) {
+            String path = CHARM_LIST_PATH + "." + itemName;
+            int id = customItemsConfig.getInt(path + ".id", -1);
+
+            if (id == -1) {
+                plugin.getLogger().warning("Missing ID for item: " + itemName);
+                continue;
+            }
+            ItemStack item = createArchCharmInternal(itemName, id);
+            if (item != null) {
+                charmCache.put(id, item.clone());
+            }
+        }
+        plugin.getLogger().info("Loaded items into cache: " + charmCache.keySet());
+    }
+
+    private ItemStack createArchCharmInternal(String itemName, int id) {
+        try {
+            String path = CHARM_LIST_PATH + "." + itemName;
+            String materialName = customItemsConfig.getString(path + ".material");
+            String name = customItemsConfig.getString(path + ".name");
+            int customModelData = customItemsConfig.getInt(path + ".custom-model-data");
+            List<String> lore = customItemsConfig.getStringList(path + ".lore");
+
+            if (materialName == null || name == null) {
+                plugin.getLogger().warning("Invalid configuration for item: " + itemName);
+                return null;
+            }
+
+            Material material = Material.valueOf(materialName.toUpperCase());
+            ItemStack item = new ItemStack(material);
+            ItemMeta meta = item.getItemMeta();
+
+            if (meta != null) {
+                meta.setDisplayName(name.replace("&", "§"));
+                List<String> coloredLore = new ArrayList<>();
+                for (String line : lore) {
+                    coloredLore.add(line.replace("&", "§"));
+                }
+                meta.setLore(coloredLore);
+                meta.setCustomModelData(customModelData);
+
+                // Set PersistentDataContainer data
+                PersistentDataContainer container = meta.getPersistentDataContainer();
+                container.set(CHARM_KEY, PersistentDataType.INTEGER, id);
 
                 item.setItemMeta(meta);
             }
@@ -244,6 +311,12 @@ public class ItemManager {
         return container.has(TOOL_KEY, PersistentDataType.INTEGER);
     }
 
+    public int getCharmID(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return 0;
+        PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        return container.getOrDefault(CHARM_KEY, PersistentDataType.INTEGER, 0);
+    }
+
     public Integer getDurability(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return null;
 
@@ -311,6 +384,27 @@ public class ItemManager {
             overflow.values().forEach(overflowItem ->
                     player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
             player.sendMessage("§eYour inventory was full. Some tools were dropped at your feet.");
+        }
+    }
+
+    public void giveArchCharm(UUID uuid, int id, int amount) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
+        ItemStack item = charmCache.get(id);
+        if (item == null) {
+            player.sendMessage("§cInvalid item ID: " + id);
+            return;
+        }
+        ItemStack giveItem = item.clone();
+        giveItem.setAmount(Math.min(amount, giveItem.getMaxStackSize()));
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
+
+        if (!overflow.isEmpty()) {
+            overflow.values().forEach(overflowItem ->
+                    player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
+            player.sendMessage("§eYour inventory was full. Some items were dropped at your feet.");
         }
     }
 

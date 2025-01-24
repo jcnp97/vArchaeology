@@ -1,0 +1,80 @@
+# vArchaeology Charms
+charmsList:
+  common: # itemName for commands
+    id: 1 # internalID
+    material: NETHER_STAR # base material
+    name: "&aCommon Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next drop is a guaranteed &acommon material&7,'
+      - '&7and consumes this charm in the process.'
+  uncommon: # itemName for commands
+    id: 2 # internalID
+    material: NETHER_STAR # base material
+    name: "&bUncommon Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during'
+      - '&7excavation, your next drop'
+      - '&7is a guaranteed &b&lUncommon&7, consuming'
+      - '&7one charm every time it triggers.'
+  rare: # itemName for commands
+    id: 3 # internalID
+    material: NETHER_STAR # base material
+    name: "&3Rare Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next material drop will be a guaranteed'
+      - '&7rarity based on the quality of the charm.'
+  unique: # itemName for commands
+    id: 4 # internalID
+    material: NETHER_STAR # base material
+    name: "&eUnique Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next material drop will be a guaranteed'
+      - '&7rarity based on the quality of the charm.'
+  special: # itemName for commands
+    id: 5 # internalID
+    material: NETHER_STAR # base material
+    name: "&6Special Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next material drop will be a guaranteed'
+      - '&7rarity based on the quality of the charm.'
+  mythical: # itemName for commands
+    id: 6 # internalID
+    material: NETHER_STAR # base material
+    name: "&5Mythical Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next material drop will be a guaranteed'
+      - '&7rarity based on the quality of the charm.'
+  exotic: # itemName for commands
+    id: 7 # internalID
+    material: NETHER_STAR # base material
+    name: "&4Exotic Charm"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Charm'
+      - ''
+      - '&7When held on your off-hand during excavation,'
+      - '&7your next material drop will be a guaranteed'
+      - '&7rarity based on the quality of the charm.'

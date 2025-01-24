@@ -2,7 +2,6 @@ package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
-import asia.virtualmc.vArchaeology.guis.TalentGUI;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 
 import java.util.ArrayList;
@@ -50,8 +49,8 @@ public class RNGManager {
         playerDropTables.remove(uuid);
     }
 
-    public Integer rollDropTable(UUID playerId) {
-        List<Integer> dropTable = playerDropTables.get(playerId);
+    public Integer rollDropTable(UUID uuid) {
+        List<Integer> dropTable = playerDropTables.get(uuid);
         if (dropTable == null || dropTable.isEmpty()) return 0;
 
         int totalWeight = dropTable.stream().mapToInt(Integer::intValue).sum();
