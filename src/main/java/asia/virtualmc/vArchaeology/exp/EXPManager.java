@@ -157,7 +157,21 @@ public class EXPManager {
         return Math.ceil(totalXP + bonusXP);
     }
 
-    public void addLampXP(UUID uuid, int lampType) {
+    public void addLampXP(UUID uuid, double exp) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        playerData.updateExp(uuid, exp, "add");
+        effectsUtil.sendPlayerMessage(uuid, "<green>You have received " + decimalFormat.format(exp) + " Archaeology XP!");
+        effectsUtil.playSoundUUID(uuid, "minecraft:entity.player.levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+    }
+
+    public void addStarXP(UUID uuid, int exp) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        playerData.addBonusXP(uuid, exp);
+        effectsUtil.sendPlayerMessage(uuid, "<green>You have received " + decimalFormat.format(exp) + " Archaeology bonus XP!");
+        effectsUtil.playSoundUUID(uuid, "minecraft:entity.player.levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+    }
+
+    public double getLampXP(UUID uuid, int lampType, int amount) {
         switch (lampType) {
             case 1 -> lampType = 500;
             case 2 -> lampType = 1000;
@@ -165,14 +179,10 @@ public class EXPManager {
             case 4 -> lampType = 4000;
             default -> lampType = 0;
         }
-        DecimalFormat decimalFormat = new DecimalFormat("#,###");
-        double lampXPCalc = Math.pow(((float) playerData.getArchLevel(uuid) / 20), 2) * lampType;
-        playerData.updateExp(uuid, lampXPCalc, "add");
-        effectsUtil.sendPlayerMessage(uuid, "<green>You have received " + decimalFormat.format(lampXPCalc) + " Archaeology XP!");
-        effectsUtil.playSoundUUID(uuid, "minecraft:entity.player.levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+        return Math.pow(((double) Math.min(playerData.getArchLevel(uuid), 99) / 20), 2) * lampType * amount;
     }
 
-    public void addStarXP(UUID uuid, int starType) {
+    public int getStarXP(UUID uuid, int starType, int amount) {
         switch (starType) {
             case 1 -> starType = 500;
             case 2 -> starType = 1000;
@@ -180,10 +190,6 @@ public class EXPManager {
             case 4 -> starType = 4000;
             default -> starType = 0;
         }
-        int bonusXPCalc = (int) (Math.pow((double) playerData.getArchLevel(uuid) / 20, 2) * starType);
-        DecimalFormat decimalFormat = new DecimalFormat("#,###");
-        playerData.addBonusXP(uuid, bonusXPCalc);
-        effectsUtil.sendPlayerMessage(uuid, "<green>You have received " + decimalFormat.format(bonusXPCalc) + " Archaeology bonus XP!");
-        effectsUtil.playSoundUUID(uuid, "minecraft:entity.player.levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+        return (int) (Math.pow((double) Math.min(playerData.getArchLevel(uuid), 99) / 20, 2) * starType * amount);
     }
 }

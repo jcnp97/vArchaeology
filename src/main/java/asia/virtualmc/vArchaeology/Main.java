@@ -6,10 +6,7 @@ import asia.virtualmc.vArchaeology.commands.PlayerDataCommands;
 import asia.virtualmc.vArchaeology.commands.ItemCommands;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
-import asia.virtualmc.vArchaeology.guis.SalvageGUI;
-import asia.virtualmc.vArchaeology.guis.SellGUI;
-import asia.virtualmc.vArchaeology.guis.TalentGUI;
-import asia.virtualmc.vArchaeology.guis.TraitGUI;
+import asia.virtualmc.vArchaeology.guis.*;
 import asia.virtualmc.vArchaeology.items.CustomCharms;
 import asia.virtualmc.vArchaeology.items.CustomItems;
 import asia.virtualmc.vArchaeology.items.CustomTools;
@@ -63,6 +60,7 @@ public final class Main extends JavaPlugin {
     private TalentGUI talentGUI;
     private SalvageGUI salvageGUI;
     private TraitGUI traitGUI;
+    private ConfirmationGUI confirmationGUI;
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
@@ -100,7 +98,8 @@ public final class Main extends JavaPlugin {
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil);
-        this.playerInteractListener = new PlayerInteractListener(this, miscItems, expManager);
+        this.confirmationGUI = new ConfirmationGUI(this, effectsUtil, expManager);
+        this.playerInteractListener = new PlayerInteractListener(this, miscItems, confirmationGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
 
         startUpdateTask();

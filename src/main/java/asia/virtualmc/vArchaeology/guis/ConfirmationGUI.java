@@ -1,122 +1,169 @@
 package asia.virtualmc.vArchaeology.guis;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
-import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
-import net.kyori.adventure.sound.Sound;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
+import java.text.DecimalFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ConfirmationGUI {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
+    private final EXPManager expManager;
     private final NamespacedKey LAMP_KEY;
     private final NamespacedKey STAR_KEY;
 
-    public ConfirmationGUI(Main plugin, EffectsUtil effectsUtil) {
+    public ConfirmationGUI(Main plugin, EffectsUtil effectsUtil, EXPManager expManager) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
+        this.expManager = expManager;
         this.LAMP_KEY = new NamespacedKey(plugin, "varch_lamp");
         this.STAR_KEY = new NamespacedKey(plugin, "varch_star");
     }
 
-    public void openConfirmationLamp(Player player) {
-        UUID playerUUID = player.getUniqueId();
-
-        int initialValue = calculateInventoryValue(player);
-
-        player.getInventory().getItemInMainHand().;
-
-
-        ItemStack item = player.getInventory().getItemInMainHand();
+    public void openConfirmationLamp(Player player, int lampType) {
         UUID uuid = player.getUniqueId();
+        int initialAmount = player.getInventory().getItemInMainHand().getAmount();
+        double initialXP = expManager.getLampXP(uuid, lampType, initialAmount);
 
-        if (item.getType() == Material.AIR || !item.hasItemMeta()) {
-            return;
-        }
-
-        PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
-        if (pdc.has(LAMP_KEY)) {
-            event.setCancelled(true);
-            player.getInventory().removeItem(item);
-            expManager.addLampXP(uuid, miscItems.getLampID(item));
-        } else if (pdc.has(STAR_KEY)) {
-            event.setCancelled(true);
-            player.getInventory().removeItem(item);
-            expManager.addStarXP(uuid, miscItems.getStarID(item));
-        }
-
-
-
-
-        ChestGui gui = new ChestGui(5, "§f\uE0F1\uE0F1\uE053\uD833\uDEAF");
+        ChestGui gui = new ChestGui(2, "§fTest");
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
-        StaticPane staticPane = createStaticPane(player, initialValue);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
 
         for (int x = 1; x <= 3; x++) {
-            ItemStack sellButton = createSellButton(initialValue);
-            GuiItem guiItem = new GuiItem(sellButton, event -> processSellAction(player, initialValue));
-            staticPane.addItem(guiItem, x, 4);
+            ItemStack confirmButton = createConfirmButtonXP(initialXP, initialAmount);
+            GuiItem guiItem = new GuiItem(confirmButton, event -> processXPAction(player, initialXP, lampType));
+            staticPane.addItem(guiItem, x, 1);
         }
 
+        for (int x = 5; x <= 7; x++) {
+            ItemStack closeButton = createCloseButton();
+            staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 1);
+        }
 
         gui.addPane(staticPane);
         gui.show(player);
     }
 
-    private void processSellAction(Player player, int initialValue) {
-        int currentValue = calculateInventoryValue(player);
+    private ItemStack createConfirmButtonXP(double exp, int amount) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedXP = decimalFormat.format(exp);
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§eUse §a" + amount + "x §eXP Lamps?");
+            meta.setCustomModelData(10367);
+            meta.setLore(List.of(
+                    "§7You will receive §6" + formattedXP + " XP§7."
+            ));
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
 
-        if (currentValue != initialValue) {
+    private void processXPAction(Player player, double initialXP, int lampType) {
+        UUID uuid = player.getUniqueId();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        int finalAmount = player.getInventory().getItemInMainHand().getAmount();
+        double finalXP = expManager.getLampXP(uuid, lampType, finalAmount);
+
+        if (initialXP != finalXP) {
             player.sendMessage("§cError: Inventory has changed. Please reopen the GUI.");
             player.closeInventory();
             return;
         }
 
         try {
-            if (currentValue > 0) {
-                sellItems(player, currentValue);
-                player.sendMessage("§aYou sold your items for §6" + currentValue + " coins!");
-                effectsUtil.playSound(player, "minecraft:cozyvanilla.sell_confirmed", Sound.Source.PLAYER, 1.0f, 1.0f);
-                logTransaction(player, currentValue);
+            if (finalXP > 0) {
+                player.getInventory().removeItem(item);
+                expManager.addLampXP(uuid, finalXP);
             } else {
-                player.sendMessage("§cNo sellable items found in your inventory!");
+                player.sendMessage("§cThere was an error processing the lamp. Please contact the administrator.");
             }
         } catch (Exception e) {
-            player.sendMessage("§cAn error occurred while processing your sale. Please try again.");
-            plugin.getLogger().severe("Error processing sale for " + player.getName() + ": " + e.getMessage());
+            player.sendMessage("§cAn error occurred while processing lamps. Please try again.");
+            plugin.getLogger().severe("Error processing xp lamp for " + player.getName() + ": " + e.getMessage());
             e.printStackTrace();
         }
-
         player.closeInventory();
     }
 
-    private ItemStack createSellButton(int totalValue) {
+    public void openConfirmationStar(Player player, int starType) {
+        UUID uuid = player.getUniqueId();
+        int initialAmount = player.getInventory().getItemInMainHand().getAmount();
+        int initialBXP = expManager.getStarXP(uuid, starType, initialAmount);
+
+        ChestGui gui = new ChestGui(2, "§fTest");
+        gui.setOnGlobalClick(event -> event.setCancelled(true));
+
+        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+
+        for (int x = 1; x <= 3; x++) {
+            ItemStack confirmButton = createConfirmButtonBXP(initialBXP, initialAmount);
+            GuiItem guiItem = new GuiItem(confirmButton, event -> processBXPAction(player, initialBXP, starType));
+            staticPane.addItem(guiItem, x, 1);
+        }
+
+        for (int x = 5; x <= 7; x++) {
+            ItemStack closeButton = createCloseButton();
+            staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 1);
+        }
+
+        gui.addPane(staticPane);
+        gui.show(player);
+    }
+
+    private ItemStack createConfirmButtonBXP(int exp, int amount) {
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedXP = decimalFormat.format(exp);
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§aSell Items");
+            meta.setDisplayName("§eUse §a" + amount + "x §eXP Stars?");
             meta.setCustomModelData(10367);
             meta.setLore(List.of(
-                    "§7Current total: §6" + totalValue + " coins",
-                    "§eClick to sell all sellable items!"
+                    "§7You will receive §6" + formattedXP + " Bonus XP§7."
             ));
             button.setItemMeta(meta);
         }
         return button;
+    }
+
+    private void processBXPAction(Player player, int initialBXP, int lampType) {
+        UUID uuid = player.getUniqueId();
+        ItemStack item = player.getInventory().getItemInMainHand();
+        int finalBXP = expManager.getStarXP(uuid, lampType, player.getInventory().getItemInMainHand().getAmount());
+
+        if (initialBXP != finalBXP) {
+            player.sendMessage("§cError: Inventory has changed. Please reopen the GUI.");
+            player.closeInventory();
+            return;
+        }
+
+        try {
+            if (finalBXP > 0) {
+                player.getInventory().removeItem(item);
+                expManager.addStarXP(uuid, finalBXP);
+            } else {
+                player.sendMessage("§cThere was an error processing the star. Please contact the administrator.");
+            }
+        } catch (Exception e) {
+            player.sendMessage("§cAn error occurred while processing stars. Please try again.");
+            plugin.getLogger().severe("Error processing xp star for " + player.getName() + ": " + e.getMessage());
+            e.printStackTrace();
+        }
+        player.closeInventory();
     }
 
     private ItemStack createCloseButton() {
@@ -128,74 +175,5 @@ public class ConfirmationGUI {
             button.setItemMeta(meta);
         }
         return button;
-    }
-
-    private OutlinePane createItemPane(Player player) {
-        OutlinePane itemPane = new OutlinePane(0, 0, 9, 4);
-        Arrays.stream(player.getInventory().getContents())
-                .filter(item -> item != null && isSellable(item))
-                .map(ItemStack::clone)
-                .forEach(itemCopy -> itemPane.addItem(new GuiItem(itemCopy)));
-        return itemPane;
-    }
-
-    private boolean isSellable(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return false;
-        return getCustomId(item) != null;
-    }
-
-    private Integer getCustomId(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return null;
-        ItemMeta meta = item.getItemMeta();
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        Integer customID = pdc.get(varchItemKey, PersistentDataType.INTEGER);
-        return (customID != null && customID >= 1 && customID <= 7) ? customID : null;
-    }
-
-    private int getItemValue(ItemStack item) {
-        Integer customID = getCustomId(item);
-        if (customID == null) return 0;
-
-        return switch (customID) {
-            case 1 -> 10;
-            case 2 -> 20;
-            case 3 -> 30;
-            case 4 -> 40;
-            case 5 -> 50;
-            case 6 -> 60;
-            case 7 -> 70;
-            default -> 0;
-        };
-    }
-
-    private int calculateInventoryValue(Player player) {
-        return Arrays.stream(player.getInventory().getContents())
-                .filter(item -> item != null && isSellable(item))
-                .mapToInt(item -> getItemValue(item) * item.getAmount())
-                .sum();
-    }
-
-    private void sellItems(Player player, int totalValue) {
-        ItemStack[] contents = player.getInventory().getContents();
-        for (int i = 0; i < contents.length; i++) {
-            if (isSellable(contents[i])) {
-                player.getInventory().setItem(i, null);
-            }
-        }
-        // Add coins to player's balance here
-    }
-
-    private void logTransaction(Player player, int value) {
-        String itemDetails = Arrays.stream(player.getInventory().getContents())
-                .filter(item -> item != null && isSellable(item))
-                .map(item -> String.format("%dx ID:%d", item.getAmount(), getCustomId(item)))
-                .collect(Collectors.joining(", "));
-
-        plugin.getLogger().info(String.format(
-                "Transaction: Player=%s, Value=%d, Items=[%s]",
-                player.getName(),
-                value,
-                itemDetails
-        ));
     }
 }
