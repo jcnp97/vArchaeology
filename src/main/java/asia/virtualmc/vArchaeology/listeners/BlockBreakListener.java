@@ -20,10 +20,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BlockBreakListener implements Listener {
     private final Main plugin;
@@ -40,6 +43,8 @@ public class BlockBreakListener implements Listener {
     private final EffectsUtil effectsUtil;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
+    private record TraitData(double twoDrops, double higherTier, double doubleADP) {}
+    private final Map<UUID, TraitData> traitDataMap;
     private final Random random;
     private static final long ADP_COOLDOWN = 60_000;
 
@@ -69,6 +74,7 @@ public class BlockBreakListener implements Listener {
         this.effectsUtil = effectsUtil;
         this.blocksList = new HashMap<>(configManager.loadBlocksList());
         this.adpCooldowns = new HashMap<>();
+        this.traitDataMap = new ConcurrentHashMap<>();
         this.random = new Random();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -95,51 +101,69 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        UUID uuid = player.getUniqueId();
         event.setDropItems(false);
-        statistics.incrementStatistics(uuid, 9);
+        statistics.incrementStatistics(playerUUID, 9);
 
-        if (!itemEquipListener.hasToolData(uuid)) {
+        if (!itemEquipListener.hasToolData(playerUUID)) {
             itemEquipListener.addPlayerData(player, mainHandItem);
         }
 
+        // Karma Trait - Two Drops & Next-Tier
+        // Dexterity Trait - Double Artefact Discovery Progress
+        if (!hasTraitData(playerUUID)) {
+            addTraitData(player);
+        }
+
         // Material Drops
-        if (random.nextDouble() < itemEquipListener.getGatherValue(uuid) / 100) {
+        if (random.nextDouble() < itemEquipListener.getGatherValue(playerUUID) / 100) {
             Location blockLocation = event.getBlock().getLocation();
-            int dropTable = calculateDropTable(uuid, player);
-            // item drop
-            customItems.dropArchItem(uuid, dropTable, blockLocation);
-            // experience
-            playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue) + expManager.getTotalMaterialGetEXP(uuid, dropTable), "add");
-            // statistics
-            collectionLog.incrementCollection(uuid, dropTable);
+            giveArchMaterialDrop(player, blockLocation, expValue, true);
         } else {
-            playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
+            playerData.updateExp(playerUUID, expManager.getTotalBlockBreakEXP(playerUUID, expValue), "add");
         }
 
         // Tier 99 Passive
-        if (itemEquipListener.hasTier99Value(uuid)) {
-            if (random.nextInt(10) < 1) {
-                int dropTable = calculateDropTable(uuid, player);
-                customItems.dropArchItem(uuid, dropTable, event.getBlock().getLocation());
-                collectionLog.incrementCollection(uuid, dropTable);
-                effectsUtil.sendPlayerMessage(uuid, "<green>Your Time-Space Convergence has been activated.");
-            }
-
-            if (random.nextInt(100) < 1) {
-                playerData.addArtefactDiscovery(uuid, 1.0);
-                effectsUtil.sendADBProgressBarTitle(uuid, playerData.getArchADP(uuid) / 100.0, 1.0);
-                effectsUtil.sendPlayerMessage(uuid, "<green>Your Chronal Focus has been activated.");
-            }
+        if (itemEquipListener.hasTier99Value(playerUUID)) {
+            tier99Passive(player);
         }
 
         // Artefact Discovery Progress
         if (canProgressAD(playerUUID)) {
-            double adbAdd = itemEquipListener.getAdbValue(uuid);
-            playerData.addArtefactDiscovery(uuid, adbAdd);
-            double adbProgress = playerData.getArchADP(uuid);
-            effectsUtil.sendADBProgressBarTitle(uuid, adbProgress / 100.0, adbAdd);
+            addArtefactProgress(playerUUID);
+            if (random.nextDouble() < getDoubleADP(playerUUID) / 100) {
+                addArtefactProgress(playerUUID);
+                effectsUtil.sendPlayerMessage(playerUUID, "<green>Your Cosmic Focus (Dexterity Trait) has doubled your Artefact Progress gain.");
+            }
         }
+    }
+
+    private void giveArchMaterialDrop(Player player, Location blockLocation, int expValue, boolean canTriggerPassive) {
+        UUID uuid = player.getUniqueId();
+        int dropTable = calculateDropTable(uuid, player);
+        double randomNumber = random.nextDouble();
+
+        if ((randomNumber < getHigherTier(uuid) / 100) && canTriggerPassive) {
+            if (dropTable < 7) {
+                dropTable += 1;
+            }
+        }
+        // item drop
+        customItems.dropArchItem(uuid, dropTable, blockLocation);
+        // experience
+        playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue) + expManager.getTotalMaterialGetEXP(uuid, dropTable), "add");
+        // statistics
+        collectionLog.incrementCollection(uuid, dropTable);
+
+        if ((randomNumber < getTwoDrops(uuid) / 100) && canTriggerPassive) {
+            giveArchMaterialDrop(player, blockLocation, expValue, false);
+        }
+    }
+
+    private void addArtefactProgress(UUID uuid) {
+        double adbAdd = itemEquipListener.getAdbValue(uuid);
+        playerData.addArtefactDiscovery(uuid, adbAdd);
+        double adbProgress = playerData.getArchADP(uuid);
+        effectsUtil.sendADBProgressBarTitle(uuid, adbProgress / 100.0, adbAdd);
     }
 
     private int calculateDropTable(UUID uuid, Player player) {
@@ -153,7 +177,7 @@ public class BlockBreakListener implements Listener {
         return itemsDropTable.rollDropTable(uuid);
     }
 
-    public boolean canProgressAD(UUID playerUUID) {
+    private boolean canProgressAD(UUID playerUUID) {
         long currentTime = System.currentTimeMillis();
         Long lastUsage = adpCooldowns.get(playerUUID);
 
@@ -170,7 +194,7 @@ public class BlockBreakListener implements Listener {
                 currentTime - entry.getValue() >= ADP_COOLDOWN);
     }
 
-    public boolean canBreakBlocks(Player player, UUID uuid, ItemStack mainHandItem) {
+    private boolean canBreakBlocks(Player player, UUID uuid, ItemStack mainHandItem) {
         if (customTools.getDurability(mainHandItem) <= 10) {
             player.sendMessage("§cYour tool's durability is too low to break this block!");
             return false;
@@ -180,7 +204,55 @@ public class BlockBreakListener implements Listener {
             player.sendMessage("§cYou do not have the required level to use this tool!");
             return false;
         }
-
         return true;
+    }
+
+    private void tier99Passive(Player player) {
+        UUID uuid = player.getUniqueId();
+        if (random.nextInt(10) < 1) {
+            int dropTable = calculateDropTable(uuid, player);
+            customItems.giveArchItem(uuid, dropTable, 1);
+            collectionLog.incrementCollection(uuid, dropTable);
+            effectsUtil.sendPlayerMessage(uuid, "<green>Your Time-Space Convergence has been activated.");
+        }
+
+        if (random.nextInt(100) < 1) {
+            playerData.addArtefactDiscovery(uuid, 1.0);
+            effectsUtil.sendADBProgressBarTitle(uuid, playerData.getArchADP(uuid) / 100.0, 1.0);
+            effectsUtil.sendPlayerMessage(uuid, "<green>Your Chronal Focus has been activated.");
+        }
+    }
+
+    private void addTraitData(Player player) {
+        UUID uuid = player.getUniqueId();
+        int karmaLevel = playerData.getKarmaTrait(uuid);
+
+        double twoDrops = (double) karmaLevel * 0.2;
+        double higherTierDrops = (double) karmaLevel * 0.2;
+        double doubleADP = (double) playerData.getDexterityTrait(uuid) * 0.1;
+
+        traitDataMap.put(uuid, new TraitData(twoDrops, higherTierDrops, doubleADP));
+    }
+
+    public boolean hasTraitData(UUID uuid) {
+        return traitDataMap.containsKey(uuid);
+    }
+    public void unloadTraitData(UUID uuid) {
+        traitDataMap.remove(uuid);
+    }
+
+    private double getTwoDrops(UUID uuid) {
+        TraitData data = traitDataMap.get(uuid);
+        return (data == null) ? 0.0 : data.twoDrops();
+    }
+
+    private double getHigherTier(UUID uuid) {
+        TraitData data = traitDataMap.get(uuid);
+        return (data == null) ? 0.0 : data.higherTier();
+    }
+
+    private double getDoubleADP(UUID uuid) {
+        TraitData data = traitDataMap.get(uuid);
+        return (data == null) ? 0.0 : data.doubleADP();
     }
 }

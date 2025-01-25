@@ -20,6 +20,7 @@ public class PlayerJoinListener implements Listener {
     private final CollectionLog collectionLog;
     private final ItemEquipListener itemEquipListener;
     private final ItemsDropTable itemsDropTable;
+    private final BlockBreakListener blockBreakListener;
 
     public PlayerJoinListener(Main plugin,
                               PlayerDataDB playerDataDB,
@@ -28,7 +29,9 @@ public class PlayerJoinListener implements Listener {
                               Statistics statistics,
                               CollectionLog collectionLog,
                               ItemEquipListener itemEquipListener,
-                              ItemsDropTable itemsDropTable) {
+                              ItemsDropTable itemsDropTable,
+                              BlockBreakListener blockBreakListener
+    ) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.playerData = playerData;
@@ -37,6 +40,7 @@ public class PlayerJoinListener implements Listener {
         this.collectionLog = collectionLog;
         this.itemEquipListener = itemEquipListener;
         this.itemsDropTable = itemsDropTable;
+        this.blockBreakListener = blockBreakListener;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -80,10 +84,13 @@ public class PlayerJoinListener implements Listener {
                     talentTree.unloadData(playerUUID);
                     statistics.unloadData(playerUUID);
                     collectionLog.unloadData(playerUUID);
-                    itemEquipListener.unloadData(playerUUID);
+                    itemEquipListener.unloadToolData(playerUUID);
 
                     if (itemsDropTable.hasDropTable(playerUUID)) {
                         itemsDropTable.unloadData(playerUUID);
+                    }
+                    if (blockBreakListener.hasTraitData(playerUUID)) {
+                        blockBreakListener.unloadTraitData(playerUUID);
                     }
                 } catch (Exception e) {
                     plugin.getLogger().severe("Error unloading data for player: " + playerUUID);

@@ -192,4 +192,6 @@ public class EXPManager {
         }
         return (int) (Math.pow((double) Math.min(playerData.getArchLevel(uuid), 99) / 20, 2) * starType * amount);
     }
+
+
 }

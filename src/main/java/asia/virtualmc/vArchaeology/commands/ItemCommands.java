@@ -76,7 +76,7 @@ public class ItemCommands {
         return new CommandAPICommand("gettool")
                 .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock", "iron_mattock",
                         "steel_mattock", "mithril_mattock", "adamantium_mattock", "runite_mattock", "dragon_mattock",
-                        "necronium_mattock", "crystal_mattock", "mattock_of_time_and_space"
+                        "necronium_mattock", "crystal_mattock", "mattock_of_time_and_space", "admin"
                 ))
                 .withArguments(new PlayerArgument("player"))
                 .withPermission("varchaeology.command.gettool")
@@ -102,6 +102,7 @@ public class ItemCommands {
             case "necronium_mattock" -> 8;
             case "crystal_mattock" -> 9;
             case "mattock_of_time_and_space" -> 10;
+            case "admin" -> 11;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
     }

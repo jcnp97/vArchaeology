@@ -2,16 +2,14 @@ package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 
+import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.Location;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -22,65 +20,71 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-public class CustomItems {
+public class ArtefactItems {
     private final Main plugin;
     private final File customItemsFile;
+    private final EffectsUtil effectsUtil;
     private FileConfiguration customItemsConfig;
+    private Random random;
 
-    private final Map<Integer, ItemStack> itemCache;
-    private static final String ITEM_LIST_PATH = "itemsList";
-    private final NamespacedKey ITEM_KEY;
+    private final Map<Integer, ItemStack> artefactCache;
+    private static final String ARTEFACT_LIST_PATH = "artefactsList";
+    private final NamespacedKey ARTEFACT_KEY;
 
-    public CustomItems(Main plugin) {
+    public ArtefactItems(Main plugin, EffectsUtil effectsUtil) {
         this.plugin = plugin;
-        this.itemCache = new ConcurrentHashMap<>();
-        this.customItemsFile = new File(plugin.getDataFolder(), "custom-items.yml");
-        this.ITEM_KEY = new NamespacedKey(plugin, "varch_item");
+        this.artefactCache = new ConcurrentHashMap<>();
+        this.customItemsFile = new File(plugin.getDataFolder(), "items/artefacts.yml");
+        this.ARTEFACT_KEY = new NamespacedKey(plugin, "varch_artefact");
+        this.random = new Random();
+        this.effectsUtil = effectsUtil;
 
-        createItemFile();
-        loadItems();
+        createArtefactFile();
+        loadArtefacts();
     }
 
-    private void createItemFile() {
+    private void createArtefactFile() {
         try {
             if (!customItemsFile.exists()) {
                 customItemsFile.getParentFile().mkdirs();
-                plugin.saveResource("custom-items.yml", false);
+                plugin.saveResource("items/artefacts.yml", false);
             }
             customItemsConfig = YamlConfiguration.loadConfiguration(customItemsFile);
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to create custom items file", e);
+            plugin.getLogger().log(Level.SEVERE, "[vArchaeology] Failed to create artefact item file: ", e);
         }
     }
 
-    private void loadItems() {
-        ConfigurationSection itemsList = customItemsConfig.getConfigurationSection(ITEM_LIST_PATH);
-        if (itemsList == null) {
-            plugin.getLogger().warning("No items found in custom-items.yml");
-            return;
-        }
-        for (String itemName : itemsList.getKeys(false)) {
-            String path = ITEM_LIST_PATH + "." + itemName;
-            int id = customItemsConfig.getInt(path + ".id", -1);
-
-            if (id == -1) {
-                plugin.getLogger().warning("Missing ID for item: " + itemName);
-                continue;
-            }
-            ItemStack item = createArchItemInternal(itemName, id);
-            if (item != null) {
-                itemCache.put(id, item.clone());
-            }
-        }
-        plugin.getLogger().info("Loaded items into cache: " + itemCache.keySet());
-    }
-
-    private ItemStack createArchItemInternal(String itemName, int id) {
+    private void loadArtefacts() {
         try {
-            String path = ITEM_LIST_PATH + "." + itemName;
+            ConfigurationSection itemsList = customItemsConfig.getConfigurationSection(ARTEFACT_LIST_PATH);
+            if (itemsList == null) {
+                plugin.getLogger().warning("No items found in items/artefacts.yml");
+                return;
+            }
+            for (String itemName : itemsList.getKeys(false)) {
+                String path = ARTEFACT_LIST_PATH + "." + itemName;
+                int id = customItemsConfig.getInt(path + ".id", -1);
+
+                if (id == -1) {
+                    plugin.getLogger().warning("Missing ID for item: " + itemName);
+                    continue;
+                }
+                ItemStack item = createArtefacts(itemName, id);
+                if (item != null) {
+                    artefactCache.put(id, item.clone());
+                }
+            }
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "[vArchaeology] Failed to load item into cache: " + artefactCache.keySet());
+        }
+    }
+
+    private ItemStack createArtefacts(String itemName, int id) {
+        try {
+            String path = ARTEFACT_LIST_PATH + "." + itemName;
             String materialName = customItemsConfig.getString(path + ".material");
             String name = customItemsConfig.getString(path + ".name");
-            int customModelData = customItemsConfig.getInt(path + ".custom-model-data");
             List<String> lore = customItemsConfig.getStringList(path + ".lore");
 
             if (materialName == null || name == null) {
@@ -99,13 +103,9 @@ public class CustomItems {
                     coloredLore.add(line.replace("&", "§"));
                 }
                 meta.setLore(coloredLore);
-                meta.setCustomModelData(customModelData);
-                meta.addEnchant(Enchantment.UNBREAKING, 1, true);
-                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 
-                // Set PersistentDataContainer data
                 PersistentDataContainer container = meta.getPersistentDataContainer();
-                container.set(ITEM_KEY, PersistentDataType.INTEGER, id);
+                container.set(ARTEFACT_KEY, PersistentDataType.INTEGER, id);
 
                 item.setItemMeta(meta);
             }
@@ -116,18 +116,18 @@ public class CustomItems {
         }
     }
 
-    public Integer getItemId(ItemStack item) {
-        if (item == null || !item.hasItemMeta()) return null;
+    public int getArtefactID(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return 0;
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-        return container.get(ITEM_KEY, PersistentDataType.INTEGER);
+        return container.getOrDefault(ARTEFACT_KEY, PersistentDataType.INTEGER, 0);
     }
 
-    public void giveArchItem(UUID uuid, int id, int amount) {
+    public void giveArtefact(UUID uuid, int id, int amount) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return;
         }
-        ItemStack item = itemCache.get(id);
+        ItemStack item = artefactCache.get(id);
         if (item == null) {
             player.sendMessage("§cInvalid item ID: " + id);
             return;
@@ -143,22 +143,32 @@ public class CustomItems {
         }
     }
 
-    public void dropArchItem(UUID uuid, int id, Location blockLocation) {
+    public void giveRandomArtefact(UUID uuid, int amount) {
         Player player = Bukkit.getPlayer(uuid);
+        effectsUtil.sendPlayerMessage(uuid, "<#00FFA2>You have discovered an unidentified Artefact.");
+        int artefactID = random.nextInt(8) + 1;
         if (player == null) {
             return;
         }
-        ItemStack item = itemCache.get(id);
+        ItemStack item = artefactCache.get(artefactID);
         if (item == null) {
-            player.sendMessage("§cInvalid item ID: " + id);
+            player.sendMessage("§cInvalid item ID: " + artefactID);
             return;
         }
-        blockLocation.getWorld().dropItemNaturally(blockLocation, item.clone());
+        ItemStack giveItem = item.clone();
+        giveItem.setAmount(Math.min(amount, giveItem.getMaxStackSize()));
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
+
+        if (!overflow.isEmpty()) {
+            overflow.values().forEach(overflowItem ->
+                    player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
+            player.sendMessage("§cYour inventory was full. Some items were dropped at your feet.");
+        }
     }
 
-    public void reloadItems() {
-        itemCache.clear();
-        createItemFile();
-        loadItems();
+    public void reloadArtefactItems() {
+        artefactCache.clear();
+        createArtefactFile();
+        loadArtefacts();
     }
 }

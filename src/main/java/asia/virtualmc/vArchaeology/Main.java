@@ -7,10 +7,7 @@ import asia.virtualmc.vArchaeology.commands.ItemCommands;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
 import asia.virtualmc.vArchaeology.guis.*;
-import asia.virtualmc.vArchaeology.items.CustomCharms;
-import asia.virtualmc.vArchaeology.items.CustomItems;
-import asia.virtualmc.vArchaeology.items.CustomTools;
-import asia.virtualmc.vArchaeology.items.MiscItems;
+import asia.virtualmc.vArchaeology.items.*;
 import asia.virtualmc.vArchaeology.listeners.*;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.logs.LogManager;
@@ -37,6 +34,7 @@ public final class Main extends JavaPlugin {
     private CustomCharms customCharms;
     private CustomItems customItems;
     private MiscItems miscItems;
+    private ArtefactItems artefactItems;
     private ItemCommands itemCommands;
     // utils
     private BossBarUtil bossBarUtil;
@@ -78,6 +76,7 @@ public final class Main extends JavaPlugin {
         this.customCharms = new CustomCharms(this);
         this.customItems = new CustomItems(this);
         this.miscItems = new MiscItems(this);
+        this.artefactItems = new ArtefactItems(this, effectsUtil);
         this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems);
         this.miscListener = new MiscListener(this);
         this.logManager = new LogManager(this);
@@ -90,17 +89,17 @@ public final class Main extends JavaPlugin {
         this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
-        this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil);
+        this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil);
         this.confirmationGUI = new ConfirmationGUI(this, effectsUtil, expManager);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, confirmationGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener);
 
         startUpdateTask();
     }

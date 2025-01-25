@@ -5,6 +5,7 @@ import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 public class MiscListener implements Listener {
     private final Main plugin;
@@ -23,4 +24,12 @@ public class MiscListener implements Listener {
             }
         }
     }
+
+//    @EventHandler
+//    public void onEntityDamage(EntityDamageEvent event) {
+//        if (event.getCause() == EntityDamageEvent.DamageCause.) {
+//
+//            event.setCancelled(true);
+//        }
+//    }
 }

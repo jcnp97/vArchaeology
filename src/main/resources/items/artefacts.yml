@@ -1,0 +1,98 @@
+# vArchaeology Artefacts
+artefactsList:
+  1:
+    id: 1
+    material: EXPLORER_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #1&7.'
+  2:
+    id: 2
+    material: FRIEND_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #2&7.'
+  3:
+    id: 3
+    material: DANGER_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #3&7.'
+  4:
+    id: 4
+    material: MOURNER_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #4&7.'
+  5:
+    id: 5
+    material: PRIZE_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #5&7.'
+  6:
+    id: 6
+    material: SHEAF_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #6&7.'
+  7:
+    id: 7
+    material: SKULL_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #7&7.'
+  8:
+    id: 8
+    material: HEARTBREAK_POTTERY_SHERD
+    name: "&8Unidentified Artefact"
+    lore:
+      - '&cArchaeology Artefact'
+      - ''
+      - '&7This can be restored by right-clicking'
+      - '&7the item on an Archaeology Workbench.'
+      - ''
+      - '&7When restored, this artefact can produce'
+      - '&7an item from &6Collection #8&7.'

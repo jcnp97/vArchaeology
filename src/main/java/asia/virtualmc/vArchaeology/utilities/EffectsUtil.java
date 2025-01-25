@@ -59,8 +59,8 @@ public class EffectsUtil {
                         .trail(true)
                         .flicker(true)
                         .build();
+                meta.setPower(0);
                 meta.addEffect(effect);
-                meta.setPower(0); // Minimize travel
                 firework.setFireworkMeta(meta);
                 count++;
             }

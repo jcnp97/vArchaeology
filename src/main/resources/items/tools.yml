@@ -157,3 +157,20 @@ toolsList:
       - ''
       - '&5Chronal Focus&7: There is a 1% chance to'
       - '&7increase Artefact Discovery by 1%.'
+  admin:
+    id: 11 # internalID
+    material: NETHERITE_SHOVEL # base material
+    name: "&4Admin Mattock" # custom name
+    custom-model-data: 100001
+    gathering-rate: 99.0
+    ad-bonus: 99.0
+    unbreaking: 10
+    required-level: 99
+    lore:
+      - '&cArchaeology Tool'
+      - ''
+      - '&7Required Level: &e99'
+      - '&7Gathering Rate: &e99.0%'
+      - '&7Artefact Progress: &e99%'
+      - ''
+      - '&4For administrators only.'

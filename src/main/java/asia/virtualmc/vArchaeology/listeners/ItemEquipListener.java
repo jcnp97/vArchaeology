@@ -60,7 +60,7 @@ public class ItemEquipListener implements Listener {
             public void run() {
                 if (!player.isOnline()) return;
 
-                unloadData(uuid);
+                unloadToolData(uuid);
 
                 ItemStack mainHandItem = player.getInventory().getItemInMainHand();
                 if (!isValidItem(mainHandItem)) {
@@ -124,7 +124,7 @@ public class ItemEquipListener implements Listener {
         return customTools.getToolId(mainHandItem) == 10;
     }
 
-    public void unloadData(UUID uuid) {
+    public void unloadToolData(UUID uuid) {
         toolDataMap.remove(uuid);
     }
 

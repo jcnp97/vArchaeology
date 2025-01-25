@@ -3,6 +3,7 @@ package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.items.ArtefactItems;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -28,14 +29,22 @@ public class PlayerData {
     private final BossBarUtil bossBarUtil;
     private final ConfigManager configManager;
     private final EffectsUtil effectsUtil;
+    private final ArtefactItems artefactItems;
     private final Map<UUID, PlayerStats> playerStatsMap;
 
-    public PlayerData(@NotNull Main plugin, @NotNull PlayerDataDB playerDataDB, @NotNull BossBarUtil bossBarUtil, @NotNull ConfigManager configManager, @NotNull EffectsUtil effectsUtil) {
+    public PlayerData(@NotNull Main plugin,
+                      @NotNull PlayerDataDB playerDataDB,
+                      @NotNull BossBarUtil bossBarUtil,
+                      @NotNull ConfigManager configManager,
+                      @NotNull EffectsUtil effectsUtil,
+                      @NotNull ArtefactItems artefactItems
+    ) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.bossBarUtil = bossBarUtil;
         this.configManager = configManager;
         this.effectsUtil = effectsUtil;
+        this.artefactItems = artefactItems;
         this.playerStatsMap = new ConcurrentHashMap<>();
     }
 
@@ -234,21 +243,17 @@ public class PlayerData {
         }
         if (!levelUp) return;
 
+        effectsUtil.sendTitleMessage(uuid,
+                "<gradient:#ebd197:#a2790d>Archaeology</gradient>",
+                "<#00FFA2>Level " + previousLevel + " ➛ " + stats.archLevel);
+        effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" +
+                stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
         if (stats.archLevel == 99 || stats.archLevel == 120) {
             effectsUtil.spawnFireworks(uuid, 12, 3);
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
-            effectsUtil.sendTitleMessage(uuid,
-                    "<#4DFFBA>Archaeology",
-                    previousLevel + " ➛ " + stats.archLevel);
-            effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" + stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
-
         } else {
             effectsUtil.spawnFireworks(uuid, 5, 5);
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.archaeology.default_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
-            effectsUtil.sendTitleMessage(uuid,
-                    "<#4DFFBA>Archaeology",
-                    previousLevel + " ➛ " + stats.archLevel);
-            effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" + stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
         }
     }
 
@@ -390,7 +395,12 @@ public class PlayerData {
     public void addArtefactDiscovery(@NotNull UUID uuid, double value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
-            stats.archADP = Math.min(stats.archADP + value,  100.0);
+            if (stats.archADP + value >= 100.0) {
+                artefactItems.giveRandomArtefact(uuid, 1);
+                stats.archADP = 0.0;
+            } else {
+                stats.archADP += value;
+            }
         }
     }
 }
