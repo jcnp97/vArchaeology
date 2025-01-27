@@ -30,12 +30,14 @@ public class ArtefactItems {
     private final Map<Integer, ItemStack> artefactCache;
     private static final String ARTEFACT_LIST_PATH = "artefactsList";
     private final NamespacedKey ARTEFACT_KEY;
+    private final NamespacedKey UNSTACKABLE_KEY;
 
     public ArtefactItems(Main plugin, EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.artefactCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "items/artefacts.yml");
         this.ARTEFACT_KEY = new NamespacedKey(plugin, "varch_artefact");
+        this.UNSTACKABLE_KEY = new NamespacedKey(plugin, "varch_unique_id");
         this.random = new Random();
         this.effectsUtil = effectsUtil;
 
@@ -106,6 +108,8 @@ public class ArtefactItems {
 
                 PersistentDataContainer container = meta.getPersistentDataContainer();
                 container.set(ARTEFACT_KEY, PersistentDataType.INTEGER, id);
+                int randomValue = (int) (Math.random() * Integer.MAX_VALUE);
+                container.set(UNSTACKABLE_KEY, PersistentDataType.INTEGER, randomValue);
 
                 item.setItemMeta(meta);
             }

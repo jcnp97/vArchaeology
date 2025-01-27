@@ -58,7 +58,8 @@ public final class Main extends JavaPlugin {
     private TalentGUI talentGUI;
     private SalvageGUI salvageGUI;
     private TraitGUI traitGUI;
-    private ConfirmationGUI confirmationGUI;
+    private LampStarGUI lampStarGUI;
+    private ArtefactRestorationGUI artefactRestorationGUI;
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
@@ -93,13 +94,14 @@ public final class Main extends JavaPlugin {
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
-        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil);
-        this.confirmationGUI = new ConfirmationGUI(this, effectsUtil, expManager);
-        this.playerInteractListener = new PlayerInteractListener(this, miscItems, confirmationGUI);
+        this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager);
+        this.artefactRestorationGUI = new ArtefactRestorationGUI(this, effectsUtil, expManager, artefactItems, playerData, statistics);
+        this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener);
+        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, artefactRestorationGUI);
 
         startUpdateTask();
     }

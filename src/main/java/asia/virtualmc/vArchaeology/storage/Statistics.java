@@ -11,11 +11,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.UUID;
-import java.util.List;
 
 public class Statistics {
     private final Main plugin;
@@ -210,12 +207,32 @@ public class Statistics {
     public void incrementStatistics(UUID playerUUID, int statsID) {
         playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
                 .merge(statsID, 1, Integer::sum);
-        updatePlayerData(playerUUID);
+        //updatePlayerData(playerUUID);
     }
 
     public void addStatistics(UUID playerUUID, int statsID, int value) {
         playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
                 .merge(statsID, value, Integer::sum);
+        //updatePlayerData(playerUUID);
+    }
+
+    public ArrayList<Integer> getComponents(UUID playerUUID) {
+        ArrayList<Integer> componentsOwned = new ArrayList<>();
+        for (int i = 2; i < 9; i++) {
+            componentsOwned.add(playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>()).getOrDefault(i,0));
+        }
+        return componentsOwned;
+    }
+
+    public void subtractComponents(UUID playerUUID, List<Integer> componentsRequired) {
+        ConcurrentHashMap<Integer, Integer> statsMap = playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>());
+        statsMap.merge(2, -componentsRequired.get(0), Integer::sum);
+        statsMap.merge(3, -componentsRequired.get(1), Integer::sum);
+        statsMap.merge(4, -componentsRequired.get(2), Integer::sum);
+        statsMap.merge(5, -componentsRequired.get(3), Integer::sum);
+        statsMap.merge(6, -componentsRequired.get(4), Integer::sum);
+        statsMap.merge(7, -componentsRequired.get(5), Integer::sum);
+        statsMap.merge(8, -componentsRequired.get(6), Integer::sum);
         updatePlayerData(playerUUID);
     }
 }

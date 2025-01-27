@@ -2,7 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 
-import asia.virtualmc.vArchaeology.guis.ConfirmationGUI;
+import asia.virtualmc.vArchaeology.guis.LampStarGUI;
 import asia.virtualmc.vArchaeology.items.MiscItems;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.EventHandler;
@@ -19,17 +19,17 @@ import java.util.UUID;
 public class PlayerInteractListener implements Listener {
     private final Main plugin;
     private final MiscItems miscItems;
-    private final ConfirmationGUI confirmationGUI;
+    private final LampStarGUI lampStarGUI;
     private final NamespacedKey LAMP_KEY;
     private final NamespacedKey STAR_KEY;
 
     public PlayerInteractListener(
             Main plugin,
             MiscItems miscItems,
-            ConfirmationGUI confirmationGUI) {
+            LampStarGUI lampStarGUI) {
         this.plugin = plugin;
         this.miscItems = miscItems;
-        this.confirmationGUI = confirmationGUI;
+        this.lampStarGUI = lampStarGUI;
         this.LAMP_KEY = new NamespacedKey(plugin, "varch_lamp");
         this.STAR_KEY = new NamespacedKey(plugin, "varch_star");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -48,10 +48,10 @@ public class PlayerInteractListener implements Listener {
         PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
         if (pdc.has(LAMP_KEY)) {
             event.setCancelled(true);
-            confirmationGUI.openConfirmationLamp(player, miscItems.getLampID(item));
+            lampStarGUI.openConfirmationLamp(player, miscItems.getLampID(item));
         } else if (pdc.has(STAR_KEY)) {
             event.setCancelled(true);
-            confirmationGUI.openConfirmationStar(player, miscItems.getStarID(item));
+            lampStarGUI.openConfirmationStar(player, miscItems.getStarID(item));
         }
     }
 
@@ -68,10 +68,10 @@ public class PlayerInteractListener implements Listener {
         PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
         if (pdc.has(LAMP_KEY)) {
             event.setCancelled(true);
-            confirmationGUI.openConfirmationLamp(player, miscItems.getLampID(item));
+            lampStarGUI.openConfirmationLamp(player, miscItems.getLampID(item));
         } else if (pdc.has(STAR_KEY)) {
             event.setCancelled(true);
-            confirmationGUI.openConfirmationStar(player, miscItems.getStarID(item));
+            lampStarGUI.openConfirmationStar(player, miscItems.getStarID(item));
         }
     }
 }

@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.guis.ArtefactRestorationGUI;
 import asia.virtualmc.vArchaeology.guis.SalvageGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.guis.TraitGUI;
@@ -21,13 +22,19 @@ public class GUICommands {
     private final SellGUI sellGUI;
     private final SalvageGUI salvageGUI;
     private final TraitGUI traitGUI;
+    private final ArtefactRestorationGUI artefactRestorationGUI;
     private final Map<UUID, Long> commandCooldowns;
 
-    public GUICommands(Main plugin, SellGUI sellGUI, SalvageGUI salvageGUI, TraitGUI traitGUI) {
+    public GUICommands(Main plugin,
+                       SellGUI sellGUI,
+                       SalvageGUI salvageGUI,
+                       TraitGUI traitGUI,
+                       ArtefactRestorationGUI artefactRestorationGUI) {
         this.plugin = plugin;
         this.sellGUI = sellGUI;
         this.salvageGUI = salvageGUI;
         this.traitGUI = traitGUI;
+        this.artefactRestorationGUI = artefactRestorationGUI;
         this.commandCooldowns = new HashMap<>();
         registerCommands();
     }
@@ -38,6 +45,7 @@ public class GUICommands {
                 .withSubcommand(archSalvageGUI())
                 .withSubcommand(archComponentsGUI())
                 .withSubcommand(archTraitGUI())
+                .withSubcommand(archRestoreArtefact())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -108,6 +116,18 @@ public class GUICommands {
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
                         traitGUI.openInfoMode(player);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+    private CommandAPICommand archRestoreArtefact() {
+        return new CommandAPICommand("restore")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        artefactRestorationGUI.openRestoreArtefact(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

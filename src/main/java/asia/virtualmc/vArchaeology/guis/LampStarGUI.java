@@ -16,14 +16,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class ConfirmationGUI {
+public class LampStarGUI {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final EXPManager expManager;
     private final NamespacedKey LAMP_KEY;
     private final NamespacedKey STAR_KEY;
 
-    public ConfirmationGUI(Main plugin, EffectsUtil effectsUtil, EXPManager expManager) {
+    public LampStarGUI(Main plugin, EffectsUtil effectsUtil, EXPManager expManager) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.expManager = expManager;
