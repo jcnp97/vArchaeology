@@ -24,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,7 +44,7 @@ public class BlockBreakListener implements Listener {
     private final EffectsUtil effectsUtil;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
-    private record TraitData(double twoDrops, double higherTier, double doubleADP) {}
+    private record TraitData(double extraRoll, double nextTier, double doubleADP, double addADP) {}
     private final Map<UUID, TraitData> traitDataMap;
     private final Random random;
     private static final long ADP_COOLDOWN = 60_000;
@@ -135,6 +136,12 @@ public class BlockBreakListener implements Listener {
                 effectsUtil.sendPlayerMessage(playerUUID, "<green>Your Cosmic Focus (Dexterity Trait) has doubled your Artefact Progress gain.");
             }
         }
+
+        // Dexterity Bonus
+        if (random.nextDouble() < getAddADP(playerUUID) / 100) {
+            playerData.addArtefactDiscovery(playerUUID, 0.1);
+            effectsUtil.sendADBProgressBarTitle(playerUUID, playerData.getArchADP(playerUUID) / 100.0, 0.1);
+        }
     }
 
     private void giveArchMaterialDrop(Player player, Location blockLocation, int expValue, boolean canTriggerPassive) {
@@ -195,6 +202,11 @@ public class BlockBreakListener implements Listener {
     }
 
     private boolean canBreakBlocks(Player player, UUID uuid, ItemStack mainHandItem) {
+        if (player.hasPotionEffect(PotionEffectType.HASTE)) {
+            player.sendMessage("§cYour haste buff prevents you from breaking this block.");
+            return false;
+        }
+
         if (customTools.getDurability(mainHandItem) <= 10) {
             player.sendMessage("§cYour tool's durability is too low to break this block!");
             return false;
@@ -226,12 +238,14 @@ public class BlockBreakListener implements Listener {
     private void addTraitData(Player player) {
         UUID uuid = player.getUniqueId();
         int karmaLevel = playerData.getKarmaTrait(uuid);
+        int dexterityLevel = playerData.getDexterityTrait(uuid);
 
-        double twoDrops = (double) karmaLevel * 0.2;
-        double higherTierDrops = (double) karmaLevel * 0.2;
-        double doubleADP = (double) playerData.getDexterityTrait(uuid) * 0.1;
+        double extraRoll = (double) karmaLevel * configManager.karmaEffects[1];
+        double nextTierRoll = (double) karmaLevel * configManager.karmaEffects[2];
+        double doubleADP = (double) dexterityLevel * configManager.dexterityEffects[1];
+        double addADP = (double) dexterityLevel * configManager.dexterityEffects[2];
 
-        traitDataMap.put(uuid, new TraitData(twoDrops, higherTierDrops, doubleADP));
+        traitDataMap.put(uuid, new TraitData(extraRoll, nextTierRoll, doubleADP, addADP));
     }
 
     public boolean hasTraitData(UUID uuid) {
@@ -243,16 +257,21 @@ public class BlockBreakListener implements Listener {
 
     private double getTwoDrops(UUID uuid) {
         TraitData data = traitDataMap.get(uuid);
-        return (data == null) ? 0.0 : data.twoDrops();
+        return (data == null) ? 0.0 : data.extraRoll();
     }
 
     private double getHigherTier(UUID uuid) {
         TraitData data = traitDataMap.get(uuid);
-        return (data == null) ? 0.0 : data.higherTier();
+        return (data == null) ? 0.0 : data.nextTier();
     }
 
     private double getDoubleADP(UUID uuid) {
         TraitData data = traitDataMap.get(uuid);
         return (data == null) ? 0.0 : data.doubleADP();
+    }
+
+    private double getAddADP(UUID uuid) {
+        TraitData data = traitDataMap.get(uuid);
+        return (data == null) ? 0.0 : data.addADP();
     }
 }

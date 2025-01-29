@@ -12,6 +12,7 @@ import asia.virtualmc.vArchaeology.listeners.*;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLog;
+import asia.virtualmc.vArchaeology.logs.SellLog;
 import asia.virtualmc.vArchaeology.storage.*;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -19,8 +20,14 @@ import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
+import eu.decentsoftware.holograms.api.utils.scheduler.S;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
+import net.milkbowl.vault.permission.Permission;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 public final class Main extends JavaPlugin {
     // storage
@@ -63,13 +70,22 @@ public final class Main extends JavaPlugin {
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
+    private SellLog sellLog;
     // commands
     private PlayerDataCommands playerDataCommands;
     private GUICommands guiCommands;
 
+    private static Economy econ = null;
+    private static Permission perms = null;
+
     @Override
     public void onEnable() {
         CommandAPI.onEnable();
+        if (!setupEconomy() ) {
+            getLogger().severe(String.format("[%s] - Disabled due to no Vault dependency found!", getDescription().getName()));
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
         this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
         this.effectsUtil = new EffectsUtil(this);
@@ -82,7 +98,7 @@ public final class Main extends JavaPlugin {
         this.miscListener = new MiscListener(this);
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
-        this.sellGUI = new SellGUI(this, effectsUtil);
+        this.sellLog = new SellLog(this, logManager);
         this.talentGUI = new TalentGUI(this, effectsUtil);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statistics = new Statistics(this, playerDataDB, configManager);
@@ -91,16 +107,17 @@ public final class Main extends JavaPlugin {
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
+        this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
-        this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable);
-        this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil);
+        this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
+        this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager);
         this.artefactRestorationGUI = new ArtefactRestorationGUI(this, effectsUtil, expManager, artefactItems, playerData, statistics);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, artefactRestorationGUI);
 
         startUpdateTask();
@@ -160,5 +177,26 @@ public final class Main extends JavaPlugin {
                 }
             }
         }.runTaskTimerAsynchronously(this, 12000L, 12000L);
+    }
+
+    public static Economy getEconomy() {
+        return econ;
+    }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().warning("Vault plugin not found!");
+            return false;
+        }
+        getLogger().info("Vault was found, attempting to get economy registration...");
+
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) {
+            getLogger().warning("No economy provider was registered with Vault!");
+            return false;
+        }
+        econ = rsp.getProvider();
+        getLogger().info("Successfully hooked into the economy: " + econ.getName());
+        return true;
     }
 }

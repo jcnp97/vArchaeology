@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
 import asia.virtualmc.vArchaeology.items.CustomTools;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
@@ -30,6 +31,7 @@ public class ItemEquipListener implements Listener {
     private final TalentTree talentTree;
     private final PlayerData playerData;
     private final ItemsDropTable itemsDropTable;
+    private final ConfigManager configManager;
     private final Map<UUID, ToolData> toolDataMap;
     private final NamespacedKey gatherKey;
     private final NamespacedKey adbKey;
@@ -38,12 +40,14 @@ public class ItemEquipListener implements Listener {
                              CustomTools customTools,
                              PlayerData playerData,
                              TalentTree talentTree,
-                             ItemsDropTable itemsDropTable) {
+                             ItemsDropTable itemsDropTable,
+                             ConfigManager configManager) {
         this.plugin = plugin;
         this.customTools = customTools;
         this.talentTree = talentTree;
         this.playerData = playerData;
         this.itemsDropTable = itemsDropTable;
+        this.configManager = configManager;
         this.toolDataMap = new ConcurrentHashMap<>();
         this.gatherKey = new NamespacedKey(plugin, "varch_gather");
         this.adbKey = new NamespacedKey(plugin, "varch_adb");
@@ -102,7 +106,9 @@ public class ItemEquipListener implements Listener {
         // Talent ID 3
         gatherRate += talentTree.getTalentLevel(uuid, 3) * 0.1;
         // Karma Trait
-        gatherRate += playerData.getKarmaTrait(uuid) * 0.05;
+        gatherRate += playerData.getKarmaTrait(uuid) * configManager.karmaEffects[0];
+        // Karma Trait (Max level bonus)
+        gatherRate += configManager.karmaEffects[3];
 
         return gatherRate;
     }
@@ -115,7 +121,11 @@ public class ItemEquipListener implements Listener {
         // Talent ID 17
         adbProgress += talentTree.getTalentLevel(uuid, 17) * 0.15;
         // Dexterity Trait
-        adbProgress += playerData.getDexterityTrait(uuid) * 0.005;
+        adbProgress += playerData.getDexterityTrait(uuid) * configManager.dexterityEffects[0];
+
+        if (playerData.getDexterityTrait(uuid) >= 50) {
+            adbProgress += configManager.dexterityEffects[3];
+        }
 
         return adbProgress;
     }

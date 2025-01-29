@@ -6,6 +6,7 @@ itemsList:
     name: "&aPurpleheart Wood (Common)"
     custom-model-data: 100000
     weight: 55
+    sell-price: 100.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -18,6 +19,7 @@ itemsList:
     name: "&bImperial Steel (Uncommon)"
     custom-model-data: 100001
     weight: 35
+    sell-price: 250.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -30,6 +32,7 @@ itemsList:
     name: "&3Everlight Silvthril (Rare)"
     custom-model-data: 100002
     weight: 25
+    sell-price: 400.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -42,6 +45,7 @@ itemsList:
     name: "&eChaotic Brimstone (Unique)"
     custom-model-data: 100003
     weight: 15
+    sell-price: 650.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -54,6 +58,7 @@ itemsList:
     name: "&6Hellfire Metal (Special)"
     custom-model-data: 100004
     weight: 8
+    sell-price: 1250.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -66,6 +71,7 @@ itemsList:
     name: "&5Aetherium Alloy (Mythical)"
     custom-model-data: 100005
     weight: 4
+    sell-price: 2500.0
     lore:
       - '&cArchaeology Item'
       - ''
@@ -78,6 +84,7 @@ itemsList:
     name: "&4Quintessence (Exotic)"
     custom-model-data: 100006
     weight: 1
+    sell-price: 10000.0
     lore:
       - '&cArchaeology Item'
       - ''

@@ -141,14 +141,12 @@ public class SalvageGUI implements Listener {
     }
 
     private void processSalvageAction(Player player, Map<Integer, Integer> initialValue) {
-        // Check if the map is null or empty
         if (initialValue == null || initialValue.isEmpty()) {
             player.sendMessage("§cNo items to salvage!");
             player.closeInventory();
             return;
         }
 
-        // Check if all values in the map are zero
         boolean hasNonZeroValue = initialValue.values().stream()
                 .anyMatch(value -> value > 0);
 

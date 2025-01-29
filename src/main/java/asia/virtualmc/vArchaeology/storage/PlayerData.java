@@ -367,6 +367,9 @@ public class PlayerData {
     public void addWisdomTrait(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
         if (stats != null) {
+            if (stats.wisdomTrait + value >= 50) {
+                stats.archXPMul += (configManager.wisdomEffects[3] / 100);
+            }
             stats.wisdomTrait += value;
         }
     }

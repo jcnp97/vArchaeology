@@ -1,5 +1,6 @@
 # vArchaeology Settings
 settings:
+  configs-debug: true
   blocksList:
     SAND: 1
     GRAVEL: 1

@@ -37,14 +37,14 @@ public class ItemsDropTable {
     public void initializeDropTable(UUID uuid, int archLevel) {
         if (hasDropTable(uuid)) return;
         List<Integer> dropTable = new ArrayList<>();
-        dropTable.add(configManager.commonWeight);
-        if (archLevel >= 10) dropTable.add(configManager.uncommonWeight);
-        if (archLevel >= 20) dropTable.add(configManager.rareWeight);
-        if (archLevel >= 30) dropTable.add(configManager.uniqueWeight);
-        if (archLevel >= 40) dropTable.add(configManager.specialWeight);
-        if (archLevel >= 50) dropTable.add(configManager.mythicalWeight);
-        if (archLevel >= 60) dropTable.add(configManager.exoticWeight);
-        if (talentTree.getTalentLevel(uuid, 10) == 1) dropTable.set(6, configManager.exoticWeight + 3);
+        dropTable.add(configManager.dropWeights[0]);
+        if (archLevel >= 10) dropTable.add(configManager.dropWeights[1]);
+        if (archLevel >= 20) dropTable.add(configManager.dropWeights[2]);
+        if (archLevel >= 30) dropTable.add(configManager.dropWeights[3]);
+        if (archLevel >= 40) dropTable.add(configManager.dropWeights[4]);
+        if (archLevel >= 50) dropTable.add(configManager.dropWeights[5]);
+        if (archLevel >= 60) dropTable.add(configManager.dropWeights[6]);
+        if (talentTree.getTalentLevel(uuid, 10) == 1) dropTable.set(6, configManager.dropWeights[6] + 3);
         playerDropTables.put(uuid, dropTable);
     }
 

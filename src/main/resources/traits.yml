@@ -1,112 +1,38 @@
 # vArchaeology Talent Trees
 traitList:
-  1: # traitID
+  wisdom:
     name: "Wisdom"
     material: EMERALD
     custom-model-data: 100000
-    block-break: 2
-    receive-material: 1
-    artefact-restoration: 0.50
-    lore:
-      - "§7• Provides §a{level*}% §7Archaeology XP when breaking blocks."
-  2:
+    effects:
+      block-break: 1.5
+      receive-material: 0.8
+      artefact-restoration: 0.2
+      max-trait-bonus: 10
+  charisma:
     name: "Charisma"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 63
-  3:
-    name: "Extraction"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 66
-  4:
-    name: "Adept Restoration"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 69
-  5:
-    name: "Prosperity"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 72
-  6:
-    name: "Archaeological Prowess"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 75
-  7:
-    name: "Divine Opulence"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 78
-  8:
-    name: "Rapid Discovery"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 81
-  9:
-    name: "Stroke of Luck"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 99
-  # Specialized Talents
-  10:
-    name: "Myriad of Quintessence"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 70
-    required-ID: 1, 3
-  11:
-    name: "Blessed Treatment"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 80
-    required-ID: 2, 4
-  12:
-    name: "Lucky Break"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 90
-    required-ID: 5, 7
-  13:
-    name: "Quality Maker"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 100
-    required-ID: 6, 8
-  14:
-    name: "Good Fortune"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 104
-    required-ID: 1, 2
-  15:
-    name: "Divine Karma"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 108
-    required-ID: 3, 4
-  16:
-    name: "Divine Knowledge"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 112
-    required-ID: 5, 6
-  17:
-    name: "Masterful Discovery"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 116
-    required-ID: 7, 8
-  18:
-    name: "Master of Archaeology"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 120
-    required-ID: 1, 2, 3, 4, 5, 6, 7, 8
-  19:
-    name: "Better Odds"
-    material: FLINT
-    custom-model-data: 100000
-    required-level: 100
-    required-ID: 9
+    material: EMERALD
+    custom-model-data: 100001
+    effects:
+      archaeology-drops: 0.8
+      artefacts: 0.4
+      aptitude-gain: 5
+      max-trait-bonus: 100000
+  karma:
+    name: "Karma"
+    material: EMERALD
+    custom-model-data: 100002
+    effects:
+      gathering-rate: 0.05
+      extra-roll: 0.2
+      next-tier-roll: 0.2
+      max-trait-bonus: 2
+  dexterity:
+    name: "Dexterity"
+    material: EMERALD
+    custom-model-data: 100003
+    effects:
+      artefact-discovery-progress: 0.004
+      double-adp: 0.1
+      gain-adp: 0.1
+      max-trait-bonus: 0.1

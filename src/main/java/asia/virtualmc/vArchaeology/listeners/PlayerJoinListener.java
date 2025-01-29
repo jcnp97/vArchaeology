@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
+import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.storage.*;
 
 import org.bukkit.event.EventHandler;
@@ -21,6 +22,7 @@ public class PlayerJoinListener implements Listener {
     private final ItemEquipListener itemEquipListener;
     private final ItemsDropTable itemsDropTable;
     private final BlockBreakListener blockBreakListener;
+    private final SellGUI sellGUI;
 
     public PlayerJoinListener(Main plugin,
                               PlayerDataDB playerDataDB,
@@ -30,7 +32,8 @@ public class PlayerJoinListener implements Listener {
                               CollectionLog collectionLog,
                               ItemEquipListener itemEquipListener,
                               ItemsDropTable itemsDropTable,
-                              BlockBreakListener blockBreakListener
+                              BlockBreakListener blockBreakListener,
+                              SellGUI sellGUI
     ) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
@@ -41,6 +44,7 @@ public class PlayerJoinListener implements Listener {
         this.itemEquipListener = itemEquipListener;
         this.itemsDropTable = itemsDropTable;
         this.blockBreakListener = blockBreakListener;
+        this.sellGUI = sellGUI;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -65,6 +69,7 @@ public class PlayerJoinListener implements Listener {
                 talentTree.loadData(playerUUID);
                 statistics.loadData(playerUUID);
                 collectionLog.loadData(playerUUID);
+                sellGUI.loadPlayerSellData(playerUUID);
 
             } catch (Exception e) {
                 plugin.getLogger().severe("Error loading player data for " + playerName + ": " + e.getMessage());
@@ -91,6 +96,9 @@ public class PlayerJoinListener implements Listener {
                     }
                     if (blockBreakListener.hasTraitData(playerUUID)) {
                         blockBreakListener.unloadTraitData(playerUUID);
+                    }
+                    if (sellGUI.hasSellData(playerUUID)) {
+                        sellGUI.unloadSellData(playerUUID);
                     }
                 } catch (Exception e) {
                     plugin.getLogger().severe("Error unloading data for player: " + playerUUID);

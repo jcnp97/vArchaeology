@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.exp;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 
@@ -23,6 +24,7 @@ public class EXPManager {
     private final PlayerData playerData;
     private final TalentTree talentTree;
     private final EffectsUtil effectsUtil;
+    private final ConfigManager configManager;
     private final Random random;
     private final ConcurrentMap<UUID, BlockBreakData> blockBreakDataMap = new ConcurrentHashMap<>();
     private final ConcurrentMap<UUID, MaterialGetData> materialGetDataMap = new ConcurrentHashMap<>();
@@ -32,12 +34,14 @@ public class EXPManager {
                       @NotNull Statistics statistics,
                       @NotNull PlayerData playerData,
                       @NotNull TalentTree talentTree,
-                      EffectsUtil effectsUtil) {
+                      EffectsUtil effectsUtil,
+                      ConfigManager configManager) {
         this.plugin = plugin;
         this.statistics = statistics;
         this.playerData = playerData;
         this.talentTree = talentTree;
         this.effectsUtil = effectsUtil;
+        this.configManager = configManager;
         this.random = new Random();
     }
 
@@ -61,7 +65,7 @@ public class EXPManager {
 
         // Precompute the base multiplier for block-break EXP
         double blockBreakBaseMultiplier =
-                ((traitBonus * 2) + (talentBonus1 * 15) + (rankBonus)) / 100.0
+                ((traitBonus * configManager.wisdomEffects[0]) + (talentBonus1 * 15) + (rankBonus)) / 100.0
                         + archXPMul;
 
         BlockBreakData blockBreakData = new BlockBreakData(
@@ -78,7 +82,7 @@ public class EXPManager {
 
         // Precompute the base multiplier for material-get EXP
         double materialGetBaseMultiplier =
-                (traitBonus + (talentBonus2 * 2) + (rankBonus)) / 100.0
+                (traitBonus * configManager.wisdomEffects[1] + (talentBonus2 * 2) + (rankBonus)) / 100.0
                         + archXPMul;
 
         MaterialGetData materialGetData = new MaterialGetData(
@@ -95,7 +99,7 @@ public class EXPManager {
 
         // Precompute the base multiplier for material-get EXP
         double artefactRestoreBaseMultiplier =
-                (traitBonus * 0.5 + (talentBonus4) + (rankBonus * 0.25)) / 100.0
+                (traitBonus * configManager.wisdomEffects[2] + (talentBonus4) + (rankBonus * 0.25)) / 100.0
                         + archXPMul;
 
         ArtefactRestoreData artefactRestoreData = new ArtefactRestoreData(
