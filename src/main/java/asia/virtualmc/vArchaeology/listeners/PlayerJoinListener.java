@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.droptables.ItemsDropTable;
+import asia.virtualmc.vArchaeology.guis.RankGUI;
 import asia.virtualmc.vArchaeology.guis.SellGUI;
 import asia.virtualmc.vArchaeology.storage.*;
 
@@ -10,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.Random;
 import java.util.UUID;
 
 public class PlayerJoinListener implements Listener {
@@ -23,6 +25,7 @@ public class PlayerJoinListener implements Listener {
     private final ItemsDropTable itemsDropTable;
     private final BlockBreakListener blockBreakListener;
     private final SellGUI sellGUI;
+    private final RankGUI rankGUI;
 
     public PlayerJoinListener(Main plugin,
                               PlayerDataDB playerDataDB,
@@ -33,7 +36,8 @@ public class PlayerJoinListener implements Listener {
                               ItemEquipListener itemEquipListener,
                               ItemsDropTable itemsDropTable,
                               BlockBreakListener blockBreakListener,
-                              SellGUI sellGUI
+                              SellGUI sellGUI,
+                              RankGUI rankGUI
     ) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
@@ -45,6 +49,7 @@ public class PlayerJoinListener implements Listener {
         this.itemsDropTable = itemsDropTable;
         this.blockBreakListener = blockBreakListener;
         this.sellGUI = sellGUI;
+        this.rankGUI = rankGUI;
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
@@ -70,7 +75,7 @@ public class PlayerJoinListener implements Listener {
                 statistics.loadData(playerUUID);
                 collectionLog.loadData(playerUUID);
                 sellGUI.loadPlayerSellData(playerUUID);
-
+                rankGUI.loadData(playerUUID);
             } catch (Exception e) {
                 plugin.getLogger().severe("Error loading player data for " + playerName + ": " + e.getMessage());
                 e.printStackTrace();
@@ -90,16 +95,10 @@ public class PlayerJoinListener implements Listener {
                     statistics.unloadData(playerUUID);
                     collectionLog.unloadData(playerUUID);
                     itemEquipListener.unloadToolData(playerUUID);
-
-                    if (itemsDropTable.hasDropTable(playerUUID)) {
-                        itemsDropTable.unloadData(playerUUID);
-                    }
-                    if (blockBreakListener.hasTraitData(playerUUID)) {
-                        blockBreakListener.unloadTraitData(playerUUID);
-                    }
-                    if (sellGUI.hasSellData(playerUUID)) {
-                        sellGUI.unloadSellData(playerUUID);
-                    }
+                    sellGUI.unloadSellData(playerUUID);
+                    blockBreakListener.unloadTraitData(playerUUID);
+                    itemsDropTable.unloadData(playerUUID);
+                    rankGUI.unloadData(playerUUID);
                 } catch (Exception e) {
                     plugin.getLogger().severe("Error unloading data for player: " + playerUUID);
                     e.printStackTrace();

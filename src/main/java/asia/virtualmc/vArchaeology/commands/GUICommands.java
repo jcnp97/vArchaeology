@@ -1,10 +1,7 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
-import asia.virtualmc.vArchaeology.guis.ArtefactRestorationGUI;
-import asia.virtualmc.vArchaeology.guis.SalvageGUI;
-import asia.virtualmc.vArchaeology.guis.SellGUI;
-import asia.virtualmc.vArchaeology.guis.TraitGUI;
+import asia.virtualmc.vArchaeology.guis.*;
 
 import dev.jorel.commandapi.CommandAPICommand;
 
@@ -23,18 +20,21 @@ public class GUICommands {
     private final SalvageGUI salvageGUI;
     private final TraitGUI traitGUI;
     private final ArtefactRestorationGUI artefactRestorationGUI;
+    private final RankGUI rankGUI;
     private final Map<UUID, Long> commandCooldowns;
 
     public GUICommands(Main plugin,
                        SellGUI sellGUI,
                        SalvageGUI salvageGUI,
                        TraitGUI traitGUI,
-                       ArtefactRestorationGUI artefactRestorationGUI) {
+                       ArtefactRestorationGUI artefactRestorationGUI,
+                       RankGUI rankGUI) {
         this.plugin = plugin;
         this.sellGUI = sellGUI;
         this.salvageGUI = salvageGUI;
         this.traitGUI = traitGUI;
         this.artefactRestorationGUI = artefactRestorationGUI;
+        this.rankGUI = rankGUI;
         this.commandCooldowns = new HashMap<>();
         registerCommands();
     }
@@ -46,6 +46,7 @@ public class GUICommands {
                 .withSubcommand(archComponentsGUI())
                 .withSubcommand(archTraitGUI())
                 .withSubcommand(archRestoreArtefact())
+                .withSubcommand(archRankGUI())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -128,6 +129,18 @@ public class GUICommands {
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
                         artefactRestorationGUI.openRestoreArtefact(player);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+    private CommandAPICommand archRankGUI() {
+        return new CommandAPICommand("rank")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        rankGUI.openRankGUI(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

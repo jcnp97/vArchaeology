@@ -277,8 +277,6 @@ public class ArtefactRestorationGUI {
         return button;
     }
 
-
-
     private ItemStack createConfirmationButton() {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();

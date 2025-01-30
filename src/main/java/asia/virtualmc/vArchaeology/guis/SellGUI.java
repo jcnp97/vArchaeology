@@ -118,9 +118,12 @@ public class SellGUI implements Listener {
         try {
             if (currentValue > 0) {
                 UUID uuid = player.getUniqueId();
+                double taxesPaid = taxDeduction(player, currentValue);
                 sellItems(player, currentValue);
-                effectsUtil.sendPlayerMessage(uuid, configManager.pluginPrefix + " <#00FFA2>You have sold your items for <gold>$" + currentValue);
-                effectsUtil.sendPlayerMessage(uuid, configManager.pluginPrefix + " <gold>$" + taxDeduction(player, currentValue) + " <red>has been deducted from your balance.");
+                statistics.addStatistics(uuid, 20, (int) currentValue);
+                statistics.addStatistics(uuid, 21, (int) taxesPaid);
+                effectsUtil.sendPlayerMessage(uuid, configManager.pluginPrefix + "<#00FFA2>You have sold your items for <gold>$" + currentValue);
+                effectsUtil.sendPlayerMessage(uuid, configManager.pluginPrefix + "<gold>$" + taxesPaid + " <red>has been deducted from your balance.");
                 effectsUtil.playSound(player, "minecraft:cozyvanilla.sell_confirmed", Sound.Source.PLAYER, 1.0f, 1.0f);
             } else {
                 player.sendMessage("§cNo sellable items found in your inventory!");
@@ -284,6 +287,7 @@ public class SellGUI implements Listener {
     }
 
     public void unloadSellData(UUID uuid) {
+        if (!sellDataMap.containsKey(uuid)) return;
         sellDataMap.remove(uuid);
     }
 

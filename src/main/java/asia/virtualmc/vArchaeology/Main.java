@@ -67,6 +67,7 @@ public final class Main extends JavaPlugin {
     private TraitGUI traitGUI;
     private LampStarGUI lampStarGUI;
     private ArtefactRestorationGUI artefactRestorationGUI;
+    private RankGUI rankGUI;
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
@@ -108,6 +109,7 @@ public final class Main extends JavaPlugin {
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
+        this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
@@ -117,8 +119,8 @@ public final class Main extends JavaPlugin {
         this.artefactRestorationGUI = new ArtefactRestorationGUI(this, effectsUtil, expManager, artefactItems, playerData, statistics);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
-        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI);
-        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, artefactRestorationGUI);
+        this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
+        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, artefactRestorationGUI, rankGUI);
 
         startUpdateTask();
     }

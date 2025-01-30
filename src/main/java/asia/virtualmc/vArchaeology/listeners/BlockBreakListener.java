@@ -111,7 +111,7 @@ public class BlockBreakListener implements Listener {
 
         // Karma Trait - Two Drops & Next-Tier
         // Dexterity Trait - Double Artefact Discovery Progress
-        if (!hasTraitData(playerUUID)) {
+        if (!traitDataMap.containsKey(playerUUID)) {
             addTraitData(player);
         }
 
@@ -248,10 +248,8 @@ public class BlockBreakListener implements Listener {
         traitDataMap.put(uuid, new TraitData(extraRoll, nextTierRoll, doubleADP, addADP));
     }
 
-    public boolean hasTraitData(UUID uuid) {
-        return traitDataMap.containsKey(uuid);
-    }
     public void unloadTraitData(UUID uuid) {
+        if (!traitDataMap.containsKey(uuid)) return;
         traitDataMap.remove(uuid);
     }
 

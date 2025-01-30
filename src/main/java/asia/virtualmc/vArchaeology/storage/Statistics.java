@@ -49,10 +49,13 @@ public class Statistics {
             );
             // 1: Rank
             // 2 - 8: Components
+            // 9 - 15: Drops
             List<String> statList = Arrays.asList("rankAchieved", "commonComponents", "uncommonComponents",
                     "rareComponents", "uniqueComponents", "specialComponents", "mythicalComponents",
-                    "exoticComponents", "blocksMined", "artefactsFound", "artefactsRestored",
-                    "treasuresFound", "moneyEarned"
+                    "exoticComponents", "commonObtained", "uncommonObtained", "rareObtained",
+                    "uniqueObtained", "specialObtained", "mythicalObtained", "exoticObtained",
+                    "blocksMined", "artefactsFound", "artefactsRestored", "treasuresFound", "moneyEarned",
+                    "taxesPaid"
             );
             String checkQuery = "SELECT COUNT(*) FROM archStatistics WHERE statsName = ?";
             String insertQuery = "INSERT INTO archStatistics (statsName) VALUES (?)";
@@ -234,5 +237,16 @@ public class Statistics {
         statsMap.merge(7, -componentsRequired.get(5), Integer::sum);
         statsMap.merge(8, -componentsRequired.get(6), Integer::sum);
         updatePlayerData(playerUUID);
+    }
+
+    public int getDropsObtained(UUID playerUUID) {
+        ConcurrentHashMap<Integer, Integer> stats = playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>());
+        return stats.getOrDefault(9, 0) +
+                stats.getOrDefault(10, 0) +
+                stats.getOrDefault(11, 0) +
+                stats.getOrDefault(12, 0) +
+                stats.getOrDefault(13, 0) +
+                stats.getOrDefault(14, 0) +
+                stats.getOrDefault(15, 0);
     }
 }

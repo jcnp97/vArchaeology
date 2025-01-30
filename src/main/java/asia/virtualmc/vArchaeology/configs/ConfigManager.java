@@ -28,7 +28,6 @@ public class ConfigManager {
     // experience-table.yml
     public final Map<Integer, Integer> experienceTable = new HashMap<>();
     // items.yml
-//    public ArrayList<Integer> dropWeights = new ArrayList<>();
     public int[] dropWeights = {0, 0, 0, 0, 0, 0, 0};
     public double[] dropBasePrice = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     // guis.yml
@@ -46,6 +45,9 @@ public class ConfigManager {
     public double[] charismaEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] karmaEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] dexterityEffects = {0.0, 0.0, 0.0, 0.0};
+    // ranks.yml
+    public final Map<Integer, rankInfo> rankTable = new HashMap<>();
+    public record rankInfo(int pointsRequired, String rankName) {}
     // others
     public String pluginPrefix = "<#0040FF>[vArch<#00FBFF>aeology] ";
     public boolean configDebug;
@@ -66,6 +68,7 @@ public class ConfigManager {
         readcustomDrops();
         readGUISettings();
         readTraitSettings();
+        readRanks();
     }
 
     public void readDatabase() {
@@ -301,5 +304,40 @@ public class ConfigManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void readRanks() {
+        File rankTableFile = new File(plugin.getDataFolder(), "ranks.yml");
+        if (!rankTableFile.exists()) {
+            try {
+                plugin.saveResource("ranks.yml", false);
+            } catch (Exception e) {
+                Bukkit.getLogger().severe("[vArchaeology] Rank table not found.");
+            }
+        }
+        FileConfiguration ranksConfig = YamlConfiguration.loadConfiguration(rankTableFile);
+        int prevPoints = -1;
+
+        for (String key : ranksConfig.getKeys(false)) {
+            try {
+                int rankLevel = Integer.parseInt(key);
+                int points = ranksConfig.getInt(key + ".points");
+                String rankName = ranksConfig.getString(key + ".rankName");
+
+                if (prevPoints >= 0 && points <= prevPoints) {
+                    throw new IllegalStateException("[vArchaeology] Invalid progression: Rank " + rankLevel +
+                            " has lower or equal EXP than previous level");
+                }
+                rankTable.put(rankLevel, new rankInfo(points, rankName));
+                prevPoints = points;
+            } catch (NumberFormatException e) {
+                plugin.getLogger().severe("[vArchaeology] Invalid number format in rank table at level " + key);
+                return;
+            } catch (IllegalStateException e) {
+                plugin.getLogger().severe(e.getMessage());
+                return;
+            }
+        }
+        ConsoleMessageUtil.sendConsoleMessage(pluginPrefix + "<#7CFEA7>Rank table has been loaded.");
     }
 }

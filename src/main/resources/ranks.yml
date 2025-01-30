@@ -1,0 +1,154 @@
+# vArchaeology Ranks
+0:
+  points: 0
+  rankName: "None"
+1:
+  points: 3000
+  rankName: "Intern I"
+2:
+  points: 6000
+  rankName: "Intern II"
+3:
+  points: 9000
+  rankName: "Intern III"
+4:
+  points: 12000
+  rankName: "Intern IV"
+5:
+  points: 15000
+  rankName: "Intern V"
+6:
+  points: 18000
+  rankName: "Intern VI"
+7:
+  points: 21000
+  rankName: "Intern VII"
+8:
+  points: 24000
+  rankName: "Intern VIII"
+9:
+  points: 27000
+  rankName: "Intern IX"
+10:
+  points: 30000
+  rankName: "Intern X"
+11:
+  points: 36000
+  rankName: "Assistant I"
+12:
+  points: 42000
+  rankName: "Assistant II"
+13:
+  points: 48000
+  rankName: "Assistant III"
+14:
+  points: 54000
+  rankName: "Assistant IV"
+15:
+  points: 60000
+  rankName: "Assistant V"
+16:
+  points: 66000
+  rankName: "Assistant VI"
+17:
+  points: 72000
+  rankName: "Assistant VII"
+18:
+  points: 78000
+  rankName: "Assistant VIII"
+19:
+  points: 84000
+  rankName: "Assistant IX"
+20:
+  points: 90000
+  rankName: "Assistant X"
+21:
+  points: 108000
+  rankName: "Associate I"
+22:
+  points: 126000
+  rankName: "Associate II"
+23:
+  points: 144000
+  rankName: "Associate III"
+24:
+  points: 162000
+  rankName: "Associate IV"
+25:
+  points: 180000
+  rankName: "Associate V"
+26:
+  points: 198000
+  rankName: "Associate VI"
+27:
+  points: 216000
+  rankName: "Associate VII"
+28:
+  points: 234000
+  rankName: "Associate VIII"
+29:
+  points: 252000
+  rankName: "Associate IX"
+30:
+  points: 270000
+  rankName: "Associate X"
+31:
+  points: 306000
+  rankName: "Professor I"
+32:
+  points: 342000
+  rankName: "Professor II"
+33:
+  points: 378000
+  rankName: "Professor III"
+34:
+  points: 414000
+  rankName: "Professor IV"
+35:
+  points: 450000
+  rankName: "Professor V"
+36:
+  points: 486000
+  rankName: "Professor VI"
+37:
+  points: 522000
+  rankName: "Professor VII"
+38:
+  points: 558000
+  rankName: "Professor VIII"
+39:
+  points: 594000
+  rankName: "Professor IX"
+40:
+  points: 630000
+  rankName: "Professor X"
+41:
+  points: 666000
+  rankName: "Professor XI"
+42:
+  points: 702000
+  rankName: "Professor XII"
+43:
+  points: 738000
+  rankName: "Professor XIII"
+44:
+  points: 774000
+  rankName: "Professor XIV"
+45:
+  points: 810000
+  rankName: "Professor XV"
+46:
+  points: 846000
+  rankName: "Professor XVI"
+47:
+  points: 882000
+  rankName: "Professor XVII"
+48:
+  points: 918000
+  rankName: "Professor XVIII"
+49:
+  points: 954000
+  rankName: "Professor XIX"
+50:
+  points: 990000
+  rankName: "Guildmaster"
