@@ -109,9 +109,9 @@ public final class Main extends JavaPlugin {
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
-        this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
-        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree);
+        this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
+        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);

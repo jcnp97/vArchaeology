@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.guis;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.storage.CollectionLog;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -24,18 +25,21 @@ public class RankGUI {
     private final PlayerData playerData;
     private final Statistics statistics;
     private final ConfigManager configManager;
+    private final CollectionLog collectionLog;
     private final ConcurrentHashMap<UUID, Integer> rankPointsMap;
 
     public RankGUI(Main plugin,
                    EffectsUtil effectsUtil,
                    PlayerData playerData,
                    Statistics statistics,
-                   ConfigManager configManager) {
+                   ConfigManager configManager,
+                   CollectionLog collectionLog) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.playerData = playerData;
         this.statistics = statistics;
         this.configManager = configManager;
+        this.collectionLog = collectionLog;
         this.rankPointsMap = new ConcurrentHashMap<>();
     }
 
@@ -52,18 +56,35 @@ public class RankGUI {
         Map<Integer, GuiItem> statButtonItems = new HashMap<>();
         int rankAchieved = statistics.getStatistics(uuid, 1);
         int currentPoints = rankPointsMap.getOrDefault(uuid, 0);
-        int nextRank = configManager.rankTable.get(rankAchieved + 1).pointsRequired();
-        for (int x = 1; x <= 7; x++) {
-            ItemStack statButton = createStatButton(uuid, rankAchieved, currentPoints, nextRank);
-            GuiItem guiItem = new GuiItem(statButton);
-            staticPane.addItem(guiItem, x, 1);
-            statButtonItems.put(x, guiItem);
+        int nextRank = configManager.rankTable.get(Math.min(rankAchieved + 1, 50)).pointsRequired();
+        String nextRankName = configManager.rankTable.get(Math.min(rankAchieved + 1, 50)).rankName();
+        String currentRankName = configManager.rankTable.get(rankAchieved).rankName();
+
+        if (rankAchieved < 50) {
+            for (int x = 1; x <= 7; x++) {
+                ItemStack statButton = createStatButton(rankAchieved, currentPoints, nextRank);
+                GuiItem guiItem = new GuiItem(statButton);
+                staticPane.addItem(guiItem, x, 1);
+                statButtonItems.put(x, guiItem);
+            }
+        } else {
+            for (int x = 1; x <= 7; x++) {
+                ItemStack statButton = createStatButton2(rankAchieved, currentPoints);
+                GuiItem guiItem = new GuiItem(statButton);
+                staticPane.addItem(guiItem, x, 1);
+                statButtonItems.put(x, guiItem);
+            }
         }
 
-        if (currentPoints >= nextRank) {
+        if (currentPoints >= nextRank && rankAchieved < 50) {
             for (int x = 3; x <= 5; x++) {
                 ItemStack confirmButton = createConfirmButton();
-                staticPane.addItem(new GuiItem(confirmButton, event -> processRankUp(player, currentPoints, nextRank)), x, 2);
+                staticPane.addItem(new GuiItem(confirmButton, event -> processRankUp(player, currentPoints, nextRank, currentRankName, nextRankName)), x, 2);
+            }
+        } else if (currentPoints >= nextRank) {
+            for (int x = 3; x <= 5; x++) {
+                ItemStack confirmButton = createMaxed();
+                staticPane.addItem(new GuiItem(confirmButton), x, 2);
             }
         } else {
             for (int x = 3; x <= 5; x++) {
@@ -79,8 +100,11 @@ public class RankGUI {
         gui.show(player);
 
         // modifications
-        int progress = Math.min(100, (currentPoints/nextRank) * 100);
-        int progressChunk = progress / 15;
+        double progress = Math.min(100, ((double) currentPoints/nextRank) * 100);
+        int progressChunk = (int) progress / 15;
+        if (rankAchieved >= 50) {
+            progressChunk = 6;
+        }
         switch (progressChunk) {
             case 0 -> modifyStatButton0(statButtonItems, progress);
             case 1 -> modifyStatButton1(statButtonItems, progress - 15);
@@ -93,18 +117,38 @@ public class RankGUI {
         gui.update();
     }
 
-    private ItemStack createStatButton(UUID uuid, int rankAchieved, int currentPoints, int nextRank) {
+    private ItemStack createStatButton(int rankAchieved, int currentPoints, int nextRank) {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        double progress = Math.min(100, ((double) currentPoints / nextRank) * 100);
+        String formattedProgress = String.format("%.2f", progress);
+        if (meta != null) {
+            meta.setDisplayName("§2" + configManager.rankTable.get(rankAchieved).rankName() +
+                    " §7→ §4" + configManager.rankTable.get(rankAchieved + 1).rankName()
+            );
+            meta.setLore(List.of(
+                    "§8§m§l                            ",
+                    "§7Current Pts: §e" + String.format("%,d", currentPoints),
+                    "§7Next Rank: §e" + String.format("%,d", nextRank),
+                    "§7Remainder: §e" + String.format("%,d", Math.max(0, nextRank - currentPoints)) + " §7(§a" + formattedProgress + "%§7)",
+                    "§8§m§l                            "
+            ));
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private ItemStack createStatButton2(int rankAchieved, int currentPoints) {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§7Your Rank: §6" + configManager.rankTable.get(rankAchieved).rankName());
+            meta.setDisplayName("§2" + configManager.rankTable.get(rankAchieved).rankName());
             meta.setLore(List.of(
-                    "§8§m§l                    ",
+                    "§8§m§l                            ",
                     "§7Current Pts: §e" + currentPoints,
-                    "§7Next Rank: §e" + nextRank,
-                    "§7Remainder: §e" + Math.max(0, nextRank - currentPoints),
-                    "§7Progress: §e" + Math.min(100, (currentPoints / nextRank) * 100) + "%",
-                    "§8§m§l                    "
+                    "§7Next Rank: §e0",
+                    "§7Remainder: §e0",
+                    "§8§m§l                            "
             ));
             button.setItemMeta(meta);
         }
@@ -122,6 +166,17 @@ public class RankGUI {
         return button;
     }
 
+    private ItemStack createMaxed() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§cMaxed rank achieved!");
+            meta.setCustomModelData(10367);
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
     private ItemStack createNoAccess() {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
@@ -133,13 +188,15 @@ public class RankGUI {
         return button;
     }
 
-    private void processRankUp(Player player, int currentPoints, int nextRank) {
+    private void processRankUp(Player player, int currentPoints, int nextRank, String currentRankName, String nextRankName) {
         UUID uuid = player.getUniqueId();
 
         try {
             if (currentPoints >= nextRank) {
+                effectsUtil.sendTitleMessage(uuid, "<#00FFA2>Ranking Up", "<yellow>" + currentRankName + " <gray>→ <yellow>" + nextRankName);
                 statistics.incrementStatistics(uuid, 1);
                 effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.rankup_sounds", Sound.Source.PLAYER, 1.0f, 1.0f);
+                effectsUtil.spawnFireworks(uuid, 5, 5);
             } else {
                 player.sendMessage("§cThere was an error processing your rank-up. Please contact the administrator.");
             }
@@ -155,20 +212,20 @@ public class RankGUI {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§e§lInformation");
+            meta.setDisplayName("§6§lInformation");
             meta.setLore(List.of(
                     "§7Your points is calculated using the",
                     "§7following statistics:",
                     "",
-                    "§7• §aArchaeology Level: " + playerData.getArchLevel(uuid),
-                    "§7• §aBlocks Mined: " + statistics.getStatistics(uuid, 16),
-                    "§7• §aMaterials Found: " + statistics.getDropsObtained(uuid),
-                    "§7• §aExotic Found: " + statistics.getStatistics(uuid, 15),
-                    "§7• §aArtefacts Found: " + statistics.getStatistics(uuid, 17),
-                    "§7• §aArtefacts Restored: " + statistics.getStatistics(uuid, 18),
-                    "§7• §aMoney Earned: $" + statistics.getStatistics(uuid, 20),
-                    "§7• §aTaxes Paid: $" + statistics.getStatistics(uuid, 21),
-                    "§7• §aAptitude: " + playerData.getArchApt(uuid)
+                    "§7• §aArchaeology Level: §e" + playerData.getArchLevel(uuid),
+                    "§7• §aBlocks Mined: §e" + statistics.getStatistics(uuid, 16),
+                    "§7• §aMaterials Found: §e" + collectionLog.getDropsObtained(uuid),
+                    "§7• §aExotic Found: §e" + statistics.getStatistics(uuid, 15),
+                    "§7• §aArtefacts Found: §e" + statistics.getStatistics(uuid, 17),
+                    "§7• §aArtefacts Restored: §e" + statistics.getStatistics(uuid, 18),
+                    "§7• §aMoney Earned: §e$" + statistics.getStatistics(uuid, 20),
+                    "§7• §aTaxes Paid: §e$" + statistics.getStatistics(uuid, 21),
+                    "§7• §aAptitude: §e" + playerData.getArchApt(uuid)
             ));
             meta.setCustomModelData(10367);
             button.setItemMeta(meta);
@@ -181,13 +238,13 @@ public class RankGUI {
 
         double totalPoints = 0.0;
         // Archaeology Level
-        totalPoints += playerData.getArchLevel(uuid) * 800;
+        totalPoints += playerData.getArchLevel(uuid) * 8400;
         // Blocks Mined
         totalPoints += statistics.getStatistics(uuid, 16) * 0.2;
         // Drops/Materials Obtained
-        totalPoints += statistics.getDropsObtained(uuid) * 2;
+        totalPoints += collectionLog.getDropsObtained(uuid) * 2;
         // Exotic Found
-        totalPoints += statistics.getStatistics(uuid, 15) * 300;
+        totalPoints += collectionLog.getCollections(uuid, 7) * 300;
         // Artefacts Found
         totalPoints += statistics.getStatistics(uuid, 17) * 300;
         // Artefacts Restored
@@ -206,6 +263,11 @@ public class RankGUI {
     public void unloadData(UUID uuid) {
         if (!rankPointsMap.containsKey(uuid)) return;
         rankPointsMap.remove(uuid);
+    }
+
+    public void setRankPoints(UUID uuid, int points) {
+        rankPointsMap.remove(uuid);
+        rankPointsMap.put(uuid, points);
     }
 
     // Modifications

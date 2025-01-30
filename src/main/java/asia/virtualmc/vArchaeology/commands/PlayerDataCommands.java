@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.guis.RankGUI;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 
@@ -20,13 +21,18 @@ public class PlayerDataCommands {
     private final Main plugin;
     private final PlayerData playerData;
     private final TalentTree talentTree;
+    private final RankGUI rankGUI;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
-    public PlayerDataCommands(Main plugin, PlayerData playerData, TalentTree talentTree) {
+    public PlayerDataCommands(Main plugin,
+                              PlayerData playerData,
+                              TalentTree talentTree,
+                              RankGUI rankGUI) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.talentTree = talentTree;
+        this.rankGUI = rankGUI;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }
@@ -39,6 +45,7 @@ public class PlayerDataCommands {
                 .withSubcommand(archSetXPMul())
                 .withSubcommand(archResetStats())
                 .withSubcommand(archAddBonusXP())
+                .withSubcommand(archSetRankPoints())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -195,6 +202,24 @@ public class PlayerDataCommands {
 
                     talentTree.updateTalentLevel(target.getUniqueId(), talentID, level);
                     sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Talent " + talentID + " to level " + level)
+                            .color(TextColor.color(0, 255, 162)));
+                });
+    }
+
+    private CommandAPICommand archSetRankPoints() {
+        return new CommandAPICommand("rankpoints")
+                .withArguments(new MultiLiteralArgument("operation", "set"))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 0))
+                .withPermission("varchaeology.command.setrankpoints")
+                .executes((sender, args) -> {
+                    String operation = (String) args.get("operation");
+                    Player target = (Player) args.get("player");
+                    UUID targetUUID = target.getUniqueId();
+                    int value = (int) args.get("value");
+
+                    rankGUI.setRankPoints(targetUUID, value);
+                    sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Rank Points " + " to " + value)
                             .color(TextColor.color(0, 255, 162)));
                 });
     }

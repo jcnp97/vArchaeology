@@ -210,4 +210,15 @@ public class CollectionLog {
                 .merge(itemID, value, Integer::sum);
         updatePlayerData(playerUUID);
     }
+
+    public int getDropsObtained(UUID playerUUID) {
+        ConcurrentHashMap<Integer, Integer> drops = playerCollections.getOrDefault(playerUUID, new ConcurrentHashMap<>());
+        return drops.getOrDefault(1, 0) +
+                drops.getOrDefault(2, 0) +
+                drops.getOrDefault(3, 0) +
+                drops.getOrDefault(4, 0) +
+                drops.getOrDefault(5, 0) +
+                drops.getOrDefault(6, 0) +
+                drops.getOrDefault(7, 0);
+    }
 }
