@@ -151,4 +151,151 @@
   rankName: "Professor XIX"
 50:
   points: 990000
-  rankName: "Guildmaster"
+  rankName: "Guildmaster I"
+51:
+  points: 1026000
+  rankName: "Guildmaster II"
+52:
+  points: 1062000
+  rankName: "Guildmaster III"
+53:
+  points: 1098000
+  rankName: "Guildmaster IV"
+54:
+  points: 1134000
+  rankName: "Guildmaster V"
+55:
+  points: 1170000
+  rankName: "Guildmaster VI"
+56:
+  points: 1206000
+  rankName: "Guildmaster VII"
+57:
+  points: 1242000
+  rankName: "Guildmaster VIII"
+58:
+  points: 1278000
+  rankName: "Guildmaster IX"
+59:
+  points: 1314000
+  rankName: "Guildmaster X"
+60:
+  points: 1350000
+  rankName: "Guildmaster XI"
+61:
+  points: 1386000
+  rankName: "Guildmaster XII"
+62:
+  points: 1422000
+  rankName: "Guildmaster XIII"
+63:
+  points: 1458000
+  rankName: "Guildmaster XIV"
+64:
+  points: 1494000
+  rankName: "Guildmaster XV"
+65:
+  points: 1530000
+  rankName: "Guildmaster XVI"
+66:
+  points: 1566000
+  rankName: "Guildmaster XVII"
+67:
+  points: 1602000
+  rankName: "Guildmaster XVIII"
+68:
+  points: 1638000
+  rankName: "Guildmaster XIX"
+69:
+  points: 1674000
+  rankName: "Guildmaster XX"
+70:
+  points: 1710000
+  rankName: "Guildmaster XXI"
+71:
+  points: 1746000
+  rankName: "Guildmaster XXII"
+72:
+  points: 1782000
+  rankName: "Guildmaster XXIII"
+73:
+  points: 1818000
+  rankName: "Guildmaster XXIV"
+74:
+  points: 1854000
+  rankName: "Guildmaster XXV"
+75:
+  points: 1890000
+  rankName: "Guildmaster XXVI"
+76:
+  points: 1926000
+  rankName: "Guildmaster XXVII"
+77:
+  points: 1962000
+  rankName: "Guildmaster XXVIII"
+78:
+  points: 1998000
+  rankName: "Guildmaster XXIX"
+79:
+  points: 2034000
+  rankName: "Guildmaster XXX"
+80:
+  points: 2070000
+  rankName: "Guildmaster XXXI"
+81:
+  points: 2106000
+  rankName: "Guildmaster XXXII"
+82:
+  points: 2142000
+  rankName: "Guildmaster XXXIII"
+83:
+  points: 2178000
+  rankName: "Guildmaster XXXIV"
+84:
+  points: 2214000
+  rankName: "Guildmaster XXXV"
+85:
+  points: 2250000
+  rankName: "Guildmaster XXXVI"
+86:
+  points: 2286000
+  rankName: "Guildmaster XXXVII"
+87:
+  points: 2322000
+  rankName: "Guildmaster XXXVIII"
+88:
+  points: 2358000
+  rankName: "Guildmaster XXXIX"
+89:
+  points: 2394000
+  rankName: "Guildmaster XL"
+90:
+  points: 2430000
+  rankName: "Guildmaster XLI"
+91:
+  points: 2466000
+  rankName: "Guildmaster XLII"
+92:
+  points: 2502000
+  rankName: "Guildmaster XLIII"
+93:
+  points: 2538000
+  rankName: "Guildmaster XLIV"
+94:
+  points: 2574000
+  rankName: "Guildmaster XLV"
+95:
+  points: 2610000
+  rankName: "Guildmaster XLVI"
+96:
+  points: 2646000
+  rankName: "Guildmaster XLVII"
+97:
+  points: 2682000
+  rankName: "Guildmaster XLVIII"
+98:
+  points: 2718000
+  rankName: "Guildmaster XLIX"
+99:
+  points: 2754000
+  rankName: "Guildmaster L"

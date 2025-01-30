@@ -56,35 +56,21 @@ public class RankGUI {
         Map<Integer, GuiItem> statButtonItems = new HashMap<>();
         int rankAchieved = statistics.getStatistics(uuid, 1);
         int currentPoints = rankPointsMap.getOrDefault(uuid, 0);
-        int nextRank = configManager.rankTable.get(Math.min(rankAchieved + 1, 50)).pointsRequired();
-        String nextRankName = configManager.rankTable.get(Math.min(rankAchieved + 1, 50)).rankName();
+        int nextRank = configManager.rankTable.get(rankAchieved + 1).pointsRequired();
+        String nextRankName = configManager.rankTable.get(rankAchieved + 1).rankName();
         String currentRankName = configManager.rankTable.get(rankAchieved).rankName();
 
-        if (rankAchieved < 50) {
-            for (int x = 1; x <= 7; x++) {
-                ItemStack statButton = createStatButton(rankAchieved, currentPoints, nextRank);
-                GuiItem guiItem = new GuiItem(statButton);
-                staticPane.addItem(guiItem, x, 1);
-                statButtonItems.put(x, guiItem);
-            }
-        } else {
-            for (int x = 1; x <= 7; x++) {
-                ItemStack statButton = createStatButton2(rankAchieved, currentPoints);
-                GuiItem guiItem = new GuiItem(statButton);
-                staticPane.addItem(guiItem, x, 1);
-                statButtonItems.put(x, guiItem);
-            }
+        for (int x = 1; x <= 7; x++) {
+            ItemStack statButton = createStatButton(rankAchieved, currentPoints, nextRank);
+            GuiItem guiItem = new GuiItem(statButton);
+            staticPane.addItem(guiItem, x, 1);
+            statButtonItems.put(x, guiItem);
         }
 
-        if (currentPoints >= nextRank && rankAchieved < 50) {
+        if (currentPoints >= nextRank) {
             for (int x = 3; x <= 5; x++) {
                 ItemStack confirmButton = createConfirmButton();
                 staticPane.addItem(new GuiItem(confirmButton, event -> processRankUp(player, currentPoints, nextRank, currentRankName, nextRankName)), x, 2);
-            }
-        } else if (currentPoints >= nextRank) {
-            for (int x = 3; x <= 5; x++) {
-                ItemStack confirmButton = createMaxed();
-                staticPane.addItem(new GuiItem(confirmButton), x, 2);
             }
         } else {
             for (int x = 3; x <= 5; x++) {
@@ -102,9 +88,6 @@ public class RankGUI {
         // modifications
         double progress = Math.min(100, ((double) currentPoints/nextRank) * 100);
         int progressChunk = (int) progress / 15;
-        if (rankAchieved >= 50) {
-            progressChunk = 6;
-        }
         switch (progressChunk) {
             case 0 -> modifyStatButton0(statButtonItems, progress);
             case 1 -> modifyStatButton1(statButtonItems, progress - 15);
@@ -127,28 +110,17 @@ public class RankGUI {
                     " §7→ §4" + configManager.rankTable.get(rankAchieved + 1).rankName()
             );
             meta.setLore(List.of(
-                    "§8§m§l                            ",
+                    "§8§m§l                                           ",
                     "§7Current Pts: §e" + String.format("%,d", currentPoints),
                     "§7Next Rank: §e" + String.format("%,d", nextRank),
                     "§7Remainder: §e" + String.format("%,d", Math.max(0, nextRank - currentPoints)) + " §7(§a" + formattedProgress + "%§7)",
-                    "§8§m§l                            "
-            ));
-            button.setItemMeta(meta);
-        }
-        return button;
-    }
-
-    private ItemStack createStatButton2(int rankAchieved, int currentPoints) {
-        ItemStack button = new ItemStack(Material.PAPER);
-        ItemMeta meta = button.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName("§2" + configManager.rankTable.get(rankAchieved).rankName());
-            meta.setLore(List.of(
-                    "§8§m§l                            ",
-                    "§7Current Pts: §e" + currentPoints,
-                    "§7Next Rank: §e0",
-                    "§7Remainder: §e0",
-                    "§8§m§l                            "
+                    "§8§m§l                                           ",
+                    "§7You gain §a+" + String.format("%.1f", (double) (rankAchieved)) + "% §7XP per block-break.",
+                    "§7You gain §a+" + String.format("%.1f", (double) (rankAchieved) * 0.50) + "% §7XP per material drop.",
+                    "§7You gain §a+" + String.format("%.1f", (double) (rankAchieved) * 0.25) + "% §7XP per artefact restore.",
+                    "§7You gain §a+" + String.format("%.1f", (double) (rankAchieved) * 1.2) + "% §7tax reduction.",
+                    "§8§m§l                                           ",
+                    "§8Note: §7All bonuses are capped at Guildmaster I."
             ));
             button.setItemMeta(meta);
         }
@@ -160,17 +132,6 @@ public class RankGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§aConfirm rank-up");
-            meta.setCustomModelData(10367);
-            button.setItemMeta(meta);
-        }
-        return button;
-    }
-
-    private ItemStack createMaxed() {
-        ItemStack button = new ItemStack(Material.PAPER);
-        ItemMeta meta = button.getItemMeta();
-        if (meta != null) {
-            meta.setDisplayName("§cMaxed rank achieved!");
             meta.setCustomModelData(10367);
             button.setItemMeta(meta);
         }

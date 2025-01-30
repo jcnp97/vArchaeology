@@ -253,7 +253,7 @@ public class SellGUI implements Listener {
 
         double dropsBaseMultiplier = calcDropsSellMultiplier(uuid);
         double artefactsBaseMultiplier = calcArtefactsSellMultiplier(uuid);
-        double taxPercentage = (statistics.getStatistics(uuid, 1) * 1.2) / 100.0;
+        double taxPercentage = (Math.min(statistics.getStatistics(uuid, 1), 50) * 1.2) / 100.0;
 
         sellDataMap.put(uuid, new SellMultiplierData(dropsBaseMultiplier, artefactsBaseMultiplier, 0.75 - taxPercentage));
     }

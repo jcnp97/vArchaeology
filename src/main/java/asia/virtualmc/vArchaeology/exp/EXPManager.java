@@ -53,7 +53,7 @@ public class EXPManager {
         // Wisdom Trait: Block-break - 2% XP/level / Material-get - 1% XP/level / Artefact-restore: 0.5% XP/level
         int traitBonus = playerData.getWisdomTrait(playerUUID);
         // Rank Bonuses: 1% XP/level for both block-break and material-get, 0.25% XP/level for artefact-restore
-        int rankBonus = statistics.getStatistics(playerUUID, 1);
+        int rankBonus = Math.min(statistics.getStatistics(playerUUID, 1), 50);
         // XP Multiplier - global multiplier
         double archXPMul = playerData.getArchXPMul(playerUUID);
 
@@ -82,7 +82,7 @@ public class EXPManager {
 
         // Precompute the base multiplier for material-get EXP
         double materialGetBaseMultiplier =
-                (traitBonus * configManager.wisdomEffects[1] + (talentBonus2 * 2) + (rankBonus)) / 100.0
+                (traitBonus * configManager.wisdomEffects[1] + (talentBonus2 * 2) + (rankBonus * 0.5)) / 100.0
                         + archXPMul;
 
         MaterialGetData materialGetData = new MaterialGetData(
