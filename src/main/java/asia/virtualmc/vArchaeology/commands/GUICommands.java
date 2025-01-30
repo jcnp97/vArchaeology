@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.blocks.RestorationStation;
 import asia.virtualmc.vArchaeology.guis.*;
 
 import dev.jorel.commandapi.CommandAPICommand;
@@ -19,7 +20,7 @@ public class GUICommands {
     private final SellGUI sellGUI;
     private final SalvageGUI salvageGUI;
     private final TraitGUI traitGUI;
-    private final ArtefactRestorationGUI artefactRestorationGUI;
+    private final RestorationStation restorationStation;
     private final RankGUI rankGUI;
     private final Map<UUID, Long> commandCooldowns;
 
@@ -27,13 +28,13 @@ public class GUICommands {
                        SellGUI sellGUI,
                        SalvageGUI salvageGUI,
                        TraitGUI traitGUI,
-                       ArtefactRestorationGUI artefactRestorationGUI,
+                       RestorationStation restorationStation,
                        RankGUI rankGUI) {
         this.plugin = plugin;
         this.sellGUI = sellGUI;
         this.salvageGUI = salvageGUI;
         this.traitGUI = traitGUI;
-        this.artefactRestorationGUI = artefactRestorationGUI;
+        this.restorationStation = restorationStation;
         this.rankGUI = rankGUI;
         this.commandCooldowns = new HashMap<>();
         registerCommands();
@@ -128,7 +129,7 @@ public class GUICommands {
                 .withPermission("varchaeology.use")
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
-                        artefactRestorationGUI.openRestoreArtefact(player);
+                        restorationStation.openRestoreArtefact(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

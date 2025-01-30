@@ -1,6 +1,8 @@
 package asia.virtualmc.vArchaeology;
 
+import asia.virtualmc.vArchaeology.blocks.RestorationStation;
 import asia.virtualmc.vArchaeology.blocks.SalvageStation;
+import asia.virtualmc.vArchaeology.commands.BlockCommands;
 import asia.virtualmc.vArchaeology.commands.GUICommands;
 import asia.virtualmc.vArchaeology.commands.PlayerDataCommands;
 import asia.virtualmc.vArchaeology.commands.ItemCommands;
@@ -57,7 +59,7 @@ public final class Main extends JavaPlugin {
     private ItemEquipListener itemEquipListener;
     private PlayerInteractListener playerInteractListener;
     // blocks
-    private SalvageStation salvageStation;
+    private RestorationStation restorationStation;
     // exp
     private EXPManager expManager;
     // guis
@@ -66,7 +68,6 @@ public final class Main extends JavaPlugin {
     private SalvageGUI salvageGUI;
     private TraitGUI traitGUI;
     private LampStarGUI lampStarGUI;
-    private ArtefactRestorationGUI artefactRestorationGUI;
     private RankGUI rankGUI;
     // logs
     private LogManager logManager;
@@ -75,6 +76,7 @@ public final class Main extends JavaPlugin {
     // commands
     private PlayerDataCommands playerDataCommands;
     private GUICommands guiCommands;
+    private BlockCommands blockCommands;
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -104,7 +106,6 @@ public final class Main extends JavaPlugin {
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statistics = new Statistics(this, playerDataDB, configManager);
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statistics, configManager, salvageLog);
-        this.salvageStation = new SalvageStation(this, salvageGUI);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
@@ -116,11 +117,12 @@ public final class Main extends JavaPlugin {
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager);
-        this.artefactRestorationGUI = new ArtefactRestorationGUI(this, effectsUtil, expManager, artefactItems, playerData, statistics);
+        this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems);
+        this.blockCommands = new BlockCommands(this, restorationStation);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
-        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, artefactRestorationGUI, rankGUI);
+        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI);
 
         startUpdateTask();
     }
@@ -136,7 +138,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         CommandAPI.onDisable();
-        salvageStation.cleanupAllCooldowns();
+        restorationStation.cleanupAllCooldowns();
         if (playerData != null) {
             playerData.updateAllData();
         } else {

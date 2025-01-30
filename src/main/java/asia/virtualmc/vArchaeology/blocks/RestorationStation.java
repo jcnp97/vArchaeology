@@ -1,48 +1,240 @@
-package asia.virtualmc.vArchaeology.guis;
+package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
+
 import asia.virtualmc.vArchaeology.exp.EXPManager;
-import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.items.ArtefactItems;
+import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
-
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
+import eu.decentsoftware.holograms.api.DHAPI;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.text.DecimalFormat;
 import java.util.*;
 
-public class ArtefactRestorationGUI {
+public class RestorationStation implements Listener {
+
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final EXPManager expManager;
     private final PlayerData playerData;
     private final Statistics statistics;
     private final ArtefactItems artefactItems;
-    private final NamespacedKey ARTEFACT_KEY;
 
-    public ArtefactRestorationGUI(Main plugin,
-                                  EffectsUtil effectsUtil,
-                                  EXPManager expManager,
-                                  ArtefactItems artefactItems,
-                                  PlayerData playerData,
-                                  Statistics statistics) {
+    private final NamespacedKey ARTEFACT_KEY;
+    private Location restorationStationLocation;
+    private final Map<UUID, Hologram> activeHolograms;
+    private final Map<UUID, BukkitRunnable> activeCraftingTasks;
+    private final Map<UUID, Long> cooldowns;
+
+    public RestorationStation(Main plugin,
+                              EffectsUtil effectsUtil,
+                              EXPManager expManager,
+                              PlayerData playerData,
+                              Statistics statistics,
+                              ArtefactItems artefactItems) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.expManager = expManager;
-        this.artefactItems = artefactItems;
         this.playerData = playerData;
         this.statistics = statistics;
+        this.artefactItems = artefactItems;
+        this.activeHolograms = new HashMap<>();
+        this.activeCraftingTasks = new HashMap<>();
+        this.cooldowns = new HashMap<>();
         this.ARTEFACT_KEY = new NamespacedKey(plugin, "varch_artefact");
+
+        loadRestorationStation();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    private void loadRestorationStation() {
+        FileConfiguration config = plugin.getConfig();
+        if (config.contains("settings.interactableBlocks.restoration-station")) {
+            String[] coords = config.getString("settings.interactableBlocks.restoration-station").split(",");
+            try {
+                double x = Double.parseDouble(coords[0].trim());
+                double y = Double.parseDouble(coords[1].trim());
+                double z = Double.parseDouble(coords[2].trim());
+                this.restorationStationLocation = new Location(plugin.getServer().getWorlds().get(0), x, y, z);
+
+                if (x == 0 && y == 0 && z == 0) {
+                    plugin.getLogger().severe("Restoration station coordinates are (0, 0, 0). Block will not be created.");
+                    restorationStationLocation = null;
+                } else {
+                    ensureBlockExists();
+                }
+
+            } catch (NumberFormatException e) {
+                plugin.getLogger().severe("Invalid restoration station coordinates in config.yml");
+            }
+        } else {
+            plugin.getLogger().severe("No restoration station location found in config.yml.");
+            restorationStationLocation = null;
+        }
+    }
+
+    private void ensureBlockExists() {
+        if (restorationStationLocation != null) {
+            Block block = restorationStationLocation.getBlock();
+            if (block.getType() == Material.AIR) {
+                block.setType(Material.STONE);
+                plugin.getLogger().info("Created restoration station block at " + formatLocation(restorationStationLocation));
+            }
+        }
+    }
+
+    public void createRestorationStation(Player player) {
+        Block targetBlock = player.getTargetBlockExact(5);
+        if (targetBlock != null) {
+            Location blockLocation = targetBlock.getLocation();
+            FileConfiguration config = plugin.getConfig();
+            String locationString = String.format("%d, %d, %d",
+                    blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ());
+            config.set("settings.interactableBlocks.restoration-station", locationString);
+            plugin.saveConfig();
+
+            plugin.getLogger().info("Saved new restoration station location: " + locationString);
+            loadRestorationStation();
+        } else {
+            player.sendMessage("§cNo block in view to set as a restoration station!");
+        }
+    }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.getClickedBlock() == null) return;
+
+        Block clickedBlock = event.getClickedBlock();
+        Player player = event.getPlayer();
+        UUID playerUUID = player.getUniqueId();
+
+        if (restorationStationLocation != null && clickedBlock.getLocation().equals(restorationStationLocation)) {
+            event.setCancelled(true);
+
+            long currentTime = System.currentTimeMillis();
+            if (cooldowns.containsKey(playerUUID)) {
+                long lastInteraction = cooldowns.get(playerUUID);
+                if (currentTime - lastInteraction < 1000) {
+                    return;
+                }
+            }
+            if (activeCraftingTasks.containsKey(playerUUID)) {
+                player.sendMessage("§cYou are currently processing an artefact!");
+                return;
+            }
+            ItemStack mainHandItem = player.getInventory().getItemInMainHand();
+            if (mainHandItem.getType() == Material.AIR) {
+                return;
+            }
+
+            if (!mainHandItem.hasItemMeta() ||
+                    !mainHandItem.getItemMeta().getPersistentDataContainer().has(ARTEFACT_KEY, PersistentDataType.INTEGER)) {
+                return;
+            }
+            cooldowns.put(playerUUID, currentTime);
+            openRestoreArtefact(player);
+        }
+    }
+
+    public void startCrafting(Player player) {
+        Location holoLocation = restorationStationLocation.clone().add(0.5, 1.5, 0.5);
+        String holoName = "progress_hologram_" + player.getUniqueId();
+
+        String[] progressChars = {
+                "\uE0F2", // Stage 1
+                "\uE0F3", // Stage 2
+                "\uE0F4", // Stage 3
+                "\uE0F5", // Stage 4
+                "\uE0F6", // Stage 5
+                "\uE0F7", // Stage 6
+                "\uE0F8", // Stage 7
+                "\uE0F9"  // Stage 8
+        };
+        ArrayList<String> lines = new ArrayList<>();
+        lines.add(progressChars[0]);
+
+        try {
+            Hologram hologram = DHAPI.createHologram(holoName, holoLocation, lines);
+            hologram.setDefaultVisibleState(false);
+            hologram.setShowPlayer(player);
+
+            activeHolograms.put(player.getUniqueId(), hologram);
+
+            BukkitRunnable craftingTask = new BukkitRunnable() {
+                private int secondsPassed = 0;
+
+                @Override
+                public void run() {
+                    secondsPassed++;
+
+                    if (secondsPassed <= 8) {
+                        // Update using DHAPI
+                        DHAPI.setHologramLine(hologram, 0, progressChars[secondsPassed - 1]);
+
+                    } else if (secondsPassed == 9) {
+                        DHAPI.removeHologramLine(hologram, 0);
+                        DHAPI.addHologramLine(hologram, Material.DIAMOND);
+                        //DHAPI.addHologramLine(hologram, new ItemStack(Material.DIAMOND));
+
+                    } else {
+                        DHAPI.removeHologram(holoName);
+                        activeHolograms.remove(player.getUniqueId());
+
+                        player.getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
+                        player.sendMessage("You received a diamond!");
+
+                        activeCraftingTasks.remove(player.getUniqueId());
+                        this.cancel();
+                    }
+                }
+            };
+
+            activeCraftingTasks.put(player.getUniqueId(), craftingTask);
+            craftingTask.runTaskTimer(plugin, 0L, 20L);
+
+        } catch (Exception e) {
+            plugin.getLogger().severe("Error creating hologram: " + e.getMessage());
+            player.sendMessage("Error creating hologram. Please contact an administrator.");
+        }
+    }
+
+    public void cleanupAllCooldowns() {
+        for (BukkitRunnable task : activeCraftingTasks.values()) {
+            task.cancel();
+        }
+        activeCraftingTasks.clear();
+
+        for (Hologram hologram : activeHolograms.values()) {
+            DHAPI.removeHologram(hologram.getName());
+        }
+        activeHolograms.clear();
+        cooldowns.clear();
+    }
+
+    private String formatLocation(Location location) {
+        return String.format("(%.1f, %.1f, %.1f)",
+                location.getX(), location.getY(), location.getZ());
+    }
+
+    // GUI Methods
     public void openRestoreArtefact(Player player) {
         ItemStack item = player.getInventory().getItemInMainHand();
         if (artefactItems.getArtefactID(item) == 0) {
@@ -208,7 +400,8 @@ public class ArtefactRestorationGUI {
         try {
             if (finalXP > 0) {
                 player.getInventory().removeItem(item);
-                expManager.addRestorationXP(uuid, finalXP);
+                startCrafting(player);
+                delayedRestorationXP(uuid, finalXP);
             } else {
                 player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
             }
@@ -254,7 +447,8 @@ public class ArtefactRestorationGUI {
             if (finalXP > 0) {
                 statistics.subtractComponents(uuid, componentsRequired);
                 player.getInventory().removeItem(item);
-                expManager.addRestorationXP(uuid, finalXP);
+                startCrafting(player);
+                delayedRestorationXP(uuid, finalXP);
             } else {
                 player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
             }
@@ -308,5 +502,14 @@ public class ArtefactRestorationGUI {
             button.setItemMeta(meta);
         }
         return button;
+    }
+
+    private void delayedRestorationXP(UUID uuid, double finalXP) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                expManager.addRestorationXP(uuid, finalXP);
+            }
+        }.runTaskLater(plugin, 200L);
     }
 }
