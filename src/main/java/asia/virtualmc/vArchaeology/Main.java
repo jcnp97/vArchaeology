@@ -116,8 +116,8 @@ public final class Main extends JavaPlugin {
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
-        this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager);
-        this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems);
+        this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager, configManager);
+        this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager);
         this.blockCommands = new BlockCommands(this, restorationStation);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);

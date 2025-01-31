@@ -76,7 +76,7 @@ public class SellGUI implements Listener {
         lastGuiOpen.put(playerUUID, currentTime);
         double initialValue = calculateInventoryValue(player);
 
-        ChestGui gui = new ChestGui(5, "§f\uE0F1\uE0F1\uE053\uD833\uDEAF");
+        ChestGui gui = new ChestGui(5, configManager.sellGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane staticPane = createStaticPane(player, initialValue);
@@ -142,7 +142,7 @@ public class SellGUI implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§aSell Items");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "§7Current total: §2$" + totalValue,
                     "§eClick to sell all sellable items!"
@@ -157,7 +157,7 @@ public class SellGUI implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cClose");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;

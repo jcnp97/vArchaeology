@@ -1,6 +1,7 @@
 package asia.virtualmc.vArchaeology.guis;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 
@@ -20,13 +21,18 @@ public class LampStarGUI {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final EXPManager expManager;
+    private final ConfigManager configManager;
     private final NamespacedKey LAMP_KEY;
     private final NamespacedKey STAR_KEY;
 
-    public LampStarGUI(Main plugin, EffectsUtil effectsUtil, EXPManager expManager) {
+    public LampStarGUI(Main plugin,
+                       EffectsUtil effectsUtil,
+                       EXPManager expManager,
+                       ConfigManager configManager) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.expManager = expManager;
+        this.configManager = configManager;
         this.LAMP_KEY = new NamespacedKey(plugin, "varch_lamp");
         this.STAR_KEY = new NamespacedKey(plugin, "varch_star");
     }
@@ -36,10 +42,10 @@ public class LampStarGUI {
         int initialAmount = player.getInventory().getItemInMainHand().getAmount();
         double initialXP = expManager.getLampXP(uuid, lampType, initialAmount);
 
-        ChestGui gui = new ChestGui(2, "§fTest");
+        ChestGui gui = new ChestGui(3, configManager.confirmGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
-        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 3);
 
         for (int x = 1; x <= 3; x++) {
             ItemStack confirmButton = createConfirmButtonXP(initialXP, initialAmount);
@@ -63,7 +69,7 @@ public class LampStarGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§eUse §a" + amount + "x §eXP Lamps?");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "§7You will receive §6" + formattedXP + " XP§7."
             ));
@@ -104,10 +110,10 @@ public class LampStarGUI {
         int initialAmount = player.getInventory().getItemInMainHand().getAmount();
         int initialBXP = expManager.getStarXP(uuid, starType, initialAmount);
 
-        ChestGui gui = new ChestGui(2, "§fTest");
+        ChestGui gui = new ChestGui(3, configManager.confirmGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
-        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 3);
 
         for (int x = 1; x <= 3; x++) {
             ItemStack confirmButton = createConfirmButtonBXP(initialBXP, initialAmount);
@@ -131,7 +137,7 @@ public class LampStarGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§eUse §a" + amount + "x §eXP Stars?");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "§7You will receive §6" + formattedXP + " Bonus XP§7."
             ));
@@ -171,7 +177,7 @@ public class LampStarGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cClose");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;

@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
 
+import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.items.ArtefactItems;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
@@ -12,6 +13,7 @@ import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -37,7 +39,7 @@ public class RestorationStation implements Listener {
     private final PlayerData playerData;
     private final Statistics statistics;
     private final ArtefactItems artefactItems;
-
+    private final ConfigManager configManager;
     private final NamespacedKey ARTEFACT_KEY;
     private Location restorationStationLocation;
     private final Map<UUID, Hologram> activeHolograms;
@@ -49,13 +51,15 @@ public class RestorationStation implements Listener {
                               EXPManager expManager,
                               PlayerData playerData,
                               Statistics statistics,
-                              ArtefactItems artefactItems) {
+                              ArtefactItems artefactItems,
+                              ConfigManager configManager) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.expManager = expManager;
         this.playerData = playerData;
         this.statistics = statistics;
         this.artefactItems = artefactItems;
+        this.configManager = configManager;
         this.activeHolograms = new HashMap<>();
         this.activeCraftingTasks = new HashMap<>();
         this.cooldowns = new HashMap<>();
@@ -137,7 +141,7 @@ public class RestorationStation implements Listener {
                 }
             }
             if (activeCraftingTasks.containsKey(playerUUID)) {
-                player.sendMessage("§cYou are currently processing an artefact!");
+                player.sendMessage("§cYou are currently restoring an artefact!");
                 return;
             }
             ItemStack mainHandItem = player.getInventory().getItemInMainHand();
@@ -154,9 +158,10 @@ public class RestorationStation implements Listener {
         }
     }
 
-    public void startCrafting(Player player) {
+    private void startCrafting(Player player, double exp) {
         Location holoLocation = restorationStationLocation.clone().add(0.5, 1.5, 0.5);
-        String holoName = "progress_hologram_" + player.getUniqueId();
+        UUID uuid = player.getUniqueId();
+        String holoName = "progress_hologram_" + uuid;
 
         String[] progressChars = {
                 "\uE0F2", // Stage 1
@@ -177,6 +182,7 @@ public class RestorationStation implements Listener {
             hologram.setShowPlayer(player);
 
             activeHolograms.put(player.getUniqueId(), hologram);
+            effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.restoration_sounds", Sound.Source.PLAYER, 1.0f, 1.0f);
 
             BukkitRunnable craftingTask = new BukkitRunnable() {
                 private int secondsPassed = 0;
@@ -189,17 +195,25 @@ public class RestorationStation implements Listener {
                         // Update using DHAPI
                         DHAPI.setHologramLine(hologram, 0, progressChars[secondsPassed - 1]);
 
-                    } else if (secondsPassed == 9) {
-                        DHAPI.removeHologramLine(hologram, 0);
-                        DHAPI.addHologramLine(hologram, Material.DIAMOND);
-                        //DHAPI.addHologramLine(hologram, new ItemStack(Material.DIAMOND));
-
-                    } else {
+                    }
+//                    else if (secondsPassed == 9) {
+//                        DHAPI.removeHologramLine(hologram, 0);
+//                        DHAPI.addHologramLine(hologram, Material.DIAMOND);
+//                        //DHAPI.addHologramLine(hologram, new ItemStack(Material.DIAMOND));
+//
+//                    }
+                    else {
                         DHAPI.removeHologram(holoName);
                         activeHolograms.remove(player.getUniqueId());
+                        String formattedEXP = String.format("%.2f", exp);
 
-                        player.getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
-                        player.sendMessage("You received a diamond!");
+                        //player.getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
+                        //player.sendMessage("You received a diamond!");
+                        effectsUtil.spawnFireworks(uuid, 3, 3);
+                        effectsUtil.sendTitleMessage(uuid, "", "<#7CFEA7>You have received <gold>" +
+                                formattedEXP + " <#7CFEA7>XP!");
+                        expManager.addRestorationXP(uuid, exp);
+
 
                         activeCraftingTasks.remove(player.getUniqueId());
                         this.cancel();
@@ -236,32 +250,26 @@ public class RestorationStation implements Listener {
 
     // GUI Methods
     public void openRestoreArtefact(Player player) {
-        ItemStack item = player.getInventory().getItemInMainHand();
-        if (artefactItems.getArtefactID(item) == 0) {
-            player.sendMessage("§cError: Artefact not found in your main hand. Please try again.");
-            return;
-        }
-
         UUID uuid = player.getUniqueId();
         double initialXP = expManager.getTotalArtefactRestoreEXP(uuid);
         int archLevel = playerData.getArchLevel(uuid);
 
-        ChestGui gui = new ChestGui(4, "§fTest");
+        ChestGui gui = new ChestGui(4, configManager.arteRestoreGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
-        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 4);
 
         // type-1 restoration (Lv. 30)
         if (archLevel >= 30) {
             for (int x = 1; x <= 3; x++) {
                 ItemStack confirmButton = createType1Button(initialXP * 0.30);
                 GuiItem guiItem = new GuiItem(confirmButton, event -> openRestoreT1ArtefactConfirm(player, initialXP * 0.30));
-                staticPane.addItem(guiItem, x, 0);
+                staticPane.addItem(guiItem, x, 1);
             }
         } else {
             for (int x = 1; x <= 3; x++) {
                 ItemStack confirmButton = createNoAccessType1();
                 GuiItem guiItem = new GuiItem(confirmButton);
-                staticPane.addItem(guiItem, x, 0);
+                staticPane.addItem(guiItem, x, 1);
             }
         }
 
@@ -271,36 +279,36 @@ public class RestorationStation implements Listener {
             for (int x = 5; x <= 7; x++) {
                 ItemStack confirmButton = createType2Button(initialXP, componentsOwned);
                 GuiItem guiItem = new GuiItem(confirmButton, event -> openRestoreT2ArtefactConfirm(player, initialXP));
-                staticPane.addItem(guiItem, x, 0);
+                staticPane.addItem(guiItem, x, 1);
             }
         } else {
             for (int x = 5; x <= 7; x++) {
                 ItemStack confirmButton = createNoAccessType2();
                 GuiItem guiItem = new GuiItem(confirmButton);
-                staticPane.addItem(guiItem, x, 0);
+                staticPane.addItem(guiItem, x, 1);
             }
         }
 
         // close button
-        for (int x = 5; x <= 7; x++) {
+        for (int x = 3; x <= 5; x++) {
             ItemStack closeButton = createCloseButton();
-            staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 1);
+            staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 3);
         }
 
         gui.addPane(staticPane);
         gui.show(player);
     }
 
-    public void openRestoreT1ArtefactConfirm(Player player, double initialXP) {
-        ChestGui gui = new ChestGui(4, "§fTest");
+    private void openRestoreT1ArtefactConfirm(Player player, double initialXP) {
+        ChestGui gui = new ChestGui(3, configManager.confirmGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
-        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 3);
 
         // type-1 restoration (Lv. 30)
         for (int x = 1; x <= 3; x++) {
-            ItemStack confirmButton = createType1Button(initialXP * 0.30);
-            GuiItem guiItem = new GuiItem(confirmButton, event -> processType1Restore(player, initialXP * 0.30));
-            staticPane.addItem(guiItem, x, 0);
+            ItemStack confirmButton = createConfirmationButton();
+            GuiItem guiItem = new GuiItem(confirmButton, event -> processType1Restore(player));
+            staticPane.addItem(guiItem, x, 1);
         }
 
         // close button
@@ -313,16 +321,16 @@ public class RestorationStation implements Listener {
         gui.show(player);
     }
 
-    public void openRestoreT2ArtefactConfirm(Player player, double initialXP) {
-        ChestGui gui = new ChestGui(4, "§fTest");
+    private void openRestoreT2ArtefactConfirm(Player player, double initialXP) {
+        ChestGui gui = new ChestGui(3, configManager.confirmGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
-        StaticPane staticPane = new StaticPane(0, 0, 9, 2);
+        StaticPane staticPane = new StaticPane(0, 0, 9, 3);
 
         // type-2 restoration (Lv. 60)
-        for (int x = 5; x <= 7; x++) {
+        for (int x = 1; x <= 3; x++) {
             ItemStack confirmButton = createConfirmationButton();
-            GuiItem guiItem = new GuiItem(confirmButton, event -> processType2Restore(player, initialXP));
-            staticPane.addItem(guiItem, x, 0);
+            GuiItem guiItem = new GuiItem(confirmButton, event -> processType2Restore(player));
+            staticPane.addItem(guiItem, x, 1);
         }
 
         // close button
@@ -342,13 +350,13 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§eType-1 Restoration §7(§a+" + formattedXP + " XP§7)");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
-                    "§cDOES NOT REQUIRE §7components to restore an",
-                    "§7artefact but will most likely destroy it during",
-                    "§7the restoration process.",
+                    "§cDOES NOT REQUIRE §7components to use but it",
+                    "§7will not produce anything.",
                     "",
-                    "§4§lWARNING! §cThis will completely destroy your artefact."
+                    "§4§lWARNING! §cThis process completely destroy",
+                    "§cyour artefact."
             ));
             button.setItemMeta(meta);
         }
@@ -362,7 +370,7 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§eType-2 Restoration §7(§a+" + formattedXP + " XP§7)");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "§7This require the following components",
                     "§7to ensure a successful restoration process.",
@@ -380,84 +388,104 @@ public class RestorationStation implements Listener {
         return button;
     }
 
-    private void processType1Restore(Player player, double initialXP) {
+    private void processType1Restore(Player player) {
         UUID uuid = player.getUniqueId();
         ItemStack item = player.getInventory().getItemInMainHand();
         double finalXP = expManager.getTotalArtefactRestoreEXP(uuid) * 0.30;
 
-        if (initialXP != finalXP) {
-            player.sendMessage("§cError: Inventory has changed. Please reopen the GUI.");
-            player.closeInventory();
-            return;
-        }
-
-        if (artefactItems.getArtefactID(item) == 0) {
-            player.sendMessage("§cError: Artefact not found in your main hand. Please try again.");
-            player.closeInventory();
+        if (!canProcessRestoration(player, finalXP)) {
             return;
         }
 
         try {
-            if (finalXP > 0) {
-                player.getInventory().removeItem(item);
-                startCrafting(player);
-                delayedRestorationXP(uuid, finalXP);
-            } else {
-                player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
-            }
+            player.getInventory().removeItem(item);
+            startCrafting(player, finalXP);
         } catch (Exception e) {
-            player.sendMessage("§cAn error occurred while processing the restoration. Please try again.");
-            plugin.getLogger().severe("Error processing artefact restoration for " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
+            handleRestoreError(player, e);
+        } finally {
+            player.closeInventory();
         }
-        player.closeInventory();
     }
 
-    private void processType2Restore(Player player, double initialXP) {
+    private void processType2Restore(Player player) {
         UUID uuid = player.getUniqueId();
-        double finalXP = expManager.getTotalArtefactRestoreEXP(uuid);
         ItemStack item = player.getInventory().getItemInMainHand();
+        double finalXP = expManager.getTotalArtefactRestoreEXP(uuid);
 
-        if (initialXP != finalXP) {
-            player.sendMessage("§cError: Inventory has changed. Please reopen the GUI.");
-            player.closeInventory();
+        if (!canProcessRestoration(player, finalXP)) {
             return;
         }
 
-        if (artefactItems.getArtefactID(item) == 0) {
+        if (!validateComponents(player, uuid)) {
+            return;
+        }
+
+        try {
+            List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
+            statistics.subtractComponents(uuid, componentsRequired);
+            player.getInventory().removeItem(item);
+            startCrafting(player, finalXP);
+        } catch (Exception e) {
+            handleRestoreError(player, e);
+        } finally {
+            player.closeInventory();
+        }
+    }
+
+    private boolean canProcessRestoration(Player player, double finalXP) {
+        ItemStack itemMainHand = player.getInventory().getItemInMainHand();
+        int artefactID = artefactItems.getArtefactID(itemMainHand);
+
+        if (artefactID == 0 || artefactID > 8) {
             player.sendMessage("§cError: Artefact not found in your main hand. Please try again.");
             player.closeInventory();
-            return;
+            return false;
         }
 
+        if (finalXP <= 0) {
+            player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
+            player.closeInventory();
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateComponents(Player player, UUID uuid) {
         ArrayList<Integer> componentsOwned = new ArrayList<>(statistics.getComponents(uuid));
         List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
 
-        if (componentsOwned.size() == componentsRequired.size()) {
-            for (int i = 0; i < componentsOwned.size(); i++) {
-                if (componentsOwned.get(i) < componentsRequired.get(i)) {
-                    player.sendMessage("§cError: You do not have the required number of components to do this.");
-                    player.closeInventory();
-                    return;
-                }
-            }
+        if (componentsOwned.size() != componentsRequired.size() ||
+                !hasRequiredComponents(componentsOwned, componentsRequired)) {
+            player.sendMessage("§cError: You do not have the required number of components to do this.");
+            player.closeInventory();
+            return false;
         }
+        return true;
+    }
 
-        try {
-            if (finalXP > 0) {
-                statistics.subtractComponents(uuid, componentsRequired);
-                player.getInventory().removeItem(item);
-                startCrafting(player);
-                delayedRestorationXP(uuid, finalXP);
-            } else {
-                player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
+    private boolean hasRequiredComponents(List<Integer> owned, List<Integer> required) {
+        for (int i = 0; i < owned.size(); i++) {
+            if (owned.get(i) < required.get(i)) {
+                return false;
             }
-        } catch (Exception e) {
-            player.sendMessage("§cAn error occurred while processing the restoration. Please try again.");
-            plugin.getLogger().severe("Error processing artefact restoration for " + player.getName() + ": " + e.getMessage());
-            e.printStackTrace();
         }
-        player.closeInventory();
+        return true;
+    }
+
+    private void handleRestoreError(Player player, Exception e) {
+        player.sendMessage("§cAn error occurred while processing the restoration. Please try again.");
+        plugin.getLogger().severe("Error processing artefact restoration for " + player.getName() + ": " + e.getMessage());
+        e.printStackTrace();
+    }
+
+    private void scheduleXPReward(UUID uuid, double finalXP) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                expManager.addRestorationXP(uuid, finalXP);
+            }
+        }.runTaskLater(plugin, 200L);
     }
 
     private ItemStack createCloseButton() {
@@ -465,7 +493,7 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cClose");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
@@ -476,7 +504,7 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§aConfirm process.");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
@@ -487,7 +515,7 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cUnlocked at Lv. 30");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
@@ -498,18 +526,9 @@ public class RestorationStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cUnlocked at Lv. 60");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
-    }
-
-    private void delayedRestorationXP(UUID uuid, double finalXP) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                expManager.addRestorationXP(uuid, finalXP);
-            }
-        }.runTaskLater(plugin, 200L);
     }
 }

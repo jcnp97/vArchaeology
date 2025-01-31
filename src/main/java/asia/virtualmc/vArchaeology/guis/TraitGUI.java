@@ -42,7 +42,7 @@ public class TraitGUI implements Listener {
     }
 
     public void openInfoMode(Player player) {
-        ChestGui gui = new ChestGui(3, configManager.traitMenu);
+        ChestGui gui = new ChestGui(3, configManager.traitGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
         gui.addPane(createInfoPane(player));
         gui.show(player);
@@ -128,7 +128,7 @@ public class TraitGUI implements Listener {
         ItemStack upgradeButton = createButton(
                 availablePoints > 0 ? "§6Toggle Upgrade Mode §7(§ePoints Left: §a" + availablePoints + "§7)" : "§cYou do not have points to upgrade right now.",
                 Material.PAPER,
-                configManager.cancelModelData
+                configManager.invisibleModelData
         );
 
         for (int x = 1; x <= 3; x++) {
@@ -139,7 +139,7 @@ public class TraitGUI implements Listener {
         }
 
         // Add close buttons
-        ItemStack closeButton = createButton("§cClose", Material.PAPER, configManager.cancelModelData);
+        ItemStack closeButton = createButton("§cClose", Material.PAPER, configManager.invisibleModelData);
         for (int x = 5; x <= 7; x++) {
             pane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 2);
         }
@@ -165,7 +165,7 @@ public class TraitGUI implements Listener {
         remainingPoints = PlayerData.getTraitPoints(playerUUID);
         resetPoints();
 
-        ChestGui gui = new ChestGui(3, configManager.traitUp);
+        ChestGui gui = new ChestGui(3, configManager.traitGUIUpgrade);
         setupUpgradeGui(gui, player);
         gui.show(player);
     }
@@ -188,7 +188,7 @@ public class TraitGUI implements Listener {
     private void addUpgradeControlButtons(StaticPane pane, Player player) {
         UUID playerUUID = player.getUniqueId();
         // Confirm buttons (3 copies)
-        ItemStack confirmItem = createButton("Confirm", Material.PAPER, configManager.cancelModelData);
+        ItemStack confirmItem = createButton("Confirm", Material.PAPER, configManager.invisibleModelData);
         ItemMeta confirmMeta = confirmItem.getItemMeta();
         if (confirmMeta != null) {
             confirmMeta.setDisplayName("§aConfirm §7(§eRemaining Points: " + remainingPoints + "§7)");
@@ -209,7 +209,7 @@ public class TraitGUI implements Listener {
         }
 
         // Cancel buttons (3 copies)
-        ItemStack cancelItem = createButton("§cCancel", Material.PAPER, configManager.cancelModelData);
+        ItemStack cancelItem = createButton("§cCancel", Material.PAPER, configManager.invisibleModelData);
         for (int x = 5; x <= 7; x++) {
             pane.addItem(new GuiItem(cancelItem, event -> {
                 resetPoints();

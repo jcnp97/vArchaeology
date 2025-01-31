@@ -41,7 +41,7 @@ public class SalvageGUI implements Listener {
     }
 
     public void openComponentsGUI(Player player) {
-        ChestGui gui = new ChestGui(5, configManager.compMenu);
+        ChestGui gui = new ChestGui(5, configManager.salvageGUIComp);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane staticPane = createStaticPaneComponents(player);
@@ -80,7 +80,7 @@ public class SalvageGUI implements Listener {
 
         if (meta != null) {
             meta.setDisplayName("§eInformation");
-            meta.setCustomModelData(configManager.confirmModelData);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "§7Components are typically used to",
                     "§7craft tools, augments, or restore",
@@ -114,7 +114,7 @@ public class SalvageGUI implements Listener {
         Map<Integer, Integer> initialValue = calculateInventoryValue(player);
 
         //ChestGui gui = new ChestGui(5, "§f\uE0F1\uE0F1\uE053\uE0FA");
-        ChestGui gui = new ChestGui(5, configManager.salvageMenu);
+        ChestGui gui = new ChestGui(5, configManager.salvageGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane staticPane = createStaticPane(player, initialValue);
@@ -197,7 +197,7 @@ public class SalvageGUI implements Listener {
 
         if (meta != null) {
             meta.setDisplayName("§aSalvage Items §f\uE072");
-            meta.setCustomModelData(configManager.confirmModelData);
+            meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
                     "",
                     "§7You will receive:",
@@ -219,7 +219,7 @@ public class SalvageGUI implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cClose");
-            meta.setCustomModelData(configManager.cancelModelData);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;

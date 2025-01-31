@@ -48,13 +48,13 @@ public class RankGUI {
 
         if (!rankPointsMap.containsKey(uuid)) loadData(uuid);
 
-        ChestGui gui = new ChestGui(4, "§f\uE0F1\uE0F1\uE053\uE0FE");
+        ChestGui gui = new ChestGui(4, configManager.rankGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
 
         StaticPane staticPane = new StaticPane(0, 0, 9, 4);
 
         Map<Integer, GuiItem> statButtonItems = new HashMap<>();
-        int rankAchieved = statistics.getStatistics(uuid, 1);
+        int rankAchieved = Math.min(statistics.getStatistics(uuid, 1), 50);
         int currentPoints = rankPointsMap.getOrDefault(uuid, 0);
         int nextRank = configManager.rankTable.get(rankAchieved + 1).pointsRequired();
         String nextRankName = configManager.rankTable.get(rankAchieved + 1).rankName();
@@ -132,7 +132,7 @@ public class RankGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§aConfirm rank-up");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
@@ -143,7 +143,7 @@ public class RankGUI {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName("§cNot enough points!");
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;
@@ -188,7 +188,7 @@ public class RankGUI {
                     "§7• §aTaxes Paid: §e$" + statistics.getStatistics(uuid, 21),
                     "§7• §aAptitude: §e" + playerData.getArchApt(uuid)
             ));
-            meta.setCustomModelData(10367);
+            meta.setCustomModelData(configManager.invisibleModelData);
             button.setItemMeta(meta);
         }
         return button;

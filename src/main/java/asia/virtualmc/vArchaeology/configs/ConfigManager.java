@@ -31,15 +31,15 @@ public class ConfigManager {
     public int[] dropWeights = {0, 0, 0, 0, 0, 0, 0};
     public double[] dropBasePrice = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
     // guis.yml
-    public String salvageMenu;
-    public String compMenu;
-    public String traitMenu;
-    public String traitUp;
-    public String salvageSound;
-    public String confirmMaterial;
-    public int confirmModelData;
-    public String cancelMaterial;
-    public int cancelModelData;
+    public int invisibleModelData;
+    public String salvageGUITitle;
+    public String salvageGUIComp;
+    public String traitGUITitle;
+    public String traitGUIUpgrade;
+    public String rankGUITitle;
+    public String sellGUITitle;
+    public String confirmGUITitle;
+    public String arteRestoreGUITitle;
     // traits.yml
     public double[] wisdomEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] charismaEffects = {0.0, 0.0, 0.0, 0.0};
@@ -190,15 +190,15 @@ public class ConfigManager {
         }
         FileConfiguration gui = YamlConfiguration.loadConfiguration(dropsFile);
         try {
-            confirmMaterial = gui.getString("guiSettings.confirm-material", "EMERALD");
-            cancelMaterial = gui.getString("guiSettings.cancel-material", "REDSTONE_BLOCK");
-            confirmModelData = gui.getInt("guiSettings.confirm-model_data", 1);
-            cancelModelData = gui.getInt("guiSettings.cancel-model_data", 1);
-            salvageMenu = gui.getString("guiSettings.salvage_station.menuTitle", "Salvage GUI");
-            compMenu = gui.getString("guiSettings.salvage_station.menuTitle-components", "Components GUI");
-            traitMenu = gui.getString("guiSettings.traitGUI.menuTitle", "Traits GUI");
-            traitUp = gui.getString("guiSettings.traitGUI.upgradeTitle", "Traits GUI");
-            salvageSound = gui.getString("guiSettings.salvage_station.soundOnClick", "minecraft:block.anvil.use");
+            invisibleModelData = gui.getInt("guiSettings.invisible-model_data", 1);
+            salvageGUITitle = gui.getString("guiSettings.salvagegui-title", "Salvage GUI");
+            salvageGUIComp = gui.getString("guiSettings.salvagegui-comp", "Components GUI");
+            traitGUITitle = gui.getString("guiSettings.traitgui-title", "Traits GUI");
+            traitGUIUpgrade = gui.getString("guiSettings.traitgui-upgrade", "Traits Upgrade");
+            rankGUITitle = gui.getString("guiSettings.rankgui-title", "Rank GUI");
+            sellGUITitle = gui.getString("guiSettings.sellgui-title", "Sell GUI");
+            confirmGUITitle = gui.getString("guiSettings.confirmgui-title", "Are you sure?");
+            arteRestoreGUITitle = gui.getString("guiSettings.artefact-restoregui-title", "Restore Artefacts GUI");
         } catch (Exception e) {
             e.printStackTrace();
         }
