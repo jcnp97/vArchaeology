@@ -1,0 +1,181 @@
+# vArchaeology Collections
+globalSettings:
+  generate-models: true
+  starting-model-data: 110000
+collectionList:
+  1: # groupID
+    material: FLINT # material
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections: # list of collections under groupID
+      - "Centurion's Sword"
+      - "Centurion's Seal"
+      - "Venator Crossbow"
+      - "Venator Dagger"
+      - "Primis Standard"
+      - "Legionary Gladius"
+      - "Legionary Shield"
+      - "Zaros Effigy"
+      - "Hookah Pipe"
+      - "Wine Goblet"
+      - "Crest of Dagon"
+      - "Training Dummy"
+  2:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Disorder Painting"
+      - "Legatus Figurine"
+      - "Solem in Umbra Painting"
+      - "Imp Mask"
+      - "Lesser Demon Mask"
+      - "Greater Demon Mask"
+      - "Teleportation Crystal"
+      - "Ritual Dagger"
+      - "Ritual Bell"
+      - "Rod of Asclepius"
+      - "Chaotic Ewer"
+      - "Songbird Recorder"
+  3:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Frying Pan"
+      - "Hallowed Lantern"
+      - "Branding Iron"
+      - "Manacles"
+      - "Ancient Timepiece"
+      - "Legatus Pendant"
+      - "Ceremonial Ornament"
+      - "Dragonkin Device"
+      - "Peacock Parasol"
+      - "Ceremonial Plume"
+      - "Aviansie Dreamcoat"
+      - "Strange Totem"
+  4:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Everlight Harp"
+      - "Everlight Trumpet"
+      - "Everlight Violin"
+      - "Folded-Arm Figurine"
+      - "Incite Fear Spell Scroll"
+      - "Pontifex Signet Ring"
+      - "Curse Tablet"
+      - "Dominion Discus"
+      - "Dominarian Device"
+      - "Fishing Trident"
+      - "Herobrine's Book"
+      - "Friendship Bracelet"
+  5:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Urn of Shadow"
+      - "Urn of Smoke"
+      - "Urn of Blood"
+      - "Urn of Ice"
+      - "Urn of Miasma"
+      - "Hand of the Ancients"
+      - "Decorative Amphora"
+      - "Loarnab Rod"
+      - "Lingam Stone"
+      - "Demon's Cube"
+      - "Alchemist Flask"
+      - "Animate Dead Spell Scroll"
+  6:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "The Lake of Fire Painting"
+      - "Inquisitor's Ceremonial Armor"
+      - "Inquisitor's Ceremonial Mask"
+      - "Inquisitor's Seal"
+      - "Gladiator Helmet"
+      - "Gladiator Sword"
+      - "Model Chariot"
+      - "Chaos Star"
+      - "Eudoxian Tablet"
+      - "Soul Scroll"
+      - "Dragon Hook Sword"
+      - "Hobgoblin Sword"
+  7:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Raksha Idol"
+      - "Gold Dish"
+      - "Xolo Spear"
+      - "Ancient Globe"
+      - "Spherical Astrolabe"
+      - "Tsutsaroth Helm"
+      - "Spear of Annihilation"
+      - "Praetorian Staff"
+      - "Kontos Lance"
+      - "Doru Spear"
+      - "Tsutsaroth Urumi"
+      - "Tsutsaroth Pauldron"
+  8:
+    material: FLINT
+    lore:
+      - '&cArchaeology Collection'
+      - ''
+      - '&7When right-clicking this item, you can:'
+      - '&7• &eOffer to monolith for talent points'
+      - '&7• &eSell to Archaeology Collectors for USD'
+      - '&7• &eConvert to component for augmentations'
+    collections:
+      - "Xolo Hard Hat"
+      - "Prototype Godsword"
+      - "Prototype Godstaff"
+      - "Prototype Godbow"
+      - "Night Goggles"
+      - "Master Control"
+      - "Comfort Gatestone"
+      - "The Lord of Light Painting"
+      - "Xolo Shield"
+      - "Ancient Cooking Pot"
+      - "Battle Plans"
+      - "War God Sculpture"

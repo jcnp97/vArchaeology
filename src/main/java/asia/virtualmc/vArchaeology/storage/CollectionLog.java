@@ -4,6 +4,7 @@ import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 
+import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,12 +19,17 @@ public class CollectionLog {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final ConfigManager configManager;
+    private final EffectsUtil effectsUtil;
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> playerCollections;
 
-    public CollectionLog(Main plugin, PlayerDataDB playerDataDB, ConfigManager configManager) {
+    public CollectionLog(Main plugin,
+                         PlayerDataDB playerDataDB,
+                         ConfigManager configManager,
+                         EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.configManager = configManager;
+        this.effectsUtil = effectsUtil;
         this.playerCollections = new ConcurrentHashMap<>();
         createCollectionTables();
     }
@@ -200,9 +206,14 @@ public class CollectionLog {
     }
 
     public void incrementCollection(UUID playerUUID, int itemID) {
-        playerCollections.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
-                .merge(itemID, 1, Integer::sum);
-        updatePlayerData(playerUUID);
+        playerCollections.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>());
+        Map<Integer, Integer> collections = playerCollections.get(playerUUID);
+        collections.putIfAbsent(itemID, 0);
+
+        if (collections.get(itemID) == 0) {
+            effectsUtil.sendCustomToast(playerUUID, configManager.startingModelData + (itemID - 8));
+        }
+        collections.merge(itemID, 1, Integer::sum);
     }
 
     public void addCollection(UUID playerUUID, int itemID, int value) {

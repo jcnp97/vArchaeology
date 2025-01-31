@@ -2,10 +2,7 @@ package asia.virtualmc.vArchaeology.commands;
 
 import asia.virtualmc.vArchaeology.Main;
 
-import asia.virtualmc.vArchaeology.items.CustomCharms;
-import asia.virtualmc.vArchaeology.items.CustomItems;
-import asia.virtualmc.vArchaeology.items.CustomTools;
-import asia.virtualmc.vArchaeology.items.MiscItems;
+import asia.virtualmc.vArchaeology.items.*;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 
@@ -17,17 +14,20 @@ public class ItemCommands {
     private final CustomCharms customCharms;
     private final CustomItems customItems;
     private final MiscItems miscItems;
+    private final ArtefactCollections artefactCollections;
 
     public ItemCommands(Main plugin,
                         CustomItems customItems,
                         CustomTools customTools,
                         CustomCharms customCharms,
-                        MiscItems miscItems) {
+                        MiscItems miscItems,
+                        ArtefactCollections artefactCollections) {
         this.plugin = plugin;
         this.customItems = customItems;
         this.customTools = customTools;
         this.customCharms = customCharms;
         this.miscItems = miscItems;
+        this.artefactCollections = artefactCollections;
         registerCommands();
     }
 
@@ -38,6 +38,7 @@ public class ItemCommands {
                 .withSubcommand(archGetCharm())
                 .withSubcommand(archGetLamps())
                 .withSubcommand(archGetStars())
+                .withSubcommand(archGetCollection())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -189,5 +190,21 @@ public class ItemCommands {
             case "huge" -> 4;
             default -> throw new IllegalArgumentException("Unknown item: " + name);
         };
+    }
+
+    private CommandAPICommand archGetCollection() {
+        return new CommandAPICommand("getcollection")
+                .withArguments(new IntegerArgument("item_id", 1))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getcollection")
+                .executes((sender, args) -> {
+                    int itemID = (int) args.get("item_id");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    sender.sendMessage("Attempting to give " + value + " of " + itemID + " to " + target.getName());
+                    artefactCollections.giveCollection(target.getUniqueId(), itemID, value);
+                });
     }
 }

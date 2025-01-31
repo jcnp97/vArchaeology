@@ -5,6 +5,7 @@ import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,6 +52,7 @@ public class ConfigManager {
     // others
     public String pluginPrefix = "<#0040FF>[vArch<#00FBFF>aeology] ";
     public boolean configDebug;
+    public int startingModelData;
 
     public ConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -69,6 +71,8 @@ public class ConfigManager {
         readGUISettings();
         readTraitSettings();
         readRanks();
+        // Read variable
+        startingModelData = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "items/collections.yml")).getInt("globalSettings.starting-model-data", 1);
     }
 
     public void readDatabase() {

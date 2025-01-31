@@ -2,12 +2,12 @@ package asia.virtualmc.vArchaeology.utilities;
 
 import asia.virtualmc.vArchaeology.Main;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.World;
+import com.fren_gor.ultimateAdvancementAPI.advancement.display.AdvancementDisplay;
+import com.fren_gor.ultimateAdvancementAPI.advancement.display.AdvancementFrameType;
+import org.bukkit.*;
 import org.bukkit.entity.Firework;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -19,16 +19,18 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
-import me.clip.placeholderapi.PlaceholderAPI;
+import com.fren_gor.ultimateAdvancementAPI.UltimateAdvancementAPI;
 
 import java.util.UUID;
 
 public class EffectsUtil {
 
     private final Main plugin;
+    private UltimateAdvancementAPI uaapi;
 
     public EffectsUtil(Main plugin) {
         this.plugin = plugin;
+        this.uaapi = UltimateAdvancementAPI.getInstance(plugin);
     }
 
     public void spawnFireworks(UUID uuid, int amount, long interval) {
@@ -121,6 +123,19 @@ public class EffectsUtil {
         }
         Component messageComponent = MiniMessage.miniMessage().deserialize(message);
         player.sendMessage(messageComponent);
+    }
+
+    public void sendCustomToast(UUID uuid, int modelData) {
+        ItemStack icon = new ItemStack(Material.FLINT);
+        Player player = Bukkit.getPlayer(uuid);
+
+        ItemMeta meta = icon.getItemMeta();
+        if (meta != null) {
+            meta.setCustomModelData(modelData);
+            icon.setItemMeta(meta);
+        }
+        uaapi.displayCustomToast(player, icon, "Collection Log Updated", AdvancementFrameType.GOAL);
+        playSound(player, "minecraft:cozyvanilla.collection_log_updated", Sound.Source.PLAYER, 1.0f, 1.0f);
     }
 
     public void sendADBProgressBarTitle(UUID playerUUID, double adbProgress, double adbAdd) {

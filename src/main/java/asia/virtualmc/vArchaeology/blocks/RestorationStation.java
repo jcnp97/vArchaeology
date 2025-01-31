@@ -4,15 +4,18 @@ import asia.virtualmc.vArchaeology.Main;
 
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
+import asia.virtualmc.vArchaeology.items.ArtefactCollections;
 import asia.virtualmc.vArchaeology.items.ArtefactItems;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
+
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
+
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -40,11 +43,13 @@ public class RestorationStation implements Listener {
     private final Statistics statistics;
     private final ArtefactItems artefactItems;
     private final ConfigManager configManager;
+    private final ArtefactCollections artefactCollections;
     private final NamespacedKey ARTEFACT_KEY;
     private Location restorationStationLocation;
     private final Map<UUID, Hologram> activeHolograms;
     private final Map<UUID, BukkitRunnable> activeCraftingTasks;
     private final Map<UUID, Long> cooldowns;
+    private final Random random;
 
     public RestorationStation(Main plugin,
                               EffectsUtil effectsUtil,
@@ -52,7 +57,8 @@ public class RestorationStation implements Listener {
                               PlayerData playerData,
                               Statistics statistics,
                               ArtefactItems artefactItems,
-                              ConfigManager configManager) {
+                              ConfigManager configManager,
+                              ArtefactCollections artefactCollections) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.expManager = expManager;
@@ -60,9 +66,11 @@ public class RestorationStation implements Listener {
         this.statistics = statistics;
         this.artefactItems = artefactItems;
         this.configManager = configManager;
+        this.artefactCollections = artefactCollections;
         this.activeHolograms = new HashMap<>();
         this.activeCraftingTasks = new HashMap<>();
         this.cooldowns = new HashMap<>();
+        this.random = new Random();
         this.ARTEFACT_KEY = new NamespacedKey(plugin, "varch_artefact");
 
         loadRestorationStation();
@@ -158,7 +166,7 @@ public class RestorationStation implements Listener {
         }
     }
 
-    private void startCrafting(Player player, double exp) {
+    private void startCrafting(Player player, double exp, boolean isType2Crafting, int collectionID) {
         Location holoLocation = restorationStationLocation.clone().add(0.5, 1.5, 0.5);
         UUID uuid = player.getUniqueId();
         String holoName = "progress_hologram_" + uuid;
@@ -192,28 +200,24 @@ public class RestorationStation implements Listener {
                     secondsPassed++;
 
                     if (secondsPassed <= 8) {
-                        // Update using DHAPI
                         DHAPI.setHologramLine(hologram, 0, progressChars[secondsPassed - 1]);
 
                     }
-//                    else if (secondsPassed == 9) {
-//                        DHAPI.removeHologramLine(hologram, 0);
-//                        DHAPI.addHologramLine(hologram, Material.DIAMOND);
-//                        //DHAPI.addHologramLine(hologram, new ItemStack(Material.DIAMOND));
-//
-//                    }
+                    else if (secondsPassed == 9 && isType2Crafting) {
+                        DHAPI.removeHologramLine(hologram, 0);
+                        String hologramItem = "#ICON: FLINT {CustomModelData:" + artefactCollections.getCollectionModelData(collectionID) + "}";
+                        DHAPI.addHologramLine(hologram, hologramItem);
+                    }
                     else {
                         DHAPI.removeHologram(holoName);
                         activeHolograms.remove(player.getUniqueId());
                         String formattedEXP = String.format("%.2f", exp);
 
-                        //player.getInventory().addItem(new ItemStack(Material.DIAMOND, 1));
-                        //player.sendMessage("You received a diamond!");
                         effectsUtil.spawnFireworks(uuid, 3, 3);
                         effectsUtil.sendTitleMessage(uuid, "", "<#7CFEA7>You have received <gold>" +
                                 formattedEXP + " <#7CFEA7>XP!");
                         expManager.addRestorationXP(uuid, exp);
-
+                        if (isType2Crafting) artefactCollections.giveCollection(uuid, collectionID, 1);
 
                         activeCraftingTasks.remove(player.getUniqueId());
                         this.cancel();
@@ -399,7 +403,7 @@ public class RestorationStation implements Listener {
 
         try {
             player.getInventory().removeItem(item);
-            startCrafting(player, finalXP);
+            startCrafting(player, finalXP, false, getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
             handleRestoreError(player, e);
         } finally {
@@ -421,15 +425,29 @@ public class RestorationStation implements Listener {
         }
 
         try {
+            player.getInventory().removeItem(item);
             List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
             statistics.subtractComponents(uuid, componentsRequired);
-            player.getInventory().removeItem(item);
-            startCrafting(player, finalXP);
+            startCrafting(player, finalXP, true, getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
             handleRestoreError(player, e);
         } finally {
             player.closeInventory();
         }
+    }
+
+    private int getRandomCollection(int artefactID) {
+        switch (artefactID) {
+            case 1 -> { return random.nextInt(1, 13); }
+            case 2 -> { return random.nextInt(13, 25); }
+            case 3 -> { return random.nextInt(25, 37); }
+            case 4 -> { return random.nextInt(37, 49); }
+            case 5 -> { return random.nextInt(49, 61); }
+            case 6 -> { return random.nextInt(61, 73); }
+            case 7 -> { return random.nextInt(73, 85); }
+            case 8 -> { return random.nextInt(85, 97); }
+        }
+        return 0;
     }
 
     private boolean canProcessRestoration(Player player, double finalXP) {
@@ -477,15 +495,6 @@ public class RestorationStation implements Listener {
         player.sendMessage("§cAn error occurred while processing the restoration. Please try again.");
         plugin.getLogger().severe("Error processing artefact restoration for " + player.getName() + ": " + e.getMessage());
         e.printStackTrace();
-    }
-
-    private void scheduleXPReward(UUID uuid, double finalXP) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                expManager.addRestorationXP(uuid, finalXP);
-            }
-        }.runTaskLater(plugin, 200L);
     }
 
     private ItemStack createCloseButton() {

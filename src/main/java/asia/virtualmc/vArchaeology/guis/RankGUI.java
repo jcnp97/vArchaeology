@@ -181,7 +181,7 @@ public class RankGUI {
                     "§7• §aArchaeology Level: §e" + playerData.getArchLevel(uuid),
                     "§7• §aBlocks Mined: §e" + statistics.getStatistics(uuid, 16),
                     "§7• §aMaterials Found: §e" + collectionLog.getDropsObtained(uuid),
-                    "§7• §aExotic Found: §e" + statistics.getStatistics(uuid, 15),
+                    "§7• §aExotic Found: §e" + collectionLog.getCollections(uuid, 7),
                     "§7• §aArtefacts Found: §e" + statistics.getStatistics(uuid, 17),
                     "§7• §aArtefacts Restored: §e" + statistics.getStatistics(uuid, 18),
                     "§7• §aMoney Earned: §e$" + statistics.getStatistics(uuid, 20),

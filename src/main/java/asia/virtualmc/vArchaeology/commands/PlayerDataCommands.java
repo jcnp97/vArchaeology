@@ -5,6 +5,7 @@ import asia.virtualmc.vArchaeology.guis.RankGUI;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 
+import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.*;
 
@@ -22,17 +23,20 @@ public class PlayerDataCommands {
     private final PlayerData playerData;
     private final TalentTree talentTree;
     private final RankGUI rankGUI;
+    private final EffectsUtil effectsUtil;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
 
     public PlayerDataCommands(Main plugin,
                               PlayerData playerData,
                               TalentTree talentTree,
-                              RankGUI rankGUI) {
+                              RankGUI rankGUI,
+                              EffectsUtil effectsUtil) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.talentTree = talentTree;
         this.rankGUI = rankGUI;
+        this.effectsUtil = effectsUtil;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
     }

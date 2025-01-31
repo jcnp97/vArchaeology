@@ -45,6 +45,7 @@ public final class Main extends JavaPlugin {
     private MiscItems miscItems;
     private ArtefactItems artefactItems;
     private ItemCommands itemCommands;
+    private ArtefactCollections artefactCollections;
     // utils
     private BossBarUtil bossBarUtil;
     private EffectsUtil effectsUtil;
@@ -97,7 +98,7 @@ public final class Main extends JavaPlugin {
         this.customItems = new CustomItems(this);
         this.miscItems = new MiscItems(this);
         this.artefactItems = new ArtefactItems(this, effectsUtil);
-        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems);
+        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections);
         this.miscListener = new MiscListener(this);
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
@@ -110,14 +111,15 @@ public final class Main extends JavaPlugin {
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
-        this.collectionLog = new CollectionLog(this, playerDataDB, configManager);
+        this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
+        this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
-        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI);
+        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager, configManager);
-        this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager);
+        this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager, artefactCollections);
         this.blockCommands = new BlockCommands(this, restorationStation);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);

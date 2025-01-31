@@ -235,15 +235,4 @@ public class Statistics {
         statsMap.merge(8, -componentsRequired.get(6), Integer::sum);
         updatePlayerData(playerUUID);
     }
-
-//    public int getDropsObtained(UUID playerUUID) {
-//        ConcurrentHashMap<Integer, Integer> stats = playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>());
-//        return stats.getOrDefault(9, 0) +
-//                stats.getOrDefault(10, 0) +
-//                stats.getOrDefault(11, 0) +
-//                stats.getOrDefault(12, 0) +
-//                stats.getOrDefault(13, 0) +
-//                stats.getOrDefault(14, 0) +
-//                stats.getOrDefault(15, 0);
-//    }
 }

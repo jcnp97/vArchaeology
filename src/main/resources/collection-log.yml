@@ -13,13 +13,17 @@ collectionList:
 
   # Collection # 1
   - "Centurion's Sword"
+  - "Centurion's Seal"
   - "Venator Crossbow"
+  - "Venator Dagger"
   - "Primis Standard"
   - "Legionary Gladius"
+  - "Legionary Shield"
   - "Zaros Effigy"
   - "Hookah Pipe"
   - "Wine Goblet"
   - "Crest of Dagon"
+  - "Training Dummy"
 
   # Collection # 2
   - "Disorder Painting"
@@ -30,6 +34,10 @@ collectionList:
   - "Greater Demon Mask"
   - "Teleportation Crystal"
   - "Ritual Dagger"
+  - "Ritual Bell"
+  - "Rod of Asclepius"
+  - "Chaotic Ewer"
+  - "Songbird Recorder"
 
   # Collection # 3
   - "Frying Pan"
@@ -40,6 +48,10 @@ collectionList:
   - "Legatus Pendant"
   - "Ceremonial Ornament"
   - "Dragonkin Device"
+  - "Peacock Parasol"
+  - "Ceremonial Plume"
+  - "Aviansie Dreamcoat"
+  - "Strange Totem"
 
   # Collection # 4
   - "Everlight Harp"
@@ -50,9 +62,13 @@ collectionList:
   - "Pontifex Signet Ring"
   - "Curse Tablet"
   - "Dominion Discus"
+  - "Dominarian Device"
+  - "Fishing Trident"
+  - "Herobrine's Book"
+  - "Friendship Bracelet"
 
   # Collection # 5
-  - "Urn of Shadows"
+  - "Urn of Shadow"
   - "Urn of Smoke"
   - "Urn of Blood"
   - "Urn of Ice"
@@ -60,6 +76,10 @@ collectionList:
   - "Hand of the Ancients"
   - "Decorative Amphora"
   - "Loarnab Rod"
+  - "Lingam Stone"
+  - "Demon's Cube"
+  - "Alchemist Flask"
+  - "Animate Dead Spell Scroll"
 
   # Collection # 6
   - "The Lake of Fire Painting"
@@ -70,6 +90,10 @@ collectionList:
   - "Gladiator Sword"
   - "Model Chariot"
   - "Chaos Star"
+  - "Eudoxian Tablet"
+  - "Soul Scroll"
+  - "Dragon Hook Sword"
+  - "Hobgoblin Sword"
 
   # Collection # 7
   - "Raksha Idol"
@@ -80,6 +104,10 @@ collectionList:
   - "Tsutsaroth Helm"
   - "Spear of Annihilation"
   - "Praetorian Staff"
+  - "Kontos Lance"
+  - "Doru Spear"
+  - "Tsutsaroth Urumi"
+  - "Tsutsaroth Pauldron"
 
   # Collection # 8
   - "Xolo Hard Hat"
@@ -90,3 +118,7 @@ collectionList:
   - "Master Control"
   - "Comfort Gatestone"
   - "The Lord of Light Painting"
+  - "Xolo Shield"
+  - "Ancient Cooking Pot"
+  - "Battle Plans"
+  - "War God Sculpture"
