@@ -53,7 +53,7 @@ public class ConfigManager {
     // collection-log.yml
     public final Map<Integer, List<String>> rarityLore = new HashMap<>();
     public final Map<Integer, List<String>> groupLore = new HashMap<>();
-    public List<String> acquiredLore = new ArrayList<>();
+    public String acquiredLore;
 
     public ConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -400,6 +400,6 @@ public class ConfigManager {
                 }
             }
         }
-        acquiredLore = config.getStringList("globalSettings.acquired-lore");
+        acquiredLore = config.getString("globalSettings.acquired-lore");
     }
 }

@@ -7,7 +7,6 @@ import asia.virtualmc.vArchaeology.items.ArtefactItems;
 import asia.virtualmc.vArchaeology.storage.CollectionLog;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
-import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.StaticPane;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import org.bukkit.Material;
@@ -24,8 +23,10 @@ public class CollectionLogGUI {
     private final ArtefactItems artefactItems;
     private final ArtefactCollections artefactCollections;
     private final CollectionLog collectionLog;
-    private static final int ITEMS_PER_PAGE = 45;
-    private final int TOTAL_ITEMS;
+    // pre-building variables
+    private final int totalCollections;
+    private final int itemPerPage;
+    private final int totalPages;
 
     public CollectionLogGUI(Main plugin,
                             EffectsUtil effectsUtil,
@@ -41,119 +42,137 @@ public class CollectionLogGUI {
         this.artefactCollections = artefactCollections;
         this.collectionLog = collectionLog;
         // pre-building our GUI on init
-        this.TOTAL_ITEMS = collectionLog.totalCollections;
+        this.totalCollections = collectionLog.totalCollections;
+        this.itemPerPage = 45;
+        this.totalPages = (totalCollections + itemPerPage - 1) / itemPerPage;
     }
 
-    private void openCollectionLogGUI(Player player, int page) {
+    public void openCollectionLog(Player player, int pageNumber) {
         UUID uuid = player.getUniqueId();
         Map<Integer, Integer> playerCollection = collectionLog.getPlayerCollection(uuid);
 
-        int totalPages = (TOTAL_ITEMS + ITEMS_PER_PAGE - 1) / ITEMS_PER_PAGE;
-        if (page < 0 || page >= totalPages) {
-            page = 0;
-        }
-        final int currentPage = page;
-
         ChestGui gui = new ChestGui(6, "Collection Log");
+        gui.setOnGlobalClick(event -> event.setCancelled(true));
+        StaticPane staticPane = new StaticPane(0, 0, 9, 6);
 
-        PaginatedPane itemsPane = new PaginatedPane(0, 0, 9, 5);
-        List<GuiItem> guiItems = new ArrayList<>();
-
-        int startID = currentPage * ITEMS_PER_PAGE + 1;
-        int endID = Math.min(TOTAL_ITEMS, (currentPage + 1) * ITEMS_PER_PAGE);
-        int slot = 0;
-        for (int itemID = startID; itemID <= endID; itemID++) {
-            GuiItem item = createCollectionItem(itemID, playerCollection);
-            int col = slot % 9;
-            int row = slot / 9;
-            itemsPane.addPane(item, col, row);
-            slot++;
-        }
-        gui.addPane(itemsPane);
-
-        // Create a static pane for navigation (the bottom row)
-        StaticPane navPane = new StaticPane(0, 5, 9, 1);
-
-        // Add the Previous Page button (if not on the first page)
-        if (currentPage > 0) {
-            GuiItem prevItem = new GuiItem(createNavItem(Material.ARROW, "Previous Page"), event -> {
-                event.setCancelled(true);
-                openCollectionLogGUI(player, currentPage - 1);
-            });
-            navPane.addItem(prevItem, 3, 0); // position (3,0) within the nav pane
+        int itemID = (pageNumber - 1) * itemPerPage;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 9; i++) {
+                itemID++;
+                int amount = playerCollection.get(itemID);
+                if (amount > 0) {
+                    ItemStack collectionItem = createCollectionItem(itemID, amount);
+                    staticPane.addItem(new GuiItem(collectionItem), i, j);
+                } else {
+                    ItemStack collectionItem = createCollectionItemNew(itemID);
+                    staticPane.addItem(new GuiItem(collectionItem), i, j);
+                }
+            }
+            itemID++;
         }
 
-        // Add the Exit button (always shown)
-        GuiItem exitItem = new GuiItem(createNavItem(Material.BARRIER, "Exit"), event -> {
-            event.setCancelled(true);
-            player.closeInventory();
-        });
-        navPane.addItem(exitItem, 4, 0);
+        if (pageNumber == 1) {
+            ItemStack nextButton = createNextButton();
+            GuiItem guiItem = new GuiItem(nextButton, event -> openCollectionLog(player, pageNumber + 1));
+            staticPane.addItem(guiItem, 1, 5);
+        } else if (pageNumber == totalPages) {
+            ItemStack previousButton = createPreviousButton();
+            GuiItem guiItem = new GuiItem(previousButton, event -> openCollectionLog(player, pageNumber - 1));
+            staticPane.addItem(guiItem, 7, 5);
+        } else {
+            ItemStack nextButton = createNextButton();
+            GuiItem guiItem = new GuiItem(nextButton, event -> openCollectionLog(player, pageNumber + 1));
+            staticPane.addItem(guiItem, 1, 5);
 
-        // Add the Next Page button (if not on the last page)
-        if (currentPage < totalPages - 1) {
-            GuiItem nextItem = new GuiItem(createNavItem(Material.ARROW, "Next Page"), event -> {
-                event.setCancelled(true);
-                openCollectionLogGUI(player, currentPage + 1);
-            });
-            navPane.addItem(nextItem, 5, 0);
+            ItemStack previousButton = createPreviousButton();
+            GuiItem guiItem2 = new GuiItem(previousButton, event -> openCollectionLog(player, pageNumber - 1));
+            staticPane.addItem(guiItem2, 7, 5);
         }
-        gui.addPane(navPane);
+
+        for (int x = 3; x <= 5; x++) {
+            ItemStack closeButton = createCloseButton();
+            staticPane.addItem(new GuiItem(closeButton, event -> event.getWhoClicked().closeInventory()), x, 5);
+        }
+
+        gui.addPane(staticPane);
         gui.show(player);
     }
 
-    private GuiItem createCollectionItem(int itemID, Map<Integer, Integer> playerCollection) {
-        int amount = playerCollection.getOrDefault(itemID, 0);
-        String displayName;
-        int customModelData;
-        List<String> lore = new ArrayList<>();
-
-        if (itemID >= 1 && itemID <= 7) {
-            // For items 1–7 use artefactItems
-            displayName = artefactItems.getDisplayName(itemID);
-            customModelData = 100000 + (itemID - 1);
-            if (amount > 0) {
-                // Append acquired lore with the acquired amount
-                for (String line : configManager.acquiredLore) {
-                    lore.add(line + amount);
-                }
-            } else {
-                // Use the by-rarity lore for this rarity
-                lore = configManager.rarityLore.getOrDefault(itemID, new ArrayList<>());
-            }
-        } else {
-            // For items 8+ use artefactCollections
-            displayName = artefactCollections.getDisplayName(itemID);
-            customModelData = configManager.startingModelData + (itemID - 8);
-            if (amount > 0) {
-                for (String line : configManager.acquiredLore) {
-                    lore.add(line + amount);
-                }
-            } else {
-                int groupID = artefactCollections.getGroupID(itemID);
-                lore = configManager.groupLore.getOrDefault(groupID, new ArrayList<>());
-            }
-        }
-
-        ItemStack itemStack = new ItemStack(Material.FLINT);
-        ItemMeta meta = itemStack.getItemMeta();
+    private ItemStack createCollectionItem(int collectionID, int amount) {
+        ItemStack button = new ItemStack(Material.FLINT);
+        ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(displayName);
-            meta.setLore(lore);
-            meta.setCustomModelData(customModelData);
-            itemStack.setItemMeta(meta);
-        }
+            if (collectionID > 0 && collectionID <= 7) {
+                meta.setDisplayName(artefactItems.getDisplayName(collectionID));
+                meta.setCustomModelData(99999 + collectionID);
+                meta.setLore(configManager.rarityLore.get(collectionID));
+                meta.setLore(List.of(
+                        configManager.acquiredLore + " §e" + amount
+                ));
+                button.setItemMeta(meta);
+            } else {
+                meta.setDisplayName(artefactCollections.getDisplayName(collectionID));
+                meta.setCustomModelData(configManager.startingModelData + collectionID);
+                meta.setLore(List.of(
+                        configManager.acquiredLore + " §e" + amount
+                ));
+                button.setItemMeta(meta);
+            }
 
-        return new GuiItem(itemStack, event -> event.setCancelled(true));
+        }
+        return button;
     }
 
-    private static ItemStack createNavItem(Material material, String name) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
+    private ItemStack createCollectionItemNew(int collectionID) {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(name);
-            item.setItemMeta(meta);
+            if (collectionID > 0 && collectionID <= 7) {
+                meta.setDisplayName(artefactItems.getDisplayName(collectionID));
+                meta.setCustomModelData(1);
+                meta.setLore(configManager.rarityLore.get(collectionID));
+                button.setItemMeta(meta);
+            } else {
+                meta.setDisplayName(artefactCollections.getDisplayName(collectionID));
+                meta.setCustomModelData(1);
+                meta.setLore(configManager.groupLore.get(collectionID));
+                button.setItemMeta(meta);
+            }
+
         }
-        return item;
+        return button;
+    }
+
+    private ItemStack createNextButton() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§aNext Page");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private ItemStack createPreviousButton() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§aPrevious Page");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private ItemStack createCloseButton() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§cClose");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            button.setItemMeta(meta);
+        }
+        return button;
     }
 }

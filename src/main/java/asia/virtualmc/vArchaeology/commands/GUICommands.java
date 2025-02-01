@@ -22,6 +22,7 @@ public class GUICommands {
     private final TraitGUI traitGUI;
     private final RestorationStation restorationStation;
     private final RankGUI rankGUI;
+    private final CollectionLogGUI collectionLogGUI;
     private final Map<UUID, Long> commandCooldowns;
 
     public GUICommands(Main plugin,
@@ -29,13 +30,15 @@ public class GUICommands {
                        SalvageGUI salvageGUI,
                        TraitGUI traitGUI,
                        RestorationStation restorationStation,
-                       RankGUI rankGUI) {
+                       RankGUI rankGUI,
+                       CollectionLogGUI collectionLogGUI) {
         this.plugin = plugin;
         this.sellGUI = sellGUI;
         this.salvageGUI = salvageGUI;
         this.traitGUI = traitGUI;
         this.restorationStation = restorationStation;
         this.rankGUI = rankGUI;
+        this.collectionLogGUI = collectionLogGUI;
         this.commandCooldowns = new HashMap<>();
         registerCommands();
     }
@@ -48,6 +51,7 @@ public class GUICommands {
                 .withSubcommand(archTraitGUI())
                 .withSubcommand(archRestoreArtefact())
                 .withSubcommand(archRankGUI())
+                .withSubcommand(archCollectionLogGUI())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -142,6 +146,18 @@ public class GUICommands {
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
                         rankGUI.openRankGUI(player);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+    private CommandAPICommand archCollectionLogGUI() {
+        return new CommandAPICommand("clog")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        collectionLogGUI.openCollectionLog(player, 1);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }
