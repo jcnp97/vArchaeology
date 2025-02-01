@@ -1,7 +1,6 @@
 package asia.virtualmc.vArchaeology;
 
 import asia.virtualmc.vArchaeology.blocks.RestorationStation;
-import asia.virtualmc.vArchaeology.blocks.SalvageStation;
 import asia.virtualmc.vArchaeology.commands.BlockCommands;
 import asia.virtualmc.vArchaeology.commands.GUICommands;
 import asia.virtualmc.vArchaeology.commands.PlayerDataCommands;
@@ -22,12 +21,10 @@ import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
-import eu.decentsoftware.holograms.api.utils.scheduler.S;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -114,7 +111,7 @@ public final class Main extends JavaPlugin {
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
         this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
-        this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, artefactItems, artefactCollections, collectionLog);
+        this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, customItems, artefactCollections, collectionLog);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);

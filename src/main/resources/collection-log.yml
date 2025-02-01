@@ -4,38 +4,38 @@ globalSettings:
   starting-model-data: 100000
   by-rarity-lore:
     1:
-      - "&7Obtained as a &aCommon &7drop."
+      - "§7Obtained as a §aCommon §7drop."
     2:
-      - "&7Obtained as an &bUncommon &7drop."
+      - "§7Obtained as an §bUncommon §7drop."
     3:
-      - "&7Obtained as a &3Rare &7drop."
+      - "§7Obtained as a §3Rare §7drop."
     4:
-      - "&7Obtained as a &eUnique &7drop."
+      - "§7Obtained as a §eUnique §7drop."
     5:
-      - "&7Obtained as a &6Special &7drop."
+      - "§7Obtained as a §6Special §7drop."
     6:
-      - "&7Obtained as a &5Mythical &7drop."
+      - "§7Obtained as a §5Mythical §7drop."
     7:
-      - "&7Obtained as an &4Exotic &7drop."
+      - "§7Obtained as an §4Exotic §7drop."
   by-group-lore:
     1:
-      - "&7Obtained from &6Collection #1 &7artefacts."
+      - "§7Obtained from §6Collection #1 §7artefacts."
     2:
-      - "&7Obtained from &6Collection #2 &7artefacts."
+      - "§7Obtained from §6Collection #2 §7artefacts."
     3:
-      - "&7Obtained from &6Collection #3 &7artefacts."
+      - "§7Obtained from §6Collection #3 §7artefacts."
     4:
-      - "&7Obtained from &6Collection #4 &7artefacts."
+      - "§7Obtained from §6Collection #4 §7artefacts."
     5:
-      - "&7Obtained from &6Collection #5 &7artefacts."
+      - "§7Obtained from §6Collection #5 §7artefacts."
     6:
-      - "&7Obtained from &6Collection #6 &7artefacts."
+      - "§7Obtained from §6Collection #6 §7artefacts."
     7:
-      - "&7Obtained from &6Collection #7 &7artefacts."
+      - "§7Obtained from §6Collection #7 §7artefacts."
     8:
-      - "&7Obtained from &6Collection #8 &7artefacts."
+      - "§7Obtained from §6Collection #8 §7artefacts."
   acquired-lore:
-    - "&7Acquired: &e"
+    - "§7Acquired: §e"
 collectionList:
   by-rarity:
     - "Purpleheart Wood"

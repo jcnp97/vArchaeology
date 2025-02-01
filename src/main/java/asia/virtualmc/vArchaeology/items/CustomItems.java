@@ -156,6 +156,14 @@ public class CustomItems {
         blockLocation.getWorld().dropItemNaturally(blockLocation, item.clone());
     }
 
+    public String getDisplayName(int itemID) {
+        ItemStack item = itemCache.get(itemID);
+        if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+        return "Unknown Item"; // Default fallback if the item is not found or has no name
+    }
+
     public void reloadItems() {
         itemCache.clear();
         createItemFile();

@@ -38,6 +38,9 @@ public class ConfigManager {
     public String sellGUITitle;
     public String confirmGUITitle;
     public String arteRestoreGUITitle;
+    public String collectionLogNext;
+    public String collectionLogPrev;
+    public String collectionLogBoth;
     // traits.yml
     public double[] wisdomEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] charismaEffects = {0.0, 0.0, 0.0, 0.0};
@@ -205,6 +208,9 @@ public class ConfigManager {
             sellGUITitle = gui.getString("guiSettings.sellgui-title", "Sell GUI");
             confirmGUITitle = gui.getString("guiSettings.confirmgui-title", "Are you sure?");
             arteRestoreGUITitle = gui.getString("guiSettings.artefact-restoregui-title", "Restore Artefacts GUI");
+            collectionLogNext = gui.getString("guiSettings.collection-next-title", "Collection Log");
+            collectionLogPrev = gui.getString("guiSettings.collection-prev-title", "Collection Log");
+            collectionLogBoth = gui.getString("guiSettings.collection-both-title", "Collection Log");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -236,11 +242,11 @@ public class ConfigManager {
             return collectionList;
         }
 
-        if (collectionSection.isList("ungrouped")) {
-            collectionList.addAll(collectionSection.getStringList("ungrouped"));
+        if (collectionSection.isList("by-rarity")) {
+            collectionList.addAll(collectionSection.getStringList("by-rarity"));
         }
 
-        ConfigurationSection groupedSection = collectionSection.getConfigurationSection("grouped");
+        ConfigurationSection groupedSection = collectionSection.getConfigurationSection("by-group");
         if (groupedSection != null) {
             List<Integer> sortedKeys = new ArrayList<>();
             for (String key : groupedSection.getKeys(false)) {
