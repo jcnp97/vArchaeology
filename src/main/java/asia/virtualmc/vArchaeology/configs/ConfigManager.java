@@ -13,10 +13,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ConfigManager {
     private Main plugin;
@@ -53,6 +50,10 @@ public class ConfigManager {
     public String pluginPrefix = "<#0040FF>[vArch<#00FBFF>aeology] ";
     public boolean configDebug;
     public int startingModelData;
+    // collection-log.yml
+    public final Map<Integer, List<String>> rarityLore = new HashMap<>();
+    public final Map<Integer, List<String>> groupLore = new HashMap<>();
+    public List<String> acquiredLore = new ArrayList<>();
 
     public ConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -71,6 +72,7 @@ public class ConfigManager {
         readGUISettings();
         readTraitSettings();
         readRanks();
+        readCollectionLore();
         // Read variable
         startingModelData = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "items/collections.yml")).getInt("globalSettings.starting-model-data", 1);
     }
@@ -229,11 +231,35 @@ public class ConfigManager {
         FileConfiguration config = YamlConfiguration.loadConfiguration(collectionFile);
         List<String> collectionList = new ArrayList<>();
 
-        if (config.isList("collectionList")) {
-            collectionList.addAll(config.getStringList("collectionList"));
+        ConfigurationSection collectionSection = config.getConfigurationSection("collectionList");
+        if (collectionSection == null) {
+            return collectionList;
+        }
+
+        if (collectionSection.isList("ungrouped")) {
+            collectionList.addAll(collectionSection.getStringList("ungrouped"));
+        }
+
+        ConfigurationSection groupedSection = collectionSection.getConfigurationSection("grouped");
+        if (groupedSection != null) {
+            List<Integer> sortedKeys = new ArrayList<>();
+            for (String key : groupedSection.getKeys(false)) {
+                try {
+                    sortedKeys.add(Integer.parseInt(key));
+                } catch (NumberFormatException e) {
+                }
+            }
+            Collections.sort(sortedKeys);
+            for (Integer key : sortedKeys) {
+                String keyStr = String.valueOf(key);
+                if (groupedSection.isList(keyStr)) {
+                    collectionList.addAll(groupedSection.getStringList(keyStr));
+                }
+            }
         }
         return collectionList;
     }
+
 
     public Map<Material, Integer> loadBlocksList() {
         FileConfiguration config = plugin.getConfig();
@@ -343,5 +369,37 @@ public class ConfigManager {
             }
         }
         ConsoleMessageUtil.sendConsoleMessage(pluginPrefix + "<#7CFEA7>Rank table has been loaded.");
+    }
+
+    private void readCollectionLore() {
+        File collectionFile = new File(plugin.getDataFolder(), "collection-log.yml");
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(collectionFile);
+
+        ConfigurationSection raritySection = config.getConfigurationSection("globalSettings.by-rarity-lore");
+        if (raritySection != null) {
+            for (String key : raritySection.getKeys(false)) {
+                try {
+                    int rarityKey = Integer.parseInt(key);
+                    List<String> loreList = raritySection.getStringList(key);
+                    rarityLore.put(rarityKey, loreList);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        ConfigurationSection groupSection = config.getConfigurationSection("globalSettings.by-group-lore");
+        if (groupSection != null) {
+            for (String key : groupSection.getKeys(false)) {
+                try {
+                    int groupKey = Integer.parseInt(key);
+                    List<String> loreList = groupSection.getStringList(key);
+                    groupLore.put(groupKey, loreList);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        acquiredLore = config.getStringList("globalSettings.acquired-lore");
     }
 }

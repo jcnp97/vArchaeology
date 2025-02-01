@@ -32,6 +32,7 @@ public class ArtefactCollections {
     private FileConfiguration collectionsConfig;
     private final Map<Integer, ItemStack> collectionCache;
     private final Map<Integer, String> modelDataToFileName;
+    private final Map<Integer, List<Integer>> groupCache;
     private boolean generateModels;
     private final NamespacedKey COLLECTION_KEY;
     private final NamespacedKey UNSTACKABLE_KEY;
@@ -47,6 +48,7 @@ public class ArtefactCollections {
         this.random = new Random();
         this.collectionCache = new ConcurrentHashMap<>();
         this.modelDataToFileName = new HashMap<>();
+        this.groupCache = new ConcurrentHashMap<>();
         this.collectionsFile = new File(plugin.getDataFolder(), "items/collections.yml");
         this.COLLECTION_KEY = new NamespacedKey(plugin, "varch_collection");
         this.UNSTACKABLE_KEY = new NamespacedKey(plugin, "varch_unique_id");
@@ -79,6 +81,10 @@ public class ArtefactCollections {
             return;
         }
 
+        collectionCache.clear();
+        modelDataToFileName.clear();
+        groupCache.clear();
+
         ConfigurationSection collectionListSection = collectionsConfig.getConfigurationSection("collectionList");
         if (collectionListSection == null) {
             plugin.getLogger().warning("No 'collectionList' section found in collections.yml");
@@ -86,10 +92,17 @@ public class ArtefactCollections {
         }
 
         int currentItemId = 1;
-
-        for (String groupId : collectionListSection.getKeys(false)) {
-            ConfigurationSection groupSection = collectionListSection.getConfigurationSection(groupId);
+        for (String groupKey : collectionListSection.getKeys(false)) {
+            ConfigurationSection groupSection = collectionListSection.getConfigurationSection(groupKey);
             if (groupSection == null) {
+                continue;
+            }
+
+            int artefactID;
+            try {
+                artefactID = Integer.parseInt(groupKey);
+            } catch (NumberFormatException e) {
+                plugin.getLogger().warning("Group key '" + groupKey + "' is not a valid integer. Skipping group.");
                 continue;
             }
 
@@ -101,7 +114,7 @@ public class ArtefactCollections {
             try {
                 material = Material.valueOf(materialName.toUpperCase());
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("Invalid material '" + materialName + "' in group " + groupId + ". Using STONE as fallback.");
+                plugin.getLogger().warning("Invalid material '" + materialName + "' in group " + groupKey + ". Using STONE as fallback.");
                 material = Material.STONE;
             }
 
@@ -128,12 +141,11 @@ public class ArtefactCollections {
                     String convertedName = convertCollectionName(collectionItemName);
                     modelDataToFileName.put(cmd, convertedName);
                 }
-
                 collectionCache.put(currentItemId, item);
+                groupCache.computeIfAbsent(artefactID, k -> new ArrayList<>()).add(currentItemId);
                 currentItemId++;
             }
         }
-
         plugin.getLogger().info("[vArchaeology] Loaded " + collectionCache.size() + " artefact items from collections.yml");
     }
 
@@ -145,14 +157,27 @@ public class ArtefactCollections {
         return container.getOrDefault(COLLECTION_KEY, PersistentDataType.INTEGER, 0);
     }
 
-    public void giveCollection(UUID uuid, int id, int amount) {
+    public String getDisplayName(int itemID) {
+        ItemStack item = collectionCache.get(itemID);
+        if (item == null) {
+            plugin.getLogger().warning("Item with ID " + itemID + " not found in collectionCache.");
+            return "Unknown Item";
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasDisplayName()) {
+            return "Unknown Item";
+        }
+        return meta.getDisplayName();
+    }
+
+    public void giveCollection(UUID uuid, int collectionID, int amount) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return;
         }
-        ItemStack item = collectionCache.get(id);
+        ItemStack item = collectionCache.get(collectionID);
         if (item == null) {
-            player.sendMessage("§cInvalid item ID: " + id);
+            player.sendMessage("§cInvalid item ID: " + collectionID);
             return;
         }
         ItemStack giveItem = item.clone();
@@ -168,7 +193,37 @@ public class ArtefactCollections {
                     player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
             player.sendMessage("§cYour inventory was full. Some items were dropped at your feet.");
         }
-        collectionLog.incrementCollection(uuid, id + 7);
+        collectionLog.incrementCollection(uuid, collectionID + 7);
+    }
+
+    public int getRandomCollection(int artefactID) {
+        List<Integer> itemIds = groupCache.get(artefactID);
+        if (itemIds == null || itemIds.isEmpty()) {
+            return 0;
+        }
+        int randomIndex = random.nextInt(itemIds.size());
+        return itemIds.get(randomIndex);
+    }
+
+    public int getCollectionModelData(int itemID) {
+        ItemStack item = collectionCache.get(itemID);
+        if (item == null || !item.hasItemMeta()) {
+            return 0;
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasCustomModelData()) {
+            return 0;
+        }
+        return meta.getCustomModelData();
+    }
+
+    public int getGroupID(int collectionID) {
+        for (Map.Entry<Integer, List<Integer>> entry : groupCache.entrySet()) {
+            if (entry.getValue().contains(collectionID)) {
+                return entry.getKey();
+            }
+        }
+        return 0;
     }
 
     public void reloadArtefactItems() {
@@ -267,17 +322,5 @@ public class ArtefactCollections {
         }
 
         plugin.getLogger().info("[vArchaeology] Generated flint.json with " + modelDataToFileName.size() + " overrides.");
-    }
-
-    public int getCollectionModelData(int itemId) {
-        ItemStack item = collectionCache.get(itemId);
-        if (item == null || !item.hasItemMeta()) {
-            return 0;
-        }
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null || !meta.hasCustomModelData()) {
-            return 0;
-        }
-        return meta.getCustomModelData();
     }
 }

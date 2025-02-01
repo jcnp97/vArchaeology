@@ -21,6 +21,7 @@ public class CollectionLog {
     private final ConfigManager configManager;
     private final EffectsUtil effectsUtil;
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> playerCollections;
+    public int totalCollections;
 
     public CollectionLog(Main plugin,
                          PlayerDataDB playerDataDB,
@@ -34,7 +35,7 @@ public class CollectionLog {
         createCollectionTables();
     }
 
-    public void createCollectionTables() {
+    private void createCollectionTables() {
         try (Connection conn = playerDataDB.getDataSource().getConnection()) {
             conn.createStatement().execute(
                     "CREATE TABLE IF NOT EXISTS archCollections (" +
@@ -54,6 +55,7 @@ public class CollectionLog {
                             ")"
             );
             List<String> collectionData = new ArrayList<>(configManager.loadCollections());
+            totalCollections = collectionData.size();
 
             String checkQuery = "SELECT COUNT(*) FROM archCollections WHERE itemName = ?";
             String insertQuery = "INSERT INTO archCollections (itemName) VALUES (?)";
@@ -203,6 +205,10 @@ public class CollectionLog {
 
     public Map<UUID, Map<Integer, Integer>> getPlayerCollections() {
         return new ConcurrentHashMap<>(playerCollections);
+    }
+
+    public Map<Integer, Integer> getPlayerCollection(UUID uuid) {
+        return playerCollections.getOrDefault(uuid, new ConcurrentHashMap<>());
     }
 
     public void incrementCollection(UUID playerUUID, int itemID) {

@@ -70,6 +70,7 @@ public final class Main extends JavaPlugin {
     private TraitGUI traitGUI;
     private LampStarGUI lampStarGUI;
     private RankGUI rankGUI;
+    private CollectionLogGUI collectionLogGUI;
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
@@ -113,6 +114,7 @@ public final class Main extends JavaPlugin {
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
         this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
+        this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, artefactItems, artefactCollections, collectionLog);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);

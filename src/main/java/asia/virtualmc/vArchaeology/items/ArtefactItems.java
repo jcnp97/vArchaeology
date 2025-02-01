@@ -120,6 +120,14 @@ public class ArtefactItems {
         }
     }
 
+    public String getDisplayName(int id) {
+        ItemStack item = artefactCache.get(id);
+        if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+        return "Unknown Item"; // Default fallback if the item is not found or has no name
+    }
+
     public int getArtefactID(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return 0;
         PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();

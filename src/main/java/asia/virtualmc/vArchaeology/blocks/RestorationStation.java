@@ -397,13 +397,13 @@ public class RestorationStation implements Listener {
         ItemStack item = player.getInventory().getItemInMainHand();
         double finalXP = expManager.getTotalArtefactRestoreEXP(uuid) * 0.30;
 
-        if (!canProcessRestoration(player, finalXP)) {
+        if (cannotProcessRestoration(player, finalXP)) {
             return;
         }
 
         try {
             player.getInventory().removeItem(item);
-            startCrafting(player, finalXP, false, getRandomCollection(artefactItems.getArtefactID(item)));
+            startCrafting(player, finalXP, false, artefactCollections.getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
             handleRestoreError(player, e);
         } finally {
@@ -416,7 +416,7 @@ public class RestorationStation implements Listener {
         ItemStack item = player.getInventory().getItemInMainHand();
         double finalXP = expManager.getTotalArtefactRestoreEXP(uuid);
 
-        if (!canProcessRestoration(player, finalXP)) {
+        if (cannotProcessRestoration(player, finalXP)) {
             return;
         }
 
@@ -428,7 +428,7 @@ public class RestorationStation implements Listener {
             player.getInventory().removeItem(item);
             List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
             statistics.subtractComponents(uuid, componentsRequired);
-            startCrafting(player, finalXP, true, getRandomCollection(artefactItems.getArtefactID(item)));
+            startCrafting(player, finalXP, true, artefactCollections.getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
             handleRestoreError(player, e);
         } finally {
@@ -436,37 +436,23 @@ public class RestorationStation implements Listener {
         }
     }
 
-    private int getRandomCollection(int artefactID) {
-        switch (artefactID) {
-            case 1 -> { return random.nextInt(1, 13); }
-            case 2 -> { return random.nextInt(13, 25); }
-            case 3 -> { return random.nextInt(25, 37); }
-            case 4 -> { return random.nextInt(37, 49); }
-            case 5 -> { return random.nextInt(49, 61); }
-            case 6 -> { return random.nextInt(61, 73); }
-            case 7 -> { return random.nextInt(73, 85); }
-            case 8 -> { return random.nextInt(85, 97); }
-        }
-        return 0;
-    }
-
-    private boolean canProcessRestoration(Player player, double finalXP) {
+    private boolean cannotProcessRestoration(Player player, double finalXP) {
         ItemStack itemMainHand = player.getInventory().getItemInMainHand();
         int artefactID = artefactItems.getArtefactID(itemMainHand);
 
-        if (artefactID == 0 || artefactID > 8) {
+        if (artefactID == 0) {
             player.sendMessage("§cError: Artefact not found in your main hand. Please try again.");
             player.closeInventory();
-            return false;
+            return true;
         }
 
         if (finalXP <= 0) {
             player.sendMessage("§cThere was an error processing the action. Please contact the administrator.");
             player.closeInventory();
-            return false;
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     private boolean validateComponents(Player player, UUID uuid) {
