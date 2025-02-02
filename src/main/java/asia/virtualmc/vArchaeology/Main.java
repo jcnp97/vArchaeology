@@ -44,6 +44,7 @@ public final class Main extends JavaPlugin {
     private ArtefactItems artefactItems;
     private ItemCommands itemCommands;
     private ArtefactCollections artefactCollections;
+    private CraftingMaterials craftingMaterials;
     // utils
     private BossBarUtil bossBarUtil;
     private EffectsUtil effectsUtil;
@@ -58,6 +59,7 @@ public final class Main extends JavaPlugin {
     private ItemEquipListener itemEquipListener;
     private PlayerInteractListener playerInteractListener;
     private ToolRestrictionListener toolRestrictionListener;
+    private ItemInteractListener itemInteractListener;
     // blocks
     private RestorationStation restorationStation;
     private CraftingStation craftingStation;
@@ -71,6 +73,7 @@ public final class Main extends JavaPlugin {
     private LampStarGUI lampStarGUI;
     private RankGUI rankGUI;
     private CollectionLogGUI collectionLogGUI;
+    private CollectionsGUI collectionsGUI;
     // logs
     private LogManager logManager;
     private SalvageLog salvageLog;
@@ -97,9 +100,9 @@ public final class Main extends JavaPlugin {
         this.customTools = new CustomTools(this);
         this.customCharms = new CustomCharms(this);
         this.customItems = new CustomItems(this);
+        this.craftingMaterials = new CraftingMaterials(this);
         this.miscItems = new MiscItems(this);
         this.artefactItems = new ArtefactItems(this, effectsUtil);
-        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections);
         this.miscListener = new MiscListener(this);
         this.toolRestrictionListener = new ToolRestrictionListener(this);
         this.logManager = new LogManager(this);
@@ -113,8 +116,11 @@ public final class Main extends JavaPlugin {
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
+        this.collectionsGUI = new CollectionsGUI(this, effectsUtil, configManager, playerData, sellGUI);
+        this.itemInteractListener = new ItemInteractListener(this, collectionsGUI);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
         this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
+        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections, craftingMaterials);
         this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, customItems, artefactCollections, collectionLog);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil);
@@ -126,7 +132,7 @@ public final class Main extends JavaPlugin {
         this.craftingStation = new CraftingStation(this, effectsUtil, playerData, statistics, customTools, configManager, customItems);
         this.blockCommands = new BlockCommands(this, restorationStation, craftingStation);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
-        this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
+        this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil, craftingMaterials);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI, collectionLogGUI);
 

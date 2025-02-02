@@ -15,19 +15,22 @@ public class ItemCommands {
     private final CustomItems customItems;
     private final MiscItems miscItems;
     private final ArtefactCollections artefactCollections;
+    private final CraftingMaterials craftingMaterials;
 
     public ItemCommands(Main plugin,
                         CustomItems customItems,
                         CustomTools customTools,
                         CustomCharms customCharms,
                         MiscItems miscItems,
-                        ArtefactCollections artefactCollections) {
+                        ArtefactCollections artefactCollections,
+                        CraftingMaterials craftingMaterials) {
         this.plugin = plugin;
         this.customItems = customItems;
         this.customTools = customTools;
         this.customCharms = customCharms;
         this.miscItems = miscItems;
         this.artefactCollections = artefactCollections;
+        this.craftingMaterials = craftingMaterials;
         registerCommands();
     }
 
@@ -39,6 +42,7 @@ public class ItemCommands {
                 .withSubcommand(archGetLamps())
                 .withSubcommand(archGetStars())
                 .withSubcommand(archGetCollection())
+                .withSubcommand(archGetCraftingMaterials())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -205,6 +209,22 @@ public class ItemCommands {
 
                     sender.sendMessage("Attempting to give " + value + " of " + itemID + " to " + target.getName());
                     artefactCollections.giveCollection(target.getUniqueId(), itemID, value);
+                });
+    }
+
+    private CommandAPICommand archGetCraftingMaterials() {
+        return new CommandAPICommand("getmat")
+                .withArguments(new IntegerArgument("item_id", 1))
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getmat")
+                .executes((sender, args) -> {
+                    int item_id = (int) args.get("item_id");
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    sender.sendMessage("Attempting to give " + value + " of " + item_id + " to " + target.getName());
+                    craftingMaterials.giveCraftingMaterial(target.getUniqueId(), item_id, value);
                 });
     }
 }

@@ -146,7 +146,7 @@ public class ArtefactCollections {
                 currentItemId++;
             }
         }
-        plugin.getLogger().info("[vArchaeology] Loaded " + collectionCache.size() + " artefact items from collections.yml");
+        plugin.getLogger().info("[vArchaeology] Loaded " + collectionCache.size() + " collection items from collections.yml");
     }
 
     public int getCollectionID(ItemStack item) {

@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.listeners;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.items.CraftingMaterials;
 import asia.virtualmc.vArchaeology.items.CustomCharms;
 import asia.virtualmc.vArchaeology.items.CustomItems;
 import asia.virtualmc.vArchaeology.items.CustomTools;
@@ -42,6 +43,7 @@ public class BlockBreakListener implements Listener {
     private final ConfigManager configManager;
     private final ItemEquipListener itemEquipListener;
     private final EffectsUtil effectsUtil;
+    private final CraftingMaterials craftingMaterials;
     private final Map<Material, Integer> blocksList;
     private final Map<UUID, Long> adpCooldowns;
     private record TraitData(double extraRoll, double nextTier, double doubleADP, double addADP) {}
@@ -60,7 +62,8 @@ public class BlockBreakListener implements Listener {
                               EXPManager expManager,
                               ConfigManager configManager,
                               ItemEquipListener itemEquipListener,
-                              EffectsUtil effectsUtil) {
+                              EffectsUtil effectsUtil,
+                              CraftingMaterials craftingMaterials) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.customItems = customItems;
@@ -73,6 +76,7 @@ public class BlockBreakListener implements Listener {
         this.configManager = configManager;
         this.itemEquipListener = itemEquipListener;
         this.effectsUtil = effectsUtil;
+        this.craftingMaterials = craftingMaterials;
         this.blocksList = new HashMap<>(configManager.loadBlocksList());
         this.adpCooldowns = new HashMap<>();
         this.traitDataMap = new ConcurrentHashMap<>();
@@ -83,14 +87,14 @@ public class BlockBreakListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-        UUID playerUUID = player.getUniqueId();
+        UUID uuid = player.getUniqueId();
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
 
         if (!customTools.isArchTool(mainHandItem)) {
             return;
         }
 
-        if (!canBreakBlocks(player, playerUUID, mainHandItem)) {
+        if (!canBreakBlocks(player, uuid, mainHandItem)) {
             event.setCancelled(true);
             return;
         }
@@ -103,44 +107,55 @@ public class BlockBreakListener implements Listener {
         }
 
         event.setDropItems(false);
-        statistics.incrementStatistics(playerUUID, 9);
+        statistics.incrementStatistics(uuid, 9);
 
-        if (!itemEquipListener.hasToolData(playerUUID)) {
+        if (!itemEquipListener.hasToolData(uuid)) {
             itemEquipListener.addPlayerData(player, mainHandItem);
         }
 
         // Karma Trait - Two Drops & Next-Tier
         // Dexterity Trait - Double Artefact Discovery Progress
-        if (!traitDataMap.containsKey(playerUUID)) {
+        if (!traitDataMap.containsKey(uuid)) {
             addTraitData(player);
         }
 
         // Material Drops
-        if (random.nextDouble() < itemEquipListener.getGatherValue(playerUUID) / 100) {
+        if (random.nextDouble() < itemEquipListener.getGatherValue(uuid) / 100) {
             Location blockLocation = event.getBlock().getLocation();
             giveArchMaterialDrop(player, blockLocation, expValue, true);
         } else {
-            playerData.updateExp(playerUUID, expManager.getTotalBlockBreakEXP(playerUUID, expValue), "add");
+            playerData.updateExp(uuid, expManager.getTotalBlockBreakEXP(uuid, expValue), "add");
         }
 
         // Tier 99 Passive
-        if (itemEquipListener.hasTier99Value(playerUUID)) {
+        if (itemEquipListener.hasTier99Value(uuid)) {
             tier99Passive(player);
         }
 
         // Artefact Discovery Progress
-        if (canProgressAD(playerUUID)) {
-            addArtefactProgress(playerUUID);
-            if (random.nextDouble() < getDoubleADP(playerUUID) / 100) {
-                addArtefactProgress(playerUUID);
-                effectsUtil.sendPlayerMessage(playerUUID, "<green>Your Cosmic Focus (Dexterity Trait) has doubled your Artefact Progress gain.");
+        if (canProgressAD(uuid)) {
+            addArtefactProgress(uuid);
+            if (random.nextDouble() < getDoubleADP(uuid) / 100) {
+                addArtefactProgress(uuid);
+                effectsUtil.sendPlayerMessage(uuid, "<green>Your Cosmic Focus (Dexterity Trait) has doubled your Artefact Progress gain.");
             }
         }
 
         // Dexterity Bonus
-        if (random.nextDouble() < getAddADP(playerUUID) / 100) {
-            playerData.addArtefactDiscovery(playerUUID, 0.1);
-            effectsUtil.sendADBProgressBarTitle(playerUUID, playerData.getArchADP(playerUUID) / 100.0, 0.1);
+        if (random.nextDouble() < getAddADP(uuid) / 100) {
+            playerData.addArtefactDiscovery(uuid, 0.1);
+            effectsUtil.sendADBProgressBarTitle(uuid, playerData.getArchADP(uuid) / 100.0, 0.1);
+        }
+
+        if (random.nextInt(1, 3) == 1) {
+            String blockType = material.name();
+            switch (blockType) {
+                case "SAND" -> giveCraftingMaterial(player, 2);
+                case "RED_SAND" -> giveCraftingMaterial(player, 3);
+                case "SOUL_SAND" -> giveCraftingMaterial(player, 4);
+                case "DIRT" -> giveCraftingMaterial(player, 5);
+                case "GRAVEL" -> giveCraftingMaterial(player, 6);
+            }
         }
     }
 
@@ -271,5 +286,14 @@ public class BlockBreakListener implements Listener {
     private double getAddADP(UUID uuid) {
         TraitData data = traitDataMap.get(uuid);
         return (data == null) ? 0.0 : data.addADP();
+    }
+
+    private void giveCraftingMaterial(Player player, int matID) {
+        craftingMaterials.giveCraftingMaterial(player.getUniqueId(), matID, 1);
+        effectsUtil.sendBroadcastMessage("<dark_red>" + player.getName() +
+                " <gold>has obtained " + EffectsUtil.convertLegacy(craftingMaterials.getDisplayName(matID)) +
+                "<gold> from Archaeology!"
+        );
+
     }
 }

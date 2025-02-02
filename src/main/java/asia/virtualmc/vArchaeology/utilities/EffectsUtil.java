@@ -193,4 +193,9 @@ public class EffectsUtil {
                 .replace("§e", "<yellow>")
                 .replace("§f", "<white>");
     }
+
+    public void sendBroadcastMessage(String message) {
+        Component messageComponent = MiniMessage.miniMessage().deserialize(message);
+        Bukkit.getServer().sendMessage(messageComponent);
+    }
 }

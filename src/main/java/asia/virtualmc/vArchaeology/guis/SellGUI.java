@@ -39,7 +39,7 @@ public class SellGUI implements Listener {
     private final Statistics statistics;
     private final SellLog sellLog;
     private final Economy economy;
-    private final NamespacedKey varchItemKey;
+    private final NamespacedKey SELL_PRICE;
     private static final long GUI_COOLDOWN = 500;
     private final Map<UUID, Long> lastGuiOpen = new ConcurrentHashMap<>();
     private final Map<UUID, SellMultiplierData> sellDataMap = new ConcurrentHashMap<>();
@@ -59,7 +59,7 @@ public class SellGUI implements Listener {
         this.statistics = statistics;
         this.sellLog = sellLog;
         this.economy = Main.getEconomy();
-        this.varchItemKey = new NamespacedKey(plugin, "varch_item");
+        this.SELL_PRICE = new NamespacedKey(plugin, "varch_item");
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -181,7 +181,7 @@ public class SellGUI implements Listener {
         if (item == null || !item.hasItemMeta()) return null;
         ItemMeta meta = item.getItemMeta();
         PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        Integer customID = pdc.get(varchItemKey, PersistentDataType.INTEGER);
+        Integer customID = pdc.get(SELL_PRICE, PersistentDataType.INTEGER);
         return (customID != null && customID >= 1 && customID <= 7) ? customID : null;
     }
 
@@ -236,6 +236,10 @@ public class SellGUI implements Listener {
                 player.getInventory().setItem(i, null);
             }
         }
+        addEconomy(player, totalValue);
+    }
+
+    public void addEconomy(Player player, double totalValue) {
         if (economy != null && totalValue > 0) {
             economy.depositPlayer(player, totalValue);
         }
@@ -294,6 +298,11 @@ public class SellGUI implements Listener {
     public double getDropsData(UUID uuid) {
         SellGUI.SellMultiplierData data = sellDataMap.get(uuid);
         return (data == null) ? 0.0 : data.drops();
+    }
+
+    public double getArtefactsData(UUID uuid) {
+        SellGUI.SellMultiplierData data = sellDataMap.get(uuid);
+        return (data == null) ? 0.0 : data.artefacts();
     }
 
     public double getTaxData(UUID uuid) {

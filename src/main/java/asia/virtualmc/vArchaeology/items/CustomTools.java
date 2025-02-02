@@ -231,9 +231,9 @@ public class CustomTools {
     public String getMaterialName(int toolID) {
         ItemStack item = toolCache.get(toolID);
         if (item != null) {
-            return item.getType().name(); // Convert Material to String
+            return item.getType().name();
         }
-        return Material.AIR.name(); // Return "AIR" instead of Material.AIR
+        return Material.AIR.name();
     }
 
     public void reloadTools() {
