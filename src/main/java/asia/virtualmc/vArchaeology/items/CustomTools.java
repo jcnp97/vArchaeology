@@ -10,12 +10,15 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.Location;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 
 import java.io.File;
 import java.util.*;
@@ -201,9 +204,43 @@ public class CustomTools {
         }
     }
 
+    public ItemStack getArchToolCache(int id) {
+        return toolCache.get(id);
+    }
+
+    public int getToolModelData(int itemID) {
+        ItemStack item = toolCache.get(itemID);
+        if (item == null || !item.hasItemMeta()) {
+            return 0;
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null || !meta.hasCustomModelData()) {
+            return 0;
+        }
+        return meta.getCustomModelData();
+    }
+
+    public String getDisplayName(int toolID) {
+        ItemStack item = toolCache.get(toolID);
+        if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            return item.getItemMeta().getDisplayName();
+        }
+        return "Unknown Item";
+    }
+
+    public String getMaterialName(int toolID) {
+        ItemStack item = toolCache.get(toolID);
+        if (item != null) {
+            return item.getType().name(); // Convert Material to String
+        }
+        return Material.AIR.name(); // Return "AIR" instead of Material.AIR
+    }
+
     public void reloadTools() {
         toolCache.clear();
         createToolFile();
         loadTools();
     }
+
+
 }

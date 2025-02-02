@@ -132,13 +132,24 @@ public class CustomItems {
             player.sendMessage("§cInvalid item ID: " + id);
             return;
         }
-        ItemStack giveItem = item.clone();
-        giveItem.setAmount(Math.min(amount, giveItem.getMaxStackSize()));
-        Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
+
+        int maxStackSize = item.getMaxStackSize();
+        List<ItemStack> itemsToGive = new ArrayList<>();
+
+        while (amount > 0) {
+            int stackSize = Math.min(amount, maxStackSize);
+            amount -= stackSize;
+            ItemStack stack = item.clone();
+            stack.setAmount(stackSize);
+            itemsToGive.add(stack);
+        }
+
+        Map<Integer, ItemStack> overflow = player.getInventory().addItem(itemsToGive.toArray(new ItemStack[0]));
 
         if (!overflow.isEmpty()) {
-            overflow.values().forEach(overflowItem ->
-                    player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
+            for (ItemStack overflowItem : overflow.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), overflowItem);
+            }
             player.sendMessage("§cYour inventory was full. Some items were dropped at your feet.");
         }
     }
@@ -161,7 +172,7 @@ public class CustomItems {
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
             return item.getItemMeta().getDisplayName();
         }
-        return "Unknown Item"; // Default fallback if the item is not found or has no name
+        return "Unknown Item";
     }
 
     public void reloadItems() {

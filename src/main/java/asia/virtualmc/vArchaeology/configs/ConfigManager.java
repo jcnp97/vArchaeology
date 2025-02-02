@@ -41,6 +41,7 @@ public class ConfigManager {
     public String collectionLogNext;
     public String collectionLogPrev;
     public String collectionLogBoth;
+    public String craftingStationTitle;
     // traits.yml
     public double[] wisdomEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] charismaEffects = {0.0, 0.0, 0.0, 0.0};
@@ -211,6 +212,7 @@ public class ConfigManager {
             collectionLogNext = gui.getString("guiSettings.collection-next-title", "Collection Log");
             collectionLogPrev = gui.getString("guiSettings.collection-prev-title", "Collection Log");
             collectionLogBoth = gui.getString("guiSettings.collection-both-title", "Collection Log");
+            craftingStationTitle = gui.getString("guiSettings.crafting-station-title", "Crafting Station");
         } catch (Exception e) {
             e.printStackTrace();
         }

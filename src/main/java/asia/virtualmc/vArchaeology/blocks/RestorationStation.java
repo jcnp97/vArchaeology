@@ -279,7 +279,7 @@ public class RestorationStation implements Listener {
 
         // type-2 restoration (Lv. 60)
         if (archLevel >= 60) {
-            ArrayList<Integer> componentsOwned = new ArrayList<>(statistics.getComponents(uuid));
+            int[] componentsOwned = statistics.getComponents(uuid);
             for (int x = 5; x <= 7; x++) {
                 ItemStack confirmButton = createType2Button(initialXP, componentsOwned);
                 GuiItem guiItem = new GuiItem(confirmButton, event -> openRestoreT2ArtefactConfirm(player, initialXP));
@@ -367,7 +367,7 @@ public class RestorationStation implements Listener {
         return button;
     }
 
-    private ItemStack createType2Button(double exp, ArrayList<Integer> componentsOwned) {
+    private ItemStack createType2Button(double exp, int[] componentsOwned) {
         DecimalFormat decimalFormat = new DecimalFormat("#,###");
         String formattedXP = decimalFormat.format(exp);
         ItemStack button = new ItemStack(Material.PAPER);
@@ -379,13 +379,13 @@ public class RestorationStation implements Listener {
                     "§7This require the following components",
                     "§7to ensure a successful restoration process.",
                     "",
-                    "§7• §aCommon Components: §2" + componentsOwned.get(0) + "§7/§c64",
-                    "§7• §bUncommon Components: §2" + componentsOwned.get(1) + "§7/§c32",
-                    "§7• §3Rare Components: §2" + componentsOwned.get(2) + "§7/§c16",
-                    "§7• §eUnique Components: §2" + componentsOwned.get(3) + "§7/§c12",
-                    "§7• §6Special Components: §2" + componentsOwned.get(4) + "§7/§c8",
-                    "§7• §5Mythical Components: §2" + componentsOwned.get(5) + "§7/§c4",
-                    "§7• §4Exotic Components: §2" + componentsOwned.get(6) + "§7/§c2"
+                    "§7• §aCommon Components: §2" + componentsOwned[0] + "§7/§c64",
+                    "§7• §bUncommon Components: §2" + componentsOwned[1] + "§7/§c32",
+                    "§7• §3Rare Components: §2" + componentsOwned[2] + "§7/§c16",
+                    "§7• §eUnique Components: §2" + componentsOwned[3] + "§7/§c12",
+                    "§7• §6Special Components: §2" + componentsOwned[4] + "§7/§c8",
+                    "§7• §5Mythical Components: §2" + componentsOwned[5] + "§7/§c4",
+                    "§7• §4Exotic Components: §2" + componentsOwned[6] + "§7/§c2"
             ));
             button.setItemMeta(meta);
         }
@@ -426,7 +426,7 @@ public class RestorationStation implements Listener {
 
         try {
             player.getInventory().removeItem(item);
-            List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
+            int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
             statistics.subtractComponents(uuid, componentsRequired);
             startCrafting(player, finalXP, true, artefactCollections.getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
@@ -456,21 +456,13 @@ public class RestorationStation implements Listener {
     }
 
     private boolean validateComponents(Player player, UUID uuid) {
-        ArrayList<Integer> componentsOwned = new ArrayList<>(statistics.getComponents(uuid));
-        List<Integer> componentsRequired = Arrays.asList(64, 32, 16, 12, 8, 4, 2);
+        int[] componentsOwned = statistics.getComponents(uuid);
+        int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
 
-        if (componentsOwned.size() != componentsRequired.size() ||
-                !hasRequiredComponents(componentsOwned, componentsRequired)) {
-            player.sendMessage("§cError: You do not have the required number of components to do this.");
-            player.closeInventory();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean hasRequiredComponents(List<Integer> owned, List<Integer> required) {
-        for (int i = 0; i < owned.size(); i++) {
-            if (owned.get(i) < required.get(i)) {
+        for (int i = 0; i < componentsOwned.length; i++) {
+            if (componentsOwned[i] < componentsRequired[i]) {
+                player.sendMessage("§cError: You do not have the required number of components to do this.");
+                player.closeInventory();
                 return false;
             }
         }

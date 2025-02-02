@@ -75,9 +75,9 @@ public class ItemCommands {
 
     private CommandAPICommand archGetTool() {
         return new CommandAPICommand("gettool")
-                .withArguments(new MultiLiteralArgument("tool_name", "bronze_mattock", "iron_mattock",
-                        "steel_mattock", "mithril_mattock", "adamantium_mattock", "runite_mattock", "dragon_mattock",
-                        "necronium_mattock", "crystal_mattock", "mattock_of_time_and_space", "admin"
+                .withArguments(new MultiLiteralArgument("tool_name", "copper_mattock", "flint_mattock",
+                        "prismarine_mattock", "carbon_steel_mattock", "netherium_mattock", "amethyst_mattock", "gold_alloy_mattock",
+                        "titanium_mattock", "dark_echo_mattock", "mattock_of_time_and_space", "admin"
                 ))
                 .withArguments(new PlayerArgument("player"))
                 .withPermission("varchaeology.command.gettool")
@@ -93,15 +93,15 @@ public class ItemCommands {
 
     private int getToolIdFromName(String name) {
         return switch (name.toLowerCase()) {
-            case "bronze_mattock" -> 1;
-            case "iron_mattock" -> 2;
-            case "steel_mattock" -> 3;
-            case "mithril_mattock" -> 4;
-            case "adamantium_mattock" -> 5;
-            case "runite_mattock" -> 6;
-            case "dragon_mattock" -> 7;
-            case "necronium_mattock" -> 8;
-            case "crystal_mattock" -> 9;
+            case "copper_mattock" -> 1;
+            case "flint_mattock" -> 2;
+            case "prismarine_mattock" -> 3;
+            case "carbon_steel_mattock" -> 4;
+            case "netherium_mattock" -> 5;
+            case "amethyst_mattock" -> 6;
+            case "gold_alloy_mattock" -> 7;
+            case "titanium_mattock" -> 8;
+            case "dark_echo_mattock" -> 9;
             case "mattock_of_time_and_space" -> 10;
             case "admin" -> 11;
             default -> throw new IllegalArgumentException("Unknown item: " + name);

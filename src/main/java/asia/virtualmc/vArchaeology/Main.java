@@ -1,5 +1,6 @@
 package asia.virtualmc.vArchaeology;
 
+import asia.virtualmc.vArchaeology.blocks.CraftingStation;
 import asia.virtualmc.vArchaeology.blocks.RestorationStation;
 import asia.virtualmc.vArchaeology.commands.BlockCommands;
 import asia.virtualmc.vArchaeology.commands.GUICommands;
@@ -56,8 +57,10 @@ public final class Main extends JavaPlugin {
     private PlayerJoinListener playerJoinListener;
     private ItemEquipListener itemEquipListener;
     private PlayerInteractListener playerInteractListener;
+    private ToolRestrictionListener toolRestrictionListener;
     // blocks
     private RestorationStation restorationStation;
+    private CraftingStation craftingStation;
     // exp
     private EXPManager expManager;
     // guis
@@ -98,6 +101,7 @@ public final class Main extends JavaPlugin {
         this.artefactItems = new ArtefactItems(this, effectsUtil);
         this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections);
         this.miscListener = new MiscListener(this);
+        this.toolRestrictionListener = new ToolRestrictionListener(this);
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
         this.sellLog = new SellLog(this, logManager);
@@ -119,7 +123,8 @@ public final class Main extends JavaPlugin {
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager, configManager);
         this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager, artefactCollections);
-        this.blockCommands = new BlockCommands(this, restorationStation);
+        this.craftingStation = new CraftingStation(this, effectsUtil, playerData, statistics, customTools, configManager, customItems);
+        this.blockCommands = new BlockCommands(this, restorationStation, craftingStation);
         this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
@@ -140,6 +145,7 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         CommandAPI.onDisable();
         restorationStation.cleanupAllCooldowns();
+        craftingStation.cleanupAllCooldowns();
         if (playerData != null) {
             playerData.updateAllData();
         } else {

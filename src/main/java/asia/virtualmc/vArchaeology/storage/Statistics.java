@@ -216,23 +216,29 @@ public class Statistics {
         //updatePlayerData(playerUUID);
     }
 
-    public ArrayList<Integer> getComponents(UUID playerUUID) {
-        ArrayList<Integer> componentsOwned = new ArrayList<>();
+    public int[] getComponents(UUID playerUUID) {
+        int[] componentsOwned = new int[7];
+
         for (int i = 2; i < 9; i++) {
-            componentsOwned.add(playerStatistics.getOrDefault(playerUUID, new ConcurrentHashMap<>()).getOrDefault(i,0));
+            componentsOwned[i - 2] = playerStatistics
+                    .getOrDefault(playerUUID, new ConcurrentHashMap<>())
+                    .getOrDefault(i, 0);
         }
         return componentsOwned;
     }
 
-    public void subtractComponents(UUID playerUUID, List<Integer> componentsRequired) {
+    public void subtractComponents(UUID playerUUID, int[] componentsRequired) {
+        if (componentsRequired.length != 7) {
+            throw new IllegalArgumentException("componentsRequired must have exactly 7 elements.");
+        }
         ConcurrentHashMap<Integer, Integer> statsMap = playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>());
-        statsMap.merge(2, -componentsRequired.get(0), Integer::sum);
-        statsMap.merge(3, -componentsRequired.get(1), Integer::sum);
-        statsMap.merge(4, -componentsRequired.get(2), Integer::sum);
-        statsMap.merge(5, -componentsRequired.get(3), Integer::sum);
-        statsMap.merge(6, -componentsRequired.get(4), Integer::sum);
-        statsMap.merge(7, -componentsRequired.get(5), Integer::sum);
-        statsMap.merge(8, -componentsRequired.get(6), Integer::sum);
+        statsMap.merge(2, -componentsRequired[0], Integer::sum);
+        statsMap.merge(3, -componentsRequired[1], Integer::sum);
+        statsMap.merge(4, -componentsRequired[2], Integer::sum);
+        statsMap.merge(5, -componentsRequired[3], Integer::sum);
+        statsMap.merge(6, -componentsRequired[4], Integer::sum);
+        statsMap.merge(7, -componentsRequired[5], Integer::sum);
+        statsMap.merge(8, -componentsRequired[6], Integer::sum);
         updatePlayerData(playerUUID);
     }
 }
