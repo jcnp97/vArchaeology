@@ -248,20 +248,6 @@ public class CraftingStation implements Listener {
                         DHAPI.removeHologramLine(hologram, 0);
                         String hologramItem = "#ICON: " + customTools.getMaterialName(toolID + 1) + " {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
                         DHAPI.addHologramLine(hologram, hologramItem);
-
-//                        if (toolID >= 1 && toolID <= 3) {
-//                            String hologramItem = "#ICON: STONE_SHOVEL {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
-//                            DHAPI.addHologramLine(hologram, hologramItem);
-//                        } else if (toolID >= 4 && toolID <= 6) {
-//                            String hologramItem = "#ICON: IRON_SHOVEL {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
-//                            DHAPI.addHologramLine(hologram, hologramItem);
-//                        } else if (toolID == 7) {
-//                            String hologramItem = "#ICON: DIAMOND_SHOVEL {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
-//                            DHAPI.addHologramLine(hologram, hologramItem);
-//                        } else {
-//                            String hologramItem = "#ICON: NETHERITE_SHOVEL {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
-//                            DHAPI.addHologramLine(hologram, hologramItem);
-//                        }
                     }
                     else {
                         DHAPI.removeHologram(holoName);

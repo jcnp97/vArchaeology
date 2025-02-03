@@ -147,7 +147,7 @@ public class BlockBreakListener implements Listener {
             effectsUtil.sendADBProgressBarTitle(uuid, playerData.getArchADP(uuid) / 100.0, 0.1);
         }
 
-        if (random.nextInt(1, 3) == 1) {
+        if (random.nextInt(1, 2501) == 1) {
             String blockType = material.name();
             switch (blockType) {
                 case "SAND" -> giveCraftingMaterial(player, 2);

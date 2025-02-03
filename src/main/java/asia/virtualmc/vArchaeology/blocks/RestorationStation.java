@@ -50,6 +50,7 @@ public class RestorationStation implements Listener {
     private final Map<UUID, BukkitRunnable> activeCraftingTasks;
     private final Map<UUID, Long> cooldowns;
     private final Random random;
+    private final int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
 
     public RestorationStation(Main plugin,
                               EffectsUtil effectsUtil,
@@ -258,6 +259,7 @@ public class RestorationStation implements Listener {
         double initialXP = expManager.getTotalArtefactRestoreEXP(uuid);
         int archLevel = playerData.getArchLevel(uuid);
 
+
         ChestGui gui = new ChestGui(4, configManager.arteRestoreGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
         StaticPane staticPane = new StaticPane(0, 0, 9, 4);
@@ -280,10 +282,18 @@ public class RestorationStation implements Listener {
         // type-2 restoration (Lv. 60)
         if (archLevel >= 60) {
             int[] componentsOwned = statistics.getComponents(uuid);
-            for (int x = 5; x <= 7; x++) {
-                ItemStack confirmButton = createType2Button(initialXP, componentsOwned);
-                GuiItem guiItem = new GuiItem(confirmButton, event -> openRestoreT2ArtefactConfirm(player, initialXP));
-                staticPane.addItem(guiItem, x, 1);
+            if (validateComponents(player)) {
+                for (int x = 5; x <= 7; x++) {
+                    ItemStack confirmButton = createType2Button(initialXP, componentsOwned);
+                    GuiItem guiItem = new GuiItem(confirmButton, event -> openRestoreT2ArtefactConfirm(player, initialXP));
+                    staticPane.addItem(guiItem, x, 1);
+                }
+            } else {
+                for (int x = 5; x <= 7; x++) {
+                    ItemStack confirmButton = createType2NoComp(initialXP, componentsOwned, componentsRequired);
+                    GuiItem guiItem = new GuiItem(confirmButton);
+                    staticPane.addItem(guiItem, x, 1);
+                }
             }
         } else {
             for (int x = 5; x <= 7; x++) {
@@ -326,6 +336,7 @@ public class RestorationStation implements Listener {
     }
 
     private void openRestoreT2ArtefactConfirm(Player player, double initialXP) {
+
         ChestGui gui = new ChestGui(3, configManager.confirmGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
         StaticPane staticPane = new StaticPane(0, 0, 9, 3);
@@ -353,14 +364,16 @@ public class RestorationStation implements Listener {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§eType-1 Restoration §7(§a+" + formattedXP + " XP§7)");
+            meta.setDisplayName("§eType-1 Restoration");
             meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
+                    "§7Restoration XP: §a" + formattedXP,
+                    "",
                     "§cDOES NOT REQUIRE §7components to use but it",
                     "§7will not produce anything.",
                     "",
-                    "§4§lWARNING! §cThis process completely destroy",
-                    "§cyour artefact."
+                    "§4§lWARNING! §cThis process will completely",
+                    "§cdestroy your artefact."
             ));
             button.setItemMeta(meta);
         }
@@ -373,9 +386,11 @@ public class RestorationStation implements Listener {
         ItemStack button = new ItemStack(Material.PAPER);
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName("§eType-2 Restoration §7(§a+" + formattedXP + " XP§7)");
+            meta.setDisplayName("§eType-2 Restoration");
             meta.setCustomModelData(configManager.invisibleModelData);
             meta.setLore(List.of(
+                    "§7Restoration XP: §a" + formattedXP,
+                    "",
                     "§7This require the following components",
                     "§7to ensure a successful restoration process.",
                     "",
@@ -390,6 +405,40 @@ public class RestorationStation implements Listener {
             button.setItemMeta(meta);
         }
         return button;
+    }
+
+    private ItemStack createType2NoComp(double exp, int[] componentsOwned, int[] componentsReq) {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        DecimalFormat decimalFormat = new DecimalFormat("#,###");
+        String formattedXP = decimalFormat.format(exp);
+        if (meta != null) {
+            meta.setDisplayName("§eType-2 Restoration");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            meta.setLore(List.of(
+                    "§7Restoration XP: §a" + formattedXP,
+                    "",
+                    "§7This require the following components",
+                    "§7to ensure a successful restoration process.",
+                    "",
+                    "§7• " + addStrikethrough(componentsOwned[0], componentsReq[0]) + "Common Components: " + componentsOwned[0] + "/64",
+                    "§7• " + addStrikethrough(componentsOwned[1], componentsReq[1]) + "Uncommon Components: " + componentsOwned[1] + "/32",
+                    "§7• " + addStrikethrough(componentsOwned[2], componentsReq[2]) + "Rare Components: " + componentsOwned[2] + "/16",
+                    "§7• " + addStrikethrough(componentsOwned[3], componentsReq[3]) + "Unique Components: " + componentsOwned[3] + "/12",
+                    "§7• " + addStrikethrough(componentsOwned[4], componentsReq[4]) + "Special Components: " + componentsOwned[4] + "/8",
+                    "§7• " + addStrikethrough(componentsOwned[5], componentsReq[5]) + "Mythical Components: " + componentsOwned[5] + "/4",
+                    "§7• " + addStrikethrough(componentsOwned[6], componentsReq[6]) + "Exotic Components: " + componentsOwned[6] + "/2"
+            ));
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private String addStrikethrough(int compOwned, int compReq) {
+        if (compOwned < compReq) {
+            return "§4§m";
+        }
+        return "§2";
     }
 
     private void processType1Restore(Player player) {
@@ -420,13 +469,14 @@ public class RestorationStation implements Listener {
             return;
         }
 
-        if (!validateComponents(player, uuid)) {
+        if (!validateComponents(player)) {
+            player.sendMessage("§cError: You do not have the required number of components to do this.");
+            player.closeInventory();
             return;
         }
 
         try {
             player.getInventory().removeItem(item);
-            int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
             statistics.subtractComponents(uuid, componentsRequired);
             startCrafting(player, finalXP, true, artefactCollections.getRandomCollection(artefactItems.getArtefactID(item)));
         } catch (Exception e) {
@@ -455,14 +505,12 @@ public class RestorationStation implements Listener {
         return false;
     }
 
-    private boolean validateComponents(Player player, UUID uuid) {
+    private boolean validateComponents(Player player) {
+        UUID uuid = player.getUniqueId();
         int[] componentsOwned = statistics.getComponents(uuid);
-        int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
 
         for (int i = 0; i < componentsOwned.length; i++) {
             if (componentsOwned[i] < componentsRequired[i]) {
-                player.sendMessage("§cError: You do not have the required number of components to do this.");
-                player.closeInventory();
                 return false;
             }
         }

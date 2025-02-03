@@ -57,7 +57,6 @@ public final class Main extends JavaPlugin {
     private BlockBreakListener blockBreakListener;
     private PlayerJoinListener playerJoinListener;
     private ItemEquipListener itemEquipListener;
-    private PlayerInteractListener playerInteractListener;
     private ToolRestrictionListener toolRestrictionListener;
     private ItemInteractListener itemInteractListener;
     // blocks
@@ -117,7 +116,6 @@ public final class Main extends JavaPlugin {
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
         this.collectionsGUI = new CollectionsGUI(this, effectsUtil, configManager, playerData, sellGUI);
-        this.itemInteractListener = new ItemInteractListener(this, collectionsGUI);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
         this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
         this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections, craftingMaterials);
@@ -128,10 +126,10 @@ public final class Main extends JavaPlugin {
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager, configManager);
+        this.itemInteractListener = new ItemInteractListener(this, collectionsGUI, miscItems, lampStarGUI);
         this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager, artefactCollections);
         this.craftingStation = new CraftingStation(this, effectsUtil, playerData, statistics, customTools, configManager, customItems);
         this.blockCommands = new BlockCommands(this, restorationStation, craftingStation);
-        this.playerInteractListener = new PlayerInteractListener(this, miscItems, lampStarGUI);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil, craftingMaterials);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI, collectionLogGUI);
