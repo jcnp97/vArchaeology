@@ -39,122 +39,223 @@ public class TalentGUI {
     }
 
     public void openTalentGUI(Player player) {
-        ChestGui talentGui = new ChestGui(6, "Talent Trees");
+        ChestGui talentGui = new ChestGui(6, configManager.talentTreeTitle);
         StaticPane pane = new StaticPane(0, 0, 9, 6);
+        talentGui.setOnGlobalClick(event -> event.setCancelled(true));
 
-        Map<Integer, Integer> playerTalents = talentTree.getPlayerTalentMap(player.getUniqueId());
-        int archLevel = playerData.getArchLevel(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+        Map<Integer, Integer> playerTalents = talentTree.getPlayerTalentMap(uuid);
+        int archLevel = playerData.getArchLevel(uuid);
+        int talentID19 = playerTalents.getOrDefault(19, 0);
+        int talentPoints = playerData.getTalentPoints(uuid);
 
-        List<Integer> sortedTalentIDs = new ArrayList<>(talents.keySet());
-        Collections.sort(sortedTalentIDs);
+        for (int i = 1; i <= 9; i++) {
+            ConfigManager.Talent talent = talents.get(i);
+            int talentLevel = playerTalents.getOrDefault(i, 0);
+            ItemStack talentIcon = createTalentIcon(archLevel, talent, talentLevel);
+            GuiItem talentGUI;
 
-        int index = 0;
-
-        for (int talentID : sortedTalentIDs) {
-            ConfigManager.Talent talent = talents.get(talentID);
-
-            boolean hasLevelRequirement = archLevel >= talent.requiredLevel;
-
-            boolean hasPrerequisiteTalent = true;
-            if (!talent.requiredIDs.isEmpty()) {
-                for (int reqId : talent.requiredIDs) {
-                    int currentLevel = playerTalents.getOrDefault(reqId, 0);
-                    if (currentLevel < 10) {
-                        hasPrerequisiteTalent = false;
-                        break;
+            if (archLevel >= talent.requiredLevel) {
+                int talentID = i;
+                talentGUI = new GuiItem(talentIcon, event -> {
+                    if (talentPoints > 0 && talentLevel < (talentID19 * 10) + 10) {
+                        openConfirmGUI(player, talentID);
+                    } else if (talentPoints > 0) {
+                        player.sendMessage("§cYou already reached the max level!");
+                    } else {
+                        player.sendMessage("§cYou don't have talent points!");
                     }
-                }
-            }
-
-            boolean unlocked = hasLevelRequirement && hasPrerequisiteTalent;
-
-            ItemStack item;
-            int currentTalentLevel = playerTalents.getOrDefault(talentID, 0);
-            if (!unlocked) {
-                item = new ItemStack(Material.BARRIER);
-                ItemMeta meta = item.getItemMeta();
-                meta.setDisplayName(talent.name + " (Locked)");
-                meta.setCustomModelData(100000);
-                List<String> lore = new ArrayList<>();
-                lore.add("Requires Arch Level: " + talent.requiredLevel);
-                if (!talent.requiredIDs.isEmpty()) {
-                    lore.add("Requires talents " + talent.requiredIDs + " at level 10");
-                }
-                meta.setLore(lore);
-                item.setItemMeta(meta);
+                });
             } else {
-                if (currentTalentLevel == 0) {
-                    item = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
-                } else {
-                    item = new ItemStack(talent.material);
-                }
-                item.setAmount(currentTalentLevel > 0 ? currentTalentLevel : 1);
-                ItemMeta meta = item.getItemMeta();
-                meta.setDisplayName(talent.name + " (Level " + currentTalentLevel + ")");
-                List<String> lore = new ArrayList<>();
-                lore.add("Required Arch Level: " + talent.requiredLevel);
-                if (!talent.requiredIDs.isEmpty()) {
-                    lore.add("Requires talents " + talent.requiredIDs + " at level 10");
-                }
-                meta.setLore(lore);
-                if (currentTalentLevel > 0) {
-                    meta.setCustomModelData(talent.customModelData);
-                }
-                item.setItemMeta(meta);
+                talentGUI = new GuiItem(talentIcon);
             }
 
-            GuiItem guiItem = new GuiItem(item, event -> {
-                event.setCancelled(true);
-                if (!unlocked) {
-                    return;
-                }
-                if (playerData.getTalentPoints(player.getUniqueId()) > 0) {
-                    openConfirmGUI(player, talentID);
-                } else {
-                    player.sendMessage("You don't have talent points!");
-                }
-            });
+            pane.addItem(talentGUI, i - 1, 0);
+        }
 
-            int col = index % 9;
-            int row = index / 9;
-            pane.addItem(guiItem, col, row);
-            index++;
+        for (int i = 10; i <= 19; i++) {
+            ConfigManager.Talent talent = talents.get(i);
+            int talentLevel = playerTalents.getOrDefault(i, 0);
+            List<Integer> reqID = talent.requiredIDs;
+
+            ItemStack talentIcon = createTalentIconSP(archLevel, talent, talentLevel, playerTalents, reqID);
+            GuiItem talentGUI;
+
+            boolean hasPrerequisiteTalent = hasPrerequisites(reqID, playerTalents);
+
+            if (archLevel >= talent.requiredLevel && hasPrerequisiteTalent) {
+                int talentID = i;
+                talentGUI = new GuiItem(talentIcon, event -> {
+                    if (talentPoints > 9 && talentLevel == 0) {
+                        openConfirmGUI(player, talentID);
+                    } else if (talentPoints > 9) {
+                        player.sendMessage("§cYou already reached the max level!");
+                    } else {
+                        player.sendMessage("§cYou don't have enough talent points!");
+                    }
+                });
+            } else {
+                talentGUI = new GuiItem(talentIcon);
+            }
+
+            if (i == 19) {
+                pane.addItem(talentGUI, 4, 2);
+            } else {
+                pane.addItem(talentGUI, i - 10, 1);
+            }
         }
 
         talentGui.addPane(pane);
         talentGui.show(player);
     }
 
-    public void openConfirmGUI(Player player, int talentID) {
-        ChestGui confirmGui = new ChestGui(1, "Confirm Talent Upgrade");
-        StaticPane pane = new StaticPane(0, 0, 9, 1);
+    private ItemStack createTalentIcon(int archLevel, ConfigManager.Talent talent, int talentLevel) {
+        ItemStack talentIcon;
+        List<String> lore = new ArrayList<>();
+        boolean hasRequiredLevel = archLevel >= talent.requiredLevel;
 
-        ItemStack confirmItem = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
-        ItemMeta confirmMeta = confirmItem.getItemMeta();
-        confirmMeta.setDisplayName("Confirm Upgrade");
-        confirmItem.setItemMeta(confirmMeta);
 
-        GuiItem confirmGuiItem = new GuiItem(confirmItem, event -> {
-            event.setCancelled(true);
-            playerData.decrementTalentPoints(player.getUniqueId());
-            talentTree.incrementTalentLevel(player.getUniqueId(), talentID);
-            openTalentGUI(player);
-        });
+        if (talentLevel > 0 && hasRequiredLevel) {
+            talentIcon = new ItemStack(talent.material);
+        } else {
+            talentIcon = new ItemStack(Material.PAPER);
+        }
 
-        ItemStack cancelItem = new ItemStack(Material.RED_STAINED_GLASS_PANE);
-        ItemMeta cancelMeta = cancelItem.getItemMeta();
-        cancelMeta.setDisplayName("Cancel");
-        cancelItem.setItemMeta(cancelMeta);
+        talentIcon.setAmount(talentLevel > 0 ? talentLevel : 1);
+        ItemMeta meta = talentIcon.getItemMeta();
 
-        GuiItem cancelGuiItem = new GuiItem(cancelItem, event -> {
-            event.setCancelled(true);
-            openTalentGUI(player);
-        });
+        if (talentLevel > 0 && hasRequiredLevel) {
+            meta.setDisplayName("§6" + talent.name + " " + talentLevel + " §7(§a" +
+                    (talent.loreData * talentLevel) + "%§7)");
+            meta.setCustomModelData(talent.customModelData);
+            meta.setLore(talent.lore);
+        } else if (talentLevel == 0 && hasRequiredLevel) {
+            meta.setDisplayName("§6" + talent.name);
+            meta.setCustomModelData(100021);
+            meta.setLore(talent.lore);
+        } else {
+            meta.setDisplayName("§6" + talent.name + " §c(Locked)");
+            lore.add("§7Requires:");
+            lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel);
+            meta.setLore(lore);
+            meta.setCustomModelData(100020);
+        }
 
-        pane.addItem(confirmGuiItem, 3, 0);
-        pane.addItem(cancelGuiItem, 5, 0);
+        talentIcon.setItemMeta(meta);
+        return talentIcon;
+    }
+
+    private ItemStack createTalentIconSP(int archLevel,
+                                         ConfigManager.Talent talent,
+                                         int talentLevel,
+                                         Map<Integer, Integer> talentTree,
+                                         List<Integer> requiredID) {
+        ItemStack talentIcon;
+        List<String> lore = new ArrayList<>();
+        boolean hasPrerequisiteTalent = hasPrerequisites(requiredID, talentTree);
+        boolean hasRequiredLevel = archLevel >= talent.requiredLevel;
+
+        if (talentLevel > 0 && hasRequiredLevel) {
+            talentIcon = new ItemStack(talent.material);
+        } else {
+            talentIcon = new ItemStack(Material.PAPER);
+        }
+
+        talentIcon.setAmount(talentLevel > 0 ? talentLevel : 1);
+        ItemMeta meta = talentIcon.getItemMeta();
+
+        if (hasRequiredLevel && hasPrerequisiteTalent) {
+            meta.setDisplayName("§4" + talent.name);
+            meta.setLore(talent.lore);
+
+            if (talentLevel == 0) {
+                meta.setCustomModelData(100021);
+            } else {
+                meta.setCustomModelData(talent.customModelData);
+            }
+        } else {
+            meta.setDisplayName("§4" + talent.name + " §c(Locked)");
+            meta.setCustomModelData(100020);
+            lore.add("§7Requires:");
+            for (int reqID : requiredID) {
+                if (talentTree.getOrDefault(reqID, 0) < 10) {
+                    lore.add("§7• §c§m" + talents.get(reqID).name + " Level 10");
+                } else {
+                    lore.add("§7• §e" + talents.get(reqID).name + " Level 10");
+                }
+            }
+            if (hasRequiredLevel) {
+                lore.add("§7• §eRequires Archaeology Level " + talent.requiredLevel);
+            } else {
+                lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel);
+            }
+            meta.setLore(lore);
+        }
+
+        talentIcon.setItemMeta(meta);
+        return talentIcon;
+    }
+
+    private boolean hasPrerequisites(List<Integer> requiredID, Map<Integer, Integer> talentTree) {
+        for (int reqID : requiredID) {
+            if (talentTree.getOrDefault(reqID, 0) < 10) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void openConfirmGUI(Player player, int talentID) {
+        UUID uuid = player.getUniqueId();
+        ChestGui confirmGui = new ChestGui(3, configManager.confirmGUITitle);
+        StaticPane pane = new StaticPane(0, 0, 9, 3);
+        confirmGui.setOnGlobalClick(event -> event.setCancelled(true));
+
+        for (int i = 1; i <= 3; i++) {
+            ItemStack confirmButton = createConfirmationButton();
+            GuiItem confirm = new GuiItem(confirmButton, event -> {
+                if (talentID <= 9) {
+                    playerData.reduceTalentPoints(uuid, 1);
+                } else {
+                    playerData.reduceTalentPoints(uuid, 10);
+                }
+                talentTree.incrementTalentLevel(uuid, talentID);
+                openTalentGUI(player);
+            });
+            pane.addItem(confirm, i, 1);
+        }
+
+        for (int i = 5; i <= 7; i++) {
+            ItemStack cancelButton = createCloseButton();
+            GuiItem confirm = new GuiItem(cancelButton, event -> {
+                openTalentGUI(player);
+            });
+            pane.addItem(confirm, i, 1);
+        }
 
         confirmGui.addPane(pane);
         confirmGui.show(player);
+    }
+
+    private ItemStack createCloseButton() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§cClose");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            button.setItemMeta(meta);
+        }
+        return button;
+    }
+
+    private ItemStack createConfirmationButton() {
+        ItemStack button = new ItemStack(Material.PAPER);
+        ItemMeta meta = button.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§aConfirm upgrade");
+            meta.setCustomModelData(configManager.invisibleModelData);
+            button.setItemMeta(meta);
+        }
+        return button;
     }
 }

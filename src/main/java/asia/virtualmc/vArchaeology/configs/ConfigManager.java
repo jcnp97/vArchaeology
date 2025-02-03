@@ -41,6 +41,7 @@ public class ConfigManager {
     public String collectionLogBoth;
     public String craftingStationTitle;
     public String collectionInteractTitle;
+    public String talentTreeTitle;
     // traits.yml
     public double[] wisdomEffects = {0.0, 0.0, 0.0, 0.0};
     public double[] charismaEffects = {0.0, 0.0, 0.0, 0.0};
@@ -219,6 +220,7 @@ public class ConfigManager {
             collectionLogBoth = gui.getString("guiSettings.collection-both-title", "Collection Log");
             craftingStationTitle = gui.getString("guiSettings.crafting-station-title", "Crafting Station");
             collectionInteractTitle = gui.getString("guiSettings.collection-interact-title", "Item Interaction");
+            talentTreeTitle = gui.getString("guiSettings.talent-tree-title", "Talent Tree");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -436,6 +438,7 @@ public class ConfigManager {
                     Material material = Material.valueOf(talentSection.getString(key + ".material"));
                     int customModelData = talentSection.getInt(key + ".custom-model-data");
                     int requiredLevel = talentSection.getInt(key + ".required-level");
+                    double loreData = talentSection.getDouble(key + ".lore-data");
 
                     List<Integer> requiredIDs = new ArrayList<>();
                     if (talentSection.contains(key + ".required-ID")) {
@@ -453,7 +456,7 @@ public class ConfigManager {
                         }
                     }
 
-                    Talent talent = new Talent(id, name, material, customModelData, requiredLevel, requiredIDs, lore);
+                    Talent talent = new Talent(id, name, material, customModelData, requiredLevel, requiredIDs, lore, loreData);
                     talentMap.put(id, talent);
                 } catch (Exception e) {
                     plugin.getLogger().warning("Could not load talent with key " + key + ": " + e.getMessage());
@@ -470,8 +473,9 @@ public class ConfigManager {
         public final int requiredLevel;
         public final List<Integer> requiredIDs;
         public final List<String> lore;
+        public final double loreData;
 
-        public Talent(int id, String name, Material material, int customModelData, int requiredLevel, List<Integer> requiredIDs, List<String> lore) {
+        public Talent(int id, String name, Material material, int customModelData, int requiredLevel, List<Integer> requiredIDs, List<String> lore, double loreData) {
             this.id = id;
             this.name = name;
             this.material = material;
@@ -479,6 +483,7 @@ public class ConfigManager {
             this.requiredLevel = requiredLevel;
             this.requiredIDs = requiredIDs;
             this.lore = lore;
+            this.loreData = loreData;
         }
     }
 }

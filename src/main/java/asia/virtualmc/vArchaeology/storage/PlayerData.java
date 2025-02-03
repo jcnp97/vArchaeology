@@ -272,9 +272,9 @@ public class PlayerData {
         if (stats != null) stats.talentPoints++;
     }
 
-    public void decrementTalentPoints(@NotNull UUID uuid) {
+    public void reduceTalentPoints(@NotNull UUID uuid, int value) {
         PlayerStats stats = playerStatsMap.get(uuid);
-        if (stats != null) stats.talentPoints--;
+        if (stats != null) stats.talentPoints -= value;
     }
 
     public void addBonusXP(@NotNull UUID uuid, int value) {
