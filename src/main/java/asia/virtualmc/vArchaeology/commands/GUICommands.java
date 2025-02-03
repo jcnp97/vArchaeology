@@ -23,6 +23,7 @@ public class GUICommands {
     private final RestorationStation restorationStation;
     private final RankGUI rankGUI;
     private final CollectionLogGUI collectionLogGUI;
+    private final TalentGUI talentGUI;
     private final Map<UUID, Long> commandCooldowns;
 
     public GUICommands(Main plugin,
@@ -31,7 +32,8 @@ public class GUICommands {
                        TraitGUI traitGUI,
                        RestorationStation restorationStation,
                        RankGUI rankGUI,
-                       CollectionLogGUI collectionLogGUI) {
+                       CollectionLogGUI collectionLogGUI,
+                       TalentGUI talentGUI) {
         this.plugin = plugin;
         this.sellGUI = sellGUI;
         this.salvageGUI = salvageGUI;
@@ -39,6 +41,7 @@ public class GUICommands {
         this.restorationStation = restorationStation;
         this.rankGUI = rankGUI;
         this.collectionLogGUI = collectionLogGUI;
+        this.talentGUI = talentGUI;
         this.commandCooldowns = new HashMap<>();
         registerCommands();
     }
@@ -52,6 +55,7 @@ public class GUICommands {
                 .withSubcommand(archRestoreArtefact())
                 .withSubcommand(archRankGUI())
                 .withSubcommand(archCollectionLogGUI())
+                .withSubcommand(archTalentGUI())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -158,6 +162,18 @@ public class GUICommands {
                 .executes((sender, args) -> {
                     if (sender instanceof Player player) {
                         collectionLogGUI.openCollectionLog(player, 1);
+                    } else {
+                        sender.sendMessage("This command can only be used by players.");
+                    }
+                });
+    }
+
+    private CommandAPICommand archTalentGUI() {
+        return new CommandAPICommand("talent")
+                .withPermission("varchaeology.use")
+                .executes((sender, args) -> {
+                    if (sender instanceof Player player) {
+                        talentGUI.openTalentGUI(player);
                     } else {
                         sender.sendMessage("This command can only be used by players.");
                     }

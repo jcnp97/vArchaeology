@@ -5,12 +5,10 @@ import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.checkerframework.checker.units.qual.A;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.ChatColor;
 
 import java.io.File;
 import java.util.*;
@@ -59,6 +57,8 @@ public class ConfigManager {
     public final Map<Integer, List<String>> rarityLore = new HashMap<>();
     public final Map<Integer, List<String>> groupLore = new HashMap<>();
     public String acquiredLore;
+    // talent-tree.yml
+    public final Map<Integer, Talent> talentMap = new HashMap<>();
 
     public ConfigManager(Main plugin) {
         this.plugin = plugin;
@@ -78,8 +78,12 @@ public class ConfigManager {
         readTraitSettings();
         readRanks();
         readCollectionLore();
+        readTalentConfig();
+
         // Read variable
-        startingModelData = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "items/collections.yml")).getInt("globalSettings.starting-model-data", 1);
+        startingModelData = YamlConfiguration.loadConfiguration(
+                new File(plugin.getDataFolder(), "items/collections.yml")
+        ).getInt("globalSettings.starting-model-data", 1);
     }
 
     public void readDatabase() {
@@ -411,5 +415,70 @@ public class ConfigManager {
             }
         }
         acquiredLore = config.getString("globalSettings.acquired-lore");
+    }
+
+    public void readTalentConfig() {
+        File talentFile = new File(plugin.getDataFolder(), "talent-trees.yml");
+        if (!talentFile.exists()) {
+            plugin.saveResource("talent-trees.yml", false);
+        }
+
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(talentFile);
+        ConfigurationSection talentSection = config.getConfigurationSection("talentList");
+        if (talentSection != null) {
+            for (String key : talentSection.getKeys(false)) {
+                try {
+                    int id = Integer.parseInt(key);
+
+                    String rawName = talentSection.getString(key + ".name");
+                    String name = ChatColor.translateAlternateColorCodes('&', rawName);
+
+                    Material material = Material.valueOf(talentSection.getString(key + ".material"));
+                    int customModelData = talentSection.getInt(key + ".custom-model-data");
+                    int requiredLevel = talentSection.getInt(key + ".required-level");
+
+                    List<Integer> requiredIDs = new ArrayList<>();
+                    if (talentSection.contains(key + ".required-ID")) {
+                        String reqIdsStr = talentSection.getString(key + ".required-ID");
+                        for (String s : reqIdsStr.split(",")) {
+                            requiredIDs.add(Integer.parseInt(s.trim()));
+                        }
+                    }
+
+                    List<String> lore = new ArrayList<>();
+                    if (talentSection.contains(key + ".lore")) {
+                        List<String> loreList = talentSection.getStringList(key + ".lore");
+                        for (String loreEntry : loreList) {
+                            lore.add(ChatColor.translateAlternateColorCodes('&', loreEntry));
+                        }
+                    }
+
+                    Talent talent = new Talent(id, name, material, customModelData, requiredLevel, requiredIDs, lore);
+                    talentMap.put(id, talent);
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Could not load talent with key " + key + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    public static class Talent {
+        public final int id;
+        public final String name;
+        public final Material material;
+        public final int customModelData;
+        public final int requiredLevel;
+        public final List<Integer> requiredIDs;
+        public final List<String> lore;
+
+        public Talent(int id, String name, Material material, int customModelData, int requiredLevel, List<Integer> requiredIDs, List<String> lore) {
+            this.id = id;
+            this.name = name;
+            this.material = material;
+            this.customModelData = customModelData;
+            this.requiredLevel = requiredLevel;
+            this.requiredIDs = requiredIDs;
+            this.lore = lore;
+        }
     }
 }

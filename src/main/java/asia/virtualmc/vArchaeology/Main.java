@@ -107,13 +107,13 @@ public final class Main extends JavaPlugin {
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
         this.sellLog = new SellLog(this, logManager);
-        this.talentGUI = new TalentGUI(this, effectsUtil);
         this.playerDataDB = new PlayerDataDB(this, configManager);
         this.statistics = new Statistics(this, playerDataDB, configManager);
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statistics, configManager, salvageLog);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
         this.playerData = new PlayerData(this, playerDataDB, bossBarUtil, configManager, effectsUtil, artefactItems);
+        this.talentGUI = new TalentGUI(this, talentTree, playerData, effectsUtil, configManager);
         this.sellGUI = new SellGUI(this, effectsUtil, playerData, configManager, talentTree, statistics, sellLog);
         this.collectionsGUI = new CollectionsGUI(this, effectsUtil, configManager, playerData, sellGUI);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
@@ -132,7 +132,7 @@ public final class Main extends JavaPlugin {
         this.blockCommands = new BlockCommands(this, restorationStation, craftingStation);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil, craftingMaterials);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
-        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI, collectionLogGUI);
+        this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI, collectionLogGUI, talentGUI);
 
         startUpdateTask();
     }

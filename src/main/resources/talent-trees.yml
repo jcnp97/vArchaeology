@@ -1,108 +1,174 @@
 # vArchaeology Talent Trees
 talentList:
   1: # talentID
-    name: "Sagacity"
+    name: "&aSagacity"
     material: FLINT # material icon for GUI display
     custom-model-data: 100000
     required-level: 60
+    lore:
+      - "&7Archaeology XP when breaking blocks."
   2:
-    name: "Insightful Judgement"
+    name: "&aInsightful Judgement"
     material: FLINT
     custom-model-data: 100000
     required-level: 63
+    lore:
+      - "&7Archaeology XP when obtaining drops."
   3:
-    name: "Extraction"
+    name: "&aExtraction"
     material: FLINT
     custom-model-data: 100000
     required-level: 66
+    lore:
+      - "&7base gathering rate."
   4:
-    name: "Adept Restoration"
+    name: "&aAdept Restoration"
     material: FLINT
     custom-model-data: 100000
     required-level: 69
+    lore:
+      - "&7Archaeology XP when restoring artefacts."
   5:
-    name: "Prosperity"
+    name: "&aProsperity"
     material: FLINT
     custom-model-data: 100000
     required-level: 72
+    lore:
+      - "&7Archaeology materials sell price."
   6:
-    name: "Archaeological Prowess"
+    name: "&aArchaeological Prowess"
     material: FLINT
     custom-model-data: 100000
     required-level: 75
+    lore:
+      - "&7permanent Archaeology aptitude."
   7:
-    name: "Divine Opulence"
+    name: "&aDivine Opulence"
     material: FLINT
     custom-model-data: 100000
     required-level: 78
+    lore:
+      - "&7restored artefacts sell price."
   8:
-    name: "Rapid Discovery"
+    name: "&aRapid Discovery"
     material: FLINT
     custom-model-data: 100000
     required-level: 81
+    lore:
+      - "&7Artefact Discovery progress."
   9:
-    name: "Stroke of Luck"
+    name: "&aStroke of Luck"
     material: FLINT
     custom-model-data: 100000
     required-level: 99
+    lore:
+      - "&7Luck Factor"
   # Specialized Talents
   10:
-    name: "Myriad of Quintessence"
+    name: "&4Myriad of Quintessence"
     material: FLINT
     custom-model-data: 100000
     required-level: 70
     required-ID: 1, 3
+    lore:
+      - "&a+3 &7drop weight on Exotic materials."
+      - "&cRequires:"
+      - "&7• &eSagacity Level 10"
+      - "&7• &eExtraction Level 10"
   11:
-    name: "Blessed Treatment"
+    name: "&4Blessed Treatment"
     material: FLINT
     custom-model-data: 100000
     required-level: 80
     required-ID: 2, 4
+    lore:
+      - "&a+500 &7Aptitude when restoring artefacts."
+      - "&cRequires:"
+      - "&7• &eInsightful Judgement Level 10"
+      - "&7• &eAdept Restoration Level 10"
   12:
-    name: "Lucky Break"
+    name: "&4Lucky Break"
     material: FLINT
     custom-model-data: 100000
     required-level: 90
     required-ID: 5, 7
+    lore:
+      - "&a+10% &7chance to double block-breaking base XP."
+      - "&cRequires:"
+      - "&7• &eProsperity Level 10"
+      - "&7• &eDivine Opulence Level 10"
   13:
-    name: "Quality Maker"
+    name: "&4Quality Maker"
     material: FLINT
     custom-model-data: 100000
     required-level: 100
     required-ID: 6, 8
+    lore:
+      - "&a+50,000 &7Archaeology Aptitude."
+      - "&cRequires:"
+      - "&7• &eArchaeological Prowess Level 10"
+      - "&7• &eRapid Discovery Level 10"
   14:
-    name: "Better Odds"
+    name: "&4Better Odds"
     material: FLINT
     custom-model-data: 100000
     required-level: 100
     required-ID: 9
+    lore:
+      - "&7Doubles the effect of Stroke of Luck."
+      - "&cRequires:"
+      - "&7• &eStroke of Luck Level 10"
   15:
-    name: "Good Fortune"
+    name: "&4Good Fortune"
     material: FLINT
     custom-model-data: 100000
     required-level: 104
     required-ID: 1, 2
+    lore:
+      - "&a+5% &7chance to double material base XP."
+      - "&cRequires:"
+      - "&7• &eSagacity Level 10"
+      - "&7• &eInsightful Judgement Level 10"
   16:
-    name: "Chaotic Renewal"
+    name: "&4Chaotic Renewal"
     material: FLINT
     custom-model-data: 100000
     required-level: 108
     required-ID: 3, 4
+    lore:
+      - "&a+5% &7chance to double Artefact Restoration XP."
+      - "&cRequires:"
+      - "&7• &eExtraction Level 10"
+      - "&7• &eAdept Restoration Level 10"
   17:
-    name: "Heaven's Grace"
+    name: "&4Heaven's Grace"
     material: FLINT
     custom-model-data: 100000
     required-level: 112
     required-ID: 5, 6
+    lore:
+      - "&a+20% &7Archaeology XP on all sources."
+      - "&cRequires:"
+      - "&7• &eProsperity Level 10"
+      - "&7• &eArchaeological Prowess Level 10"
   18:
-    name: "Masterful Discovery"
+    name: "&4Masterful Discovery"
     material: FLINT
     custom-model-data: 100000
     required-level: 116
     required-ID: 7, 8
+    lore:
+      - "&a+0.15% &7Artefact Discovery progress."
+      - "&cRequires:"
+      - "&7• &eDivine Opulence Level 10"
+      - "&7• &eRapid Discovery Level 10"
   19:
-    name: "Master of Archaeology"
+    name: "&4Master of Archaeology"
     material: FLINT
     custom-model-data: 100000
     required-level: 120
     required-ID: 1, 2, 3, 4, 5, 6, 7, 8
+    lore:
+      - "&7Increases max level of all basic talent by 10."
+      - "&cRequires:"
+      - "&7• &eAll Talents Level 10"

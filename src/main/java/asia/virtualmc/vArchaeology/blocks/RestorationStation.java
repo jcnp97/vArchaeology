@@ -1,7 +1,6 @@
 package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
-
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
 import asia.virtualmc.vArchaeology.items.ArtefactCollections;
@@ -52,6 +51,9 @@ public class RestorationStation implements Listener {
     private final Random random;
     private final int[] componentsRequired = {64, 32, 16, 12, 8, 4, 2};
 
+    // New field for the permanent hologram (station hologram)
+    private Hologram permanentHologram;
+
     public RestorationStation(Main plugin,
                               EffectsUtil effectsUtil,
                               EXPManager expManager,
@@ -93,6 +95,7 @@ public class RestorationStation implements Listener {
                     restorationStationLocation = null;
                 } else {
                     ensureBlockExists();
+                    createPermanentHologram();
                 }
 
             } catch (NumberFormatException e) {
@@ -112,6 +115,21 @@ public class RestorationStation implements Listener {
                 plugin.getLogger().info("Created restoration station block at " + formatLocation(restorationStationLocation));
             }
         }
+    }
+
+    private void createPermanentHologram() {
+        if (restorationStationLocation == null) return;
+
+        if (permanentHologram != null) {
+            DHAPI.removeHologram(permanentHologram.getName());
+        }
+
+        Location permanentHoloLocation = restorationStationLocation.clone().add(0.5, 1.5, 0.5);
+        List<String> lines = Arrays.asList(
+                "§6Archaeology Workbench §f\uE073"
+        );
+        permanentHologram = DHAPI.createHologram("restoration_station", permanentHoloLocation, lines);
+        permanentHologram.setDefaultVisibleState(true);
     }
 
     public void createRestorationStation(Player player) {
@@ -167,7 +185,17 @@ public class RestorationStation implements Listener {
         }
     }
 
+    /**
+     * Starts the progress hologram and the restoration process.
+     * Temporarily removes the permanent hologram before starting and re-adds it (if no other processes are active)
+     * once the restoration is complete.
+     */
     private void startCrafting(Player player, double exp, boolean isType2Crafting, int collectionID) {
+        // Remove the permanent hologram temporarily (if it exists).
+        if (permanentHologram != null) {
+            permanentHologram.setHidePlayer(player);
+        }
+
         Location holoLocation = restorationStationLocation.clone().add(0.5, 1.5, 0.5);
         UUID uuid = player.getUniqueId();
         String holoName = "progress_hologram_" + uuid;
@@ -202,14 +230,12 @@ public class RestorationStation implements Listener {
 
                     if (secondsPassed <= 8) {
                         DHAPI.setHologramLine(hologram, 0, progressChars[secondsPassed - 1]);
-
-                    }
-                    else if (secondsPassed == 9 && isType2Crafting) {
+                    } else if (secondsPassed == 9 && isType2Crafting) {
                         DHAPI.removeHologramLine(hologram, 0);
                         String hologramItem = "#ICON: FLINT {CustomModelData:" + artefactCollections.getCollectionModelData(collectionID) + "}";
                         DHAPI.addHologramLine(hologram, hologramItem);
-                    }
-                    else {
+                    } else {
+                        // End the progress hologram and process rewards.
                         DHAPI.removeHologram(holoName);
                         activeHolograms.remove(player.getUniqueId());
                         String formattedEXP = String.format("%.2f", exp);
@@ -218,9 +244,12 @@ public class RestorationStation implements Listener {
                         effectsUtil.sendTitleMessage(uuid, "", "<#7CFEA7>You have received <gold>" +
                                 formattedEXP + " <#7CFEA7>XP!");
                         expManager.addRestorationXP(uuid, exp);
-                        if (isType2Crafting) artefactCollections.giveCollection(uuid, collectionID, 1);
+                        if (isType2Crafting) {
+                            artefactCollections.giveCollection(uuid, collectionID, 1);
+                        }
 
                         activeCraftingTasks.remove(player.getUniqueId());
+                        permanentHologram.removeHidePlayer(player);
                         this.cancel();
                     }
                 }
@@ -258,7 +287,6 @@ public class RestorationStation implements Listener {
         UUID uuid = player.getUniqueId();
         double initialXP = expManager.getTotalArtefactRestoreEXP(uuid);
         int archLevel = playerData.getArchLevel(uuid);
-
 
         ChestGui gui = new ChestGui(4, configManager.arteRestoreGUITitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));

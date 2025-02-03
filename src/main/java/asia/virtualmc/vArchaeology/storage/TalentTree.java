@@ -205,6 +205,15 @@ public class TalentTree {
         return new ConcurrentHashMap<>(playerTalents);
     }
 
+    public Map<Integer, Integer> getPlayerTalentMap(UUID uuid) {
+        return playerTalents.getOrDefault(uuid, new ConcurrentHashMap<>());
+    }
+
+    public void incrementTalentLevel(UUID playerUUID, int talentID) {
+        playerTalents.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())
+                .merge(talentID, 1, Integer::sum);
+        updatePlayerData(playerUUID);
+    }
 
     public void updateTalentLevel(UUID playerUUID, int talentID, int newLevel) {
         playerTalents.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>())

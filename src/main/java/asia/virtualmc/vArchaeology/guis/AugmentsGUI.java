@@ -18,7 +18,7 @@ import org.bukkit.ChatColor;
 
 import java.util.*;
 
-public class TraitGUI implements Listener {
+public class AugmentsGUI implements Listener {
     private final Main plugin;
     private final EffectsUtil effectsUtil;
     private final ConfigManager configManager;
@@ -27,10 +27,10 @@ public class TraitGUI implements Listener {
     private int remainingPoints = 0;
     private final int maxTraitLevel = 50;
 
-    public TraitGUI(Main plugin,
-                    EffectsUtil effectsUtil,
-                    PlayerData PlayerData,
-                    ConfigManager configManager) {
+    public AugmentsGUI(Main plugin,
+                       EffectsUtil effectsUtil,
+                       PlayerData PlayerData,
+                       ConfigManager configManager) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.PlayerData = PlayerData;
@@ -237,7 +237,6 @@ public class TraitGUI implements Listener {
             List<String> lore = new ArrayList<>();
             lore.add(ChatColor.YELLOW + "Left-click to add point");
             lore.add(ChatColor.YELLOW + "Right-click to remove point");
-            //lore.add(ChatColor.GRAY + "Current Level: " + currentLevel + "/" + maxTraitLevel);
 
             meta.setLore(lore);
             item.setItemMeta(meta);

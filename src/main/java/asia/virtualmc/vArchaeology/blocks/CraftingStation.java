@@ -1,7 +1,6 @@
 package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
-
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 import asia.virtualmc.vArchaeology.items.CustomItems;
 import asia.virtualmc.vArchaeology.items.CustomTools;
@@ -16,7 +15,6 @@ import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
 
 import net.kyori.adventure.sound.Sound;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -52,6 +50,9 @@ public class CraftingStation implements Listener {
     private final NamespacedKey BRONZE_MATTOCK;
     private final NamespacedKey TOOL_KEY;
 
+    // Permanent hologram for the crafting station (title and lore)
+    private Hologram permanentHologram;
+
     public CraftingStation(Main plugin,
                            EffectsUtil effectsUtil,
                            PlayerData playerData,
@@ -75,14 +76,13 @@ public class CraftingStation implements Listener {
         loadCraftingStation();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
+        // Register Bronze Mattock recipe
         ItemStack bronzeMattock = customTools.getArchToolCache(1);
         ShapedRecipe tier1Recipe = new ShapedRecipe(BRONZE_MATTOCK, bronzeMattock);
         tier1Recipe.shape("AAB", " C ", " C ");
-
         tier1Recipe.setIngredient('A', Material.IRON_INGOT);
         tier1Recipe.setIngredient('B', Material.COPPER_INGOT);
         tier1Recipe.setIngredient('C', Material.STICK);
-
         plugin.getServer().addRecipe(tier1Recipe);
     }
 
@@ -101,6 +101,7 @@ public class CraftingStation implements Listener {
                     craftingStationLocation = null;
                 } else {
                     ensureBlockExists();
+                    createPermanentHologram();
                 }
 
             } catch (NumberFormatException e) {
@@ -120,6 +121,21 @@ public class CraftingStation implements Listener {
                 plugin.getLogger().info("Created crafting station block at " + formatLocation(craftingStationLocation));
             }
         }
+    }
+
+    private void createPermanentHologram() {
+        if (craftingStationLocation == null) return;
+
+        if (permanentHologram != null) {
+            DHAPI.removeHologram(permanentHologram.getName());
+        }
+
+        Location permanentHoloLocation = craftingStationLocation.clone().add(0.5, 1.5, 0.5);
+        List<String> lines = Arrays.asList(
+                "§6Crafting Station §f\uE073"
+        );
+        permanentHologram = DHAPI.createHologram("crafting_station", permanentHoloLocation, lines);
+        permanentHologram.setDefaultVisibleState(true);
     }
 
     public void createCraftingStation(Player player) {
@@ -176,7 +192,6 @@ public class CraftingStation implements Listener {
                 return;
             }
 
-
             if (activeCraftingTasks.containsKey(uuid)) {
                 player.sendMessage("§cYou are currently engaged in a crafting process!");
                 return;
@@ -194,21 +209,31 @@ public class CraftingStation implements Listener {
 
     private boolean levelRequirementsCheck(UUID uuid, int toolID) {
         int archLevel = playerData.getArchLevel(uuid);
-        switch (toolID) {
-            case 1 -> { return archLevel >= 15; }
-            case 2 -> { return archLevel >= 30; }
-            case 3 -> { return archLevel >= 40; }
-            case 4 -> { return archLevel >= 50; }
-            case 5 -> { return archLevel >= 60; }
-            case 6 -> { return archLevel >= 70; }
-            case 7 -> { return archLevel >= 80; }
-            case 8 -> { return archLevel >= 90; }
-            case 9 -> { return archLevel >= 99; }
-            default -> { return false; }
-        }
+        return switch (toolID) {
+            case 1 -> archLevel >= 15;
+            case 2 -> archLevel >= 30;
+            case 3 -> archLevel >= 40;
+            case 4 -> archLevel >= 50;
+            case 5 -> archLevel >= 60;
+            case 6 -> archLevel >= 70;
+            case 7 -> archLevel >= 80;
+            case 8 -> archLevel >= 90;
+            case 9 -> archLevel >= 99;
+            default -> false;
+        };
     }
 
+    /**
+     * Starts the crafting process for a player.
+     * Removes the permanent hologram (if it exists) so that a progress hologram can be shown.
+     * Once the process is complete (and if no other crafting tasks are running), the permanent hologram is recreated.
+     */
     private void startCrafting(Player player, int toolID) {
+        // Remove the permanent hologram temporarily (if it exists).
+        if (permanentHologram != null) {
+            permanentHologram.setHidePlayer(player);
+        }
+
         Location holoLocation = craftingStationLocation.clone().add(0.5, 1.5, 0.5);
         UUID uuid = player.getUniqueId();
         String holoName = "progress_hologram_" + uuid;
@@ -243,13 +268,11 @@ public class CraftingStation implements Listener {
 
                     if (secondsPassed <= 8) {
                         DHAPI.setHologramLine(hologram, 0, progressChars[secondsPassed - 1]);
-                    }
-                    else if (secondsPassed == 9) {
+                    } else if (secondsPassed == 9) {
                         DHAPI.removeHologramLine(hologram, 0);
                         String hologramItem = "#ICON: " + customTools.getMaterialName(toolID + 1) + " {CustomModelData:" + customTools.getToolModelData(toolID + 1) + "}";
                         DHAPI.addHologramLine(hologram, hologramItem);
-                    }
-                    else {
+                    } else {
                         DHAPI.removeHologram(holoName);
                         activeHolograms.remove(uuid);
 
@@ -259,6 +282,7 @@ public class CraftingStation implements Listener {
                         customTools.giveArchTool(uuid, toolID + 1);
 
                         activeCraftingTasks.remove(uuid);
+                        permanentHologram.removeHidePlayer(player);
                         this.cancel();
                     }
                 }
@@ -292,8 +316,8 @@ public class CraftingStation implements Listener {
     }
 
     // GUI Methods
-    public void openBronzeMattockRecipe(Player player) {
 
+    public void openBronzeMattockRecipe(Player player) {
         ChestGui gui = new ChestGui(6, configManager.craftingStationTitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
         StaticPane staticPane = new StaticPane(0, 0, 9, 6);
@@ -305,6 +329,7 @@ public class CraftingStation implements Listener {
             staticPane.addItem(iron, x, 1);
         }
 
+        // COPPER_INGOT
         ItemStack copperIngot = new ItemStack(Material.COPPER_INGOT);
         GuiItem copper = new GuiItem(copperIngot);
         staticPane.addItem(copper, 3, 1);
@@ -433,18 +458,18 @@ public class CraftingStation implements Listener {
     }
 
     private int[] craftingMaterials(int itemID) {
-        switch (itemID) {
-            case 1 -> { return new int[]{256, 128, 0, 0, 0, 0, 0}; }
-            case 2 -> { return new int[]{512, 256, 64, 32, 0, 0, 0}; }
-            case 3 -> { return new int[]{768, 512, 128, 64, 16, 0, 0}; }
-            case 4 -> { return new int[]{1024, 768, 256, 128, 32, 8, 0}; }
-            case 5 -> { return new int[]{1280, 1024, 512, 256, 64, 16, 4}; }
-            case 6 -> { return new int[]{1536, 1280, 768, 512, 128, 32, 8}; }
-            case 7 -> { return new int[]{1792, 1536, 1024, 768, 256, 64, 16}; }
-            case 8 -> { return new int[]{2048, 1792, 1280, 1024, 512, 128, 32}; }
-            case 9 -> { return new int[]{2304, 2048, 1536, 1280, 768, 256, 64}; }
-            default -> { return new int[]{0, 0, 0, 0, 0, 0, 0}; }
-        }
+        return switch (itemID) {
+            case 1 -> new int[]{256, 128, 0, 0, 0, 0, 0};
+            case 2 -> new int[]{512, 256, 64, 32, 0, 0, 0};
+            case 3 -> new int[]{768, 512, 128, 64, 16, 0, 0};
+            case 4 -> new int[]{1024, 768, 256, 128, 32, 8, 0};
+            case 5 -> new int[]{1280, 1024, 512, 256, 64, 16, 4};
+            case 6 -> new int[]{1536, 1280, 768, 512, 128, 32, 8};
+            case 7 -> new int[]{1792, 1536, 1024, 768, 256, 64, 16};
+            case 8 -> new int[]{2048, 1792, 1280, 1024, 512, 128, 32};
+            case 9 -> new int[]{2304, 2048, 1536, 1280, 768, 256, 64};
+            default -> new int[]{0, 0, 0, 0, 0, 0, 0};
+        };
     }
 
     private ItemStack createItemMaterial(int[] compOwned, int[] compReq, int index) {
@@ -452,10 +477,8 @@ public class CraftingStation implements Listener {
         ItemMeta meta = button.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(customItems.getDisplayName(index + 1));
-            meta.setCustomModelData(100000 + (index));
-            meta.setLore(List.of(
-                    "§7Amount: §2" + compOwned[index] + "§7/§4" + compReq[index]
-            ));
+            meta.setCustomModelData(100000 + index);
+            meta.setLore(List.of("§7Amount: §2" + compOwned[index] + "§7/§4" + compReq[index]));
             button.setItemMeta(meta);
         }
         return button;
@@ -467,9 +490,7 @@ public class CraftingStation implements Listener {
         if (meta != null) {
             meta.setDisplayName(customItems.getDisplayName(index + 1));
             meta.setCustomModelData(100000);
-            meta.setLore(List.of(
-                    "§7Amount: §2" + compOwned[index] + "§7/§2" + compReq[index]
-            ));
+            meta.setLore(List.of("§7Amount: §2" + compOwned[index] + "§7/§2" + compReq[index]));
             button.setItemMeta(meta);
         }
         return button;
