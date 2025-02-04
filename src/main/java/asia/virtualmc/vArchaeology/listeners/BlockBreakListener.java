@@ -59,11 +59,11 @@ public class BlockBreakListener implements Listener {
                               @NotNull ItemsDropTable itemsDropTable,
                               @NotNull Statistics statistics,
                               @NotNull CollectionLog collectionLog,
-                              EXPManager expManager,
-                              ConfigManager configManager,
-                              ItemEquipListener itemEquipListener,
-                              EffectsUtil effectsUtil,
-                              CraftingMaterials craftingMaterials) {
+                              @NotNull EXPManager expManager,
+                              @NotNull ConfigManager configManager,
+                              @NotNull ItemEquipListener itemEquipListener,
+                              @NotNull EffectsUtil effectsUtil,
+                              @NotNull CraftingMaterials craftingMaterials) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.customItems = customItems;

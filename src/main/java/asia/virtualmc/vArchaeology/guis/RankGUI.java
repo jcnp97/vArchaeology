@@ -226,6 +226,11 @@ public class RankGUI {
         rankPointsMap.remove(uuid);
     }
 
+    public int getRankPoints(UUID uuid) {
+        if (!rankPointsMap.containsKey(uuid)) return 0;
+        return rankPointsMap.get(uuid);
+    }
+
     public void setRankPoints(UUID uuid, int points) {
         rankPointsMap.remove(uuid);
         rankPointsMap.put(uuid, points);

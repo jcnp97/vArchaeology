@@ -16,6 +16,7 @@ import asia.virtualmc.vArchaeology.logs.CraftingLog;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLog;
 import asia.virtualmc.vArchaeology.logs.SellLog;
+import asia.virtualmc.vArchaeology.placeholders.PlaceholderPlayerData;
 import asia.virtualmc.vArchaeology.storage.*;
 import asia.virtualmc.vArchaeology.utilities.BossBarUtil;
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -23,6 +24,7 @@ import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
 import dev.jorel.commandapi.CommandAPI;
 import dev.jorel.commandapi.CommandAPIBukkitConfig;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -83,6 +85,8 @@ public final class Main extends JavaPlugin {
     private PlayerDataCommands playerDataCommands;
     private GUICommands guiCommands;
     private BlockCommands blockCommands;
+    // placeholders
+    private PlaceholderPlayerData placeholderPlayerData;
 
     private static Economy econ = null;
     private static Permission perms = null;
@@ -137,6 +141,7 @@ public final class Main extends JavaPlugin {
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);
         this.guiCommands = new GUICommands(this, sellGUI, salvageGUI, traitGUI, restorationStation, rankGUI, collectionLogGUI, talentGUI);
 
+        registerPAPI();
         startUpdateTask();
     }
 
@@ -201,20 +206,28 @@ public final class Main extends JavaPlugin {
         return econ;
     }
 
+    private void registerPAPI() {
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            this.placeholderPlayerData = new PlaceholderPlayerData(this, playerData, statistics, configManager, rankGUI);
+        } else {
+            getLogger().severe("[vArchaeology] Failed to register PlaceholderAPI support.");
+        }
+    }
+
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().warning("Vault plugin not found!");
+            getLogger().warning("[vArchaeology] Vault plugin not found!");
             return false;
         }
-        getLogger().info("Vault was found, attempting to get economy registration...");
+        getLogger().info("[vArchaeology] Vault was found, attempting to get economy registration...");
 
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            getLogger().warning("No economy provider was registered with Vault!");
+            getLogger().warning("[vArchaeology] No economy provider was registered with Vault!");
             return false;
         }
         econ = rsp.getProvider();
-        getLogger().info("Successfully hooked into the economy: " + econ.getName());
+        getLogger().info("[vArchaeology] Successfully hooked into the economy: " + econ.getName());
         return true;
     }
 }
