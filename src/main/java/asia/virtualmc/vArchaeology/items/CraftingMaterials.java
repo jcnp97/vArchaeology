@@ -2,6 +2,8 @@ package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 
+import asia.virtualmc.vArchaeology.blocks.CraftingStation;
+import asia.virtualmc.vArchaeology.logs.CraftingLog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -9,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -21,6 +24,7 @@ import java.util.logging.Level;
 
 public class CraftingMaterials {
     private final Main plugin;
+    private final CraftingLog craftingLog;
     private final File customItemsFile;
     private FileConfiguration customItemsConfig;
 
@@ -28,8 +32,9 @@ public class CraftingMaterials {
     private static final String CRAFT_LIST_PATH = "craftingList";
     private final NamespacedKey CRAFT_KEY;
 
-    public CraftingMaterials(Main plugin) {
+    public CraftingMaterials(Main plugin, CraftingLog craftingLog) {
         this.plugin = plugin;
+        this.craftingLog = craftingLog;
         this.craftingCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "items/crafting-materials.yml");
         this.CRAFT_KEY = new NamespacedKey(plugin, "varch_crafting");
@@ -119,12 +124,16 @@ public class CraftingMaterials {
         return container.getOrDefault(CRAFT_KEY, PersistentDataType.INTEGER, 0);
     }
 
-    public String getDisplayName(int toolID) {
-        ItemStack item = craftingCache.get(toolID);
+    public String getDisplayName(int craftID) {
+        ItemStack item = craftingCache.get(craftID);
         if (item != null && item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
             return item.getItemMeta().getDisplayName();
         }
         return "Unknown Item";
+    }
+
+    public ItemStack getCraftingMaterialCache(int craftID) {
+        return craftingCache.get(craftID);
     }
 
     public void giveCraftingMaterial(UUID uuid, int id, int amount) {
@@ -146,6 +155,54 @@ public class CraftingMaterials {
                     player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
             player.sendMessage("§eYour inventory was full. Some items were dropped at your feet.");
         }
+    }
+
+    public void removeCraftingMaterial(Player player, int craftID) {
+        Inventory inventory = player.getInventory();
+        for (ItemStack item : inventory.getContents()) {
+            if (item == null) {
+                continue;
+            }
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta == null) {
+                continue;
+            }
+
+            PersistentDataContainer pdc = meta.getPersistentDataContainer();
+            if (!pdc.has(CRAFT_KEY, PersistentDataType.INTEGER)) {
+                continue;
+            }
+
+            Integer itemCraftId = pdc.get(CRAFT_KEY, PersistentDataType.INTEGER);
+            if (itemCraftId == null || itemCraftId != craftID) {
+                continue;
+            }
+
+            ItemStack removalItem = item.clone();
+            removalItem.setAmount(1);
+
+            HashMap<Integer, ItemStack> remaining = inventory.removeItem(removalItem);
+            if (remaining.isEmpty()) {
+                craftingLog.logTransactionTaken(player.getName(), meta.getDisplayName(), 1);
+                break;
+            }
+        }
+    }
+
+    public boolean hasCraftingMaterial(Player player, int craftID) {
+        for (ItemStack item: player.getInventory().getContents()) {
+            if (item == null || !item.hasItemMeta()) continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (meta.getPersistentDataContainer().has(CRAFT_KEY, PersistentDataType.INTEGER)) {
+                int itemID = meta.getPersistentDataContainer().get(CRAFT_KEY, PersistentDataType.INTEGER);
+                if (itemID == craftID) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void reloadCharms() {

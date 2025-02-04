@@ -60,6 +60,7 @@ public class ConfigManager {
     public String acquiredLore;
     // talent-tree.yml
     public final Map<Integer, Talent> talentMap = new HashMap<>();
+    public final String[] dropNames = {"Common", "Uncommon", "Rare", "Unique", "Special", "Mythical", "Exotic"};
 
     public ConfigManager(Main plugin) {
         this.plugin = plugin;

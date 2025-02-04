@@ -1,10 +1,12 @@
 package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
+import asia.virtualmc.vArchaeology.logs.SalvageLog;
 import asia.virtualmc.vArchaeology.utilities.ConsoleMessageUtil;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
@@ -18,12 +20,17 @@ public class Statistics {
     private final Main plugin;
     private final PlayerDataDB playerDataDB;
     private final ConfigManager configManager;
+    private final SalvageLog salvageLog;
     private final ConcurrentHashMap<UUID, ConcurrentHashMap<Integer, Integer>> playerStatistics;
 
-    public Statistics(Main plugin, PlayerDataDB playerDataDB, ConfigManager configManager) {
+    public Statistics(Main plugin,
+                      PlayerDataDB playerDataDB,
+                      ConfigManager configManager,
+                      SalvageLog salvageLog) {
         this.plugin = plugin;
         this.playerDataDB = playerDataDB;
         this.configManager = configManager;
+        this.salvageLog = salvageLog;
         this.playerStatistics = new ConcurrentHashMap<>();
         createStatisticsTables();
     }
@@ -227,11 +234,24 @@ public class Statistics {
         return componentsOwned;
     }
 
-    public void subtractComponents(UUID playerUUID, int[] componentsRequired) {
+    public void addComponents(UUID uuid, int amount) {
+        ConcurrentHashMap<Integer, Integer> statsMap = playerStatistics.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
+        statsMap.merge(2, amount, Integer::sum);
+        statsMap.merge(3, amount, Integer::sum);
+        statsMap.merge(4, amount, Integer::sum);
+        statsMap.merge(5, amount, Integer::sum);
+        statsMap.merge(6, amount, Integer::sum);
+        statsMap.merge(7, amount, Integer::sum);
+        statsMap.merge(8, amount, Integer::sum);
+        updatePlayerData(uuid);
+    }
+
+    public void subtractComponents(UUID uuid, int[] componentsRequired) {
+        Player player = Bukkit.getPlayer(uuid);
         if (componentsRequired.length != 7) {
             throw new IllegalArgumentException("componentsRequired must have exactly 7 elements.");
         }
-        ConcurrentHashMap<Integer, Integer> statsMap = playerStatistics.computeIfAbsent(playerUUID, k -> new ConcurrentHashMap<>());
+        ConcurrentHashMap<Integer, Integer> statsMap = playerStatistics.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
         statsMap.merge(2, -componentsRequired[0], Integer::sum);
         statsMap.merge(3, -componentsRequired[1], Integer::sum);
         statsMap.merge(4, -componentsRequired[2], Integer::sum);
@@ -239,6 +259,11 @@ public class Statistics {
         statsMap.merge(6, -componentsRequired[4], Integer::sum);
         statsMap.merge(7, -componentsRequired[5], Integer::sum);
         statsMap.merge(8, -componentsRequired[6], Integer::sum);
-        updatePlayerData(playerUUID);
+        updatePlayerData(uuid);
+        for (int i = 0; i < componentsRequired.length; i++) {
+            if (componentsRequired[i] > 0) {
+                salvageLog.logTransactionTaken(player.getName(), configManager.dropNames[i], componentsRequired[i]);
+            }
+        }
     }
 }

@@ -1,0 +1,108 @@
+craftingList:
+  cosmic_gem: # itemName for commands
+    id: 1 # internalID
+    material: HEART_OF_THE_SEA # base material
+    name: "&4Cosmic Gem"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7You can right-click &7this on crafting'
+      - '&7station alongside with mattock blueprints'
+      - '&7to craft &5Time-Space Fragment&7.'
+  blueprint_1: # itemName for commands
+    id: 2 # internalID
+    material: GUSTER_BANNER_PATTERN # base material
+    name: "&5Upper Half Handle Blueprint"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7One of the materials needed to craft'
+      - '&5Time-Space Fragment&7. You can obtain'
+      - '&7other blueprints from specific blocks.'
+      - ''
+      - '&7• &eUpper Half Handle &7- &aSAND'
+      - '&7• &eLower Half Handle &7- &aRED SAND'
+      - '&7• &eHead Pin &7- &aSOUL SAND'
+      - '&7• &eAdze Blade &7- &aDIRT'
+      - '&7• &eAxe Blade &7- &aGRAVEL'
+  blueprint_2: # itemName for commands
+    id: 3 # internalID
+    material: BORDURE_INDENTED_BANNER_PATTERN # base material
+    name: "&5Lower Half Handle Blueprint"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7One of the materials needed to craft'
+      - '&5Time-Space Fragment&7. You can obtain'
+      - '&7other blueprints from specific blocks.'
+      - ''
+      - '&7• &eUpper Half Handle &7- &aSAND'
+      - '&7• &eLower Half Handle &7- &aRED SAND'
+      - '&7• &eHead Pin &7- &aSOUL SAND'
+      - '&7• &eAdze Blade &7- &aDIRT'
+      - '&7• &eAxe Blade &7- &aGRAVEL'
+  blueprint_3: # itemName for commands
+    id: 4 # internalID
+    material: FLOWER_BANNER_PATTERN # base material
+    name: "&5Head Pin Blueprint"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7One of the materials needed to craft'
+      - '&5Time-Space Fragment&7. You can obtain'
+      - '&7other blueprints from specific blocks.'
+      - ''
+      - '&7• &eUpper Half Handle &7- &aSAND'
+      - '&7• &eLower Half Handle &7- &aRED SAND'
+      - '&7• &eHead Pin &7- &aSOUL SAND'
+      - '&7• &eAdze Blade &7- &aDIRT'
+      - '&7• &eAxe Blade &7- &aGRAVEL'
+  blueprint_4: # itemName for commands
+    id: 5 # internalID
+    material: GLOBE_BANNER_PATTERN # base material
+    name: "&5Adze Blade Blueprint"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7One of the materials needed to craft'
+      - '&5Time-Space Fragment&7. You can obtain'
+      - '&7other blueprints from specific blocks.'
+      - ''
+      - '&7• &eUpper Half Handle &7- &aSAND'
+      - '&7• &eLower Half Handle &7- &aRED SAND'
+      - '&7• &eHead Pin &7- &aSOUL SAND'
+      - '&7• &eAdze Blade &7- &aDIRT'
+      - '&7• &eAxe Blade &7- &aGRAVEL'
+  blueprint_5: # itemName for commands
+    id: 6 # internalID
+    material: FIELD_MASONED_BANNER_PATTERN # base material
+    name: "&5Axe Blade Blueprint"
+    custom-model-data: 100000
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7One of the materials needed to craft'
+      - '&5Time-Space Fragment&7. You can obtain'
+      - '&7other blueprints from specific blocks.'
+      - ''
+      - '&7• &eUpper Half Handle &7- &aSAND'
+      - '&7• &eLower Half Handle &7- &aRED SAND'
+      - '&7• &eHead Pin &7- &aSOUL SAND'
+      - '&7• &eAdze Blade &7- &aDIRT'
+      - '&7• &eAxe Blade &7- &aGRAVEL'
+  time_space_fragment: # itemName for commands
+    id: 7 # internalID
+    material: ECHO_SHARD # base material
+    name: "&5Time-Space Fragment"
+    custom-model-data: 100001
+    lore:
+      - '&cArchaeology Crafting Material'
+      - ''
+      - '&7This is used as a material to upgrade'
+      - '&7your &5Dark Echo Mattock &7into'
+      - '&4Mattock of Time and Space&7.'

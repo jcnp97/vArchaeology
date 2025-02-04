@@ -3,6 +3,8 @@ package asia.virtualmc.vArchaeology.logs;
 import asia.virtualmc.vArchaeology.Main;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -11,12 +13,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.io.*;
 
-public class SalvageLog {
+public class CraftingLog {
     private final Main plugin;
     private final LogManager logManager;
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public SalvageLog(Main plugin, LogManager logManager) {
+    public CraftingLog(Main plugin, LogManager logManager) {
         this.plugin = plugin;
         this.logManager = logManager;
     }
@@ -24,12 +26,12 @@ public class SalvageLog {
     public void logTransactionReceived(String player, String material, int amount) {
         try {
             File logs = new File(plugin.getDataFolder(), "logs");
-            File salvageDir = new File(logs, "salvage-station");
+            File salvageDir = new File(logs, "crafting-station");
             String baseFileName = LocalDate.now().format(DATE_FORMAT);
             File logFile = logManager.findAvailableLogFile(salvageDir, baseFileName);
 
             SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
-            String logEntry = String.format("[%s]: %s received %s components x%d.%n",
+            String logEntry = String.format("[%s]: %s received %s x%d.%n",
                     timeFormat.format(new Date()),
                     player,
                     material,
@@ -51,7 +53,7 @@ public class SalvageLog {
     public void logTransactionTaken(String player, String material, int amount) {
         try {
             File logs = new File(plugin.getDataFolder(), "logs");
-            File salvageDir = new File(logs, "salvage-station");
+            File salvageDir = new File(logs, "crafting-station");
             String baseFileName = LocalDate.now().format(DATE_FORMAT);
             File logFile = logManager.findAvailableLogFile(salvageDir, baseFileName);
 

@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.blocks;
 
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.configs.ConfigManager;
+import asia.virtualmc.vArchaeology.items.CraftingMaterials;
 import asia.virtualmc.vArchaeology.items.CustomItems;
 import asia.virtualmc.vArchaeology.items.CustomTools;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
@@ -43,6 +44,7 @@ public class CraftingStation implements Listener {
     private final CustomTools customTools;
     private final ConfigManager configManager;
     private final CustomItems customItems;
+    private final CraftingMaterials craftingMaterials;
     private Location craftingStationLocation;
     private final Map<UUID, Hologram> activeHolograms;
     private final Map<UUID, BukkitRunnable> activeCraftingTasks;
@@ -59,7 +61,8 @@ public class CraftingStation implements Listener {
                            Statistics statistics,
                            CustomTools customTools,
                            ConfigManager configManager,
-                           CustomItems customItems) {
+                           CustomItems customItems,
+                           CraftingMaterials craftingMaterials) {
         this.plugin = plugin;
         this.effectsUtil = effectsUtil;
         this.playerData = playerData;
@@ -67,6 +70,7 @@ public class CraftingStation implements Listener {
         this.customTools = customTools;
         this.configManager = configManager;
         this.customItems = customItems;
+        this.craftingMaterials = craftingMaterials;
         this.activeHolograms = new HashMap<>();
         this.activeCraftingTasks = new HashMap<>();
         this.cooldowns = new HashMap<>();
@@ -276,10 +280,14 @@ public class CraftingStation implements Listener {
                         DHAPI.removeHologram(holoName);
                         activeHolograms.remove(uuid);
 
-                        effectsUtil.spawnFireworks(uuid, 10, 3);
-                        effectsUtil.sendTitleMessage(uuid, "<#7CFEA7>You have upgraded your", EffectsUtil.convertLegacy(customTools.getDisplayName(toolID)) +
-                                " <#7CFEA7>→ " + EffectsUtil.convertLegacy(customTools.getDisplayName(toolID + 1)));
+                        effectsUtil.spawnFireworks(uuid, 6, 3);
+                        effectsUtil.sendTitleMessage(uuid, "<#7CFEA7>You have received ", EffectsUtil.convertLegacy(customTools.getDisplayName(toolID + 1)));
                         customTools.giveArchTool(uuid, toolID + 1);
+                        if (toolID == 9) {
+                            effectsUtil.sendBroadcastMessage("<dark_red>" + player.getName() +
+                                    " <gold>has crafted " + EffectsUtil.convertLegacy(customTools.getDisplayName(toolID + 1)) + "<gold>.");
+                            effectsUtil.playSound(player, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
+                        }
 
                         activeCraftingTasks.remove(uuid);
                         permanentHologram.removeHidePlayer(player);
@@ -316,7 +324,6 @@ public class CraftingStation implements Listener {
     }
 
     // GUI Methods
-
     public void openBronzeMattockRecipe(Player player) {
         ChestGui gui = new ChestGui(6, configManager.craftingStationTitle);
         gui.setOnGlobalClick(event -> event.setCancelled(true));
@@ -438,8 +445,34 @@ public class CraftingStation implements Listener {
         GuiItem upgrade = new GuiItem(upgradeTool);
         staticPane.addItem(upgrade, 7, 2);
 
+        // tier 99 extra material
+        boolean hasCraftingMaterial = false;
+        if (toolID == 9) {
+            if (craftingMaterials.hasCraftingMaterial(player, 7)) {
+                hasCraftingMaterial = true;
+                GuiItem t99Fragment = new GuiItem(craftingMaterials.getCraftingMaterialCache(7));
+                staticPane.addItem(t99Fragment, 2, 3);
+            } else {
+                ItemMeta t99FragmentMeta = craftingMaterials.getCraftingMaterialCache(7).getItemMeta();
+                ItemStack noFragment = new ItemStack(Material.BARRIER);
+                ItemMeta noFragmentMeta = noFragment.getItemMeta();
+
+                if (t99FragmentMeta != null) {
+                    noFragmentMeta.setDisplayName(t99FragmentMeta.getDisplayName());
+                    noFragmentMeta.setLore(t99FragmentMeta.getLore());
+                    noFragmentMeta.setCustomModelData(100000);
+                    noFragment.setItemMeta(noFragmentMeta);
+                }
+                GuiItem t99Fragment = new GuiItem(noFragment);
+                staticPane.addItem(t99Fragment, 2, 3);
+            }
+        }
+
         // craft button
-        if (canCraft) {
+        if (canCraft && toolID < 9) {
+            ItemStack craftButton = createCraftButton();
+            staticPane.addItem(new GuiItem(craftButton, event -> processCrafting(player, craftingMaterialsArr, toolID)), 5, 2);
+        } else if (canCraft && toolID == 9 && hasCraftingMaterial) {
             ItemStack craftButton = createCraftButton();
             staticPane.addItem(new GuiItem(craftButton, event -> processCrafting(player, craftingMaterialsArr, toolID)), 5, 2);
         } else {
@@ -502,13 +535,27 @@ public class CraftingStation implements Listener {
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
 
         try {
-            if (hasEnoughComponents(ownedComponents, requiredMaterials) && customTools.getToolId(mainHandItem) == toolID) {
-                statistics.subtractComponents(uuid, requiredMaterials);
-                player.getInventory().removeItem(mainHandItem);
-                startCrafting(player, toolID);
+            if (toolID < 9) {
+                if (hasEnoughComponents(ownedComponents, requiredMaterials) && customTools.getToolId(mainHandItem) == toolID) {
+                    statistics.subtractComponents(uuid, requiredMaterials);
+                    customTools.takeArchTool(player, toolID);
+                    startCrafting(player, toolID);
+                } else {
+                    player.sendMessage("§cYour mainhand/inventory had changed. Please try again.");
+                }
             } else {
-                player.sendMessage("§cYour mainhand/inventory had changed. Please try again.");
+                if (hasEnoughComponents(ownedComponents, requiredMaterials) &&
+                        customTools.getToolId(mainHandItem) == toolID && craftingMaterials.hasCraftingMaterial(player, 7)) {
+                    //player.getInventory().removeItem(mainHandItem);
+                    customTools.takeArchTool(player, toolID);
+                    craftingMaterials.removeCraftingMaterial(player, 7);
+                    statistics.subtractComponents(uuid, requiredMaterials);
+                    startCrafting(player, toolID);
+                } else {
+                    player.sendMessage("§cYour mainhand/inventory had changed. Please try again.");
+                }
             }
+
         } catch (Exception e) {
             handleCraftError(player, e);
         } finally {

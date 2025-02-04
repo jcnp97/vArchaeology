@@ -12,6 +12,7 @@ import asia.virtualmc.vArchaeology.guis.*;
 import asia.virtualmc.vArchaeology.items.*;
 import asia.virtualmc.vArchaeology.listeners.*;
 import asia.virtualmc.vArchaeology.exp.EXPManager;
+import asia.virtualmc.vArchaeology.logs.CraftingLog;
 import asia.virtualmc.vArchaeology.logs.LogManager;
 import asia.virtualmc.vArchaeology.logs.SalvageLog;
 import asia.virtualmc.vArchaeology.logs.SellLog;
@@ -77,6 +78,7 @@ public final class Main extends JavaPlugin {
     private LogManager logManager;
     private SalvageLog salvageLog;
     private SellLog sellLog;
+    private CraftingLog craftingLog;
     // commands
     private PlayerDataCommands playerDataCommands;
     private GUICommands guiCommands;
@@ -96,10 +98,8 @@ public final class Main extends JavaPlugin {
         this.configManager = new ConfigManager(this);
         this.bossBarUtil = new BossBarUtil(this);
         this.effectsUtil = new EffectsUtil(this);
-        this.customTools = new CustomTools(this);
         this.customCharms = new CustomCharms(this);
         this.customItems = new CustomItems(this);
-        this.craftingMaterials = new CraftingMaterials(this);
         this.miscItems = new MiscItems(this);
         this.artefactItems = new ArtefactItems(this, effectsUtil);
         this.miscListener = new MiscListener(this);
@@ -107,8 +107,11 @@ public final class Main extends JavaPlugin {
         this.logManager = new LogManager(this);
         this.salvageLog = new SalvageLog(this, logManager);
         this.sellLog = new SellLog(this, logManager);
+        this.craftingLog = new CraftingLog(this, logManager);
+        this.customTools = new CustomTools(this, craftingLog);
+        this.craftingMaterials = new CraftingMaterials(this, craftingLog);
         this.playerDataDB = new PlayerDataDB(this, configManager);
-        this.statistics = new Statistics(this, playerDataDB, configManager);
+        this.statistics = new Statistics(this, playerDataDB, configManager, salvageLog);
         this.salvageGUI = new SalvageGUI(this, effectsUtil, statistics, configManager, salvageLog);
         this.talentTree = new TalentTree(this, playerDataDB, configManager);
         this.itemsDropTable = new ItemsDropTable(this, configManager, talentTree);
@@ -121,14 +124,14 @@ public final class Main extends JavaPlugin {
         this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections, craftingMaterials);
         this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, customItems, artefactCollections, collectionLog);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
-        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil);
+        this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil, statistics);
         this.traitGUI = new TraitGUI(this, effectsUtil, playerData, configManager);
         this.itemEquipListener = new ItemEquipListener(this, customTools, playerData, talentTree, itemsDropTable, configManager);
         this.expManager = new EXPManager(this, statistics, playerData, talentTree, effectsUtil, configManager);
         this.lampStarGUI = new LampStarGUI(this, effectsUtil, expManager, configManager);
         this.itemInteractListener = new ItemInteractListener(this, collectionsGUI, miscItems, lampStarGUI);
         this.restorationStation = new RestorationStation(this, effectsUtil, expManager, playerData, statistics, artefactItems, configManager, artefactCollections);
-        this.craftingStation = new CraftingStation(this, effectsUtil, playerData, statistics, customTools, configManager, customItems);
+        this.craftingStation = new CraftingStation(this, effectsUtil, playerData, statistics, customTools, configManager, customItems, craftingMaterials);
         this.blockCommands = new BlockCommands(this, restorationStation, craftingStation);
         this.blockBreakListener = new BlockBreakListener(this, playerData, customItems, customTools, customCharms, itemsDropTable, statistics, collectionLog, expManager, configManager, itemEquipListener, effectsUtil, craftingMaterials);
         this.playerJoinListener = new PlayerJoinListener(this, playerDataDB, playerData, talentTree, statistics, collectionLog, itemEquipListener, itemsDropTable, blockBreakListener, sellGUI, rankGUI);

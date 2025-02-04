@@ -2,6 +2,7 @@ package asia.virtualmc.vArchaeology.items;
 
 import asia.virtualmc.vArchaeology.Main;
 
+import asia.virtualmc.vArchaeology.logs.CraftingLog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -27,6 +28,7 @@ import java.util.logging.Level;
 
 public class CustomTools {
     private final Main plugin;
+    private final CraftingLog craftingLog;
     private final File customItemsFile;
     private FileConfiguration customItemsConfig;
 
@@ -37,8 +39,9 @@ public class CustomTools {
     private final NamespacedKey AD_BONUS_KEY;
     private final NamespacedKey REQ_LEVEL_KEY;
 
-    public CustomTools(Main plugin) {
+    public CustomTools(Main plugin, CraftingLog craftingLog) {
         this.plugin = plugin;
+        this.craftingLog = craftingLog;
         this.toolCache = new ConcurrentHashMap<>();
         this.customItemsFile = new File(plugin.getDataFolder(), "items/tools.yml");
 
@@ -183,14 +186,14 @@ public class CustomTools {
         return maxDurability - itemMeta.getDamage();
     }
 
-    public void giveArchTool(UUID uuid, int id) {
+    public void giveArchTool(UUID uuid, int toolID) {
         Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return;
         }
-        ItemStack toolItem = toolCache.get(id);
+        ItemStack toolItem = toolCache.get(toolID);
         if (toolItem == null) {
-            player.sendMessage("§cInvalid tool ID: " + id);
+            player.sendMessage("§cInvalid tool ID: " + toolID);
             return;
         }
         ItemStack giveItem = toolItem.clone();
@@ -201,6 +204,25 @@ public class CustomTools {
             overflow.values().forEach(overflowItem ->
                     player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
             player.sendMessage("§eYour inventory was full. Some tools were dropped at your feet.");
+        }
+        craftingLog.logTransactionReceived(player.getName(), giveItem.getItemMeta().getDisplayName(), 1);
+    }
+
+    public void takeArchTool(Player player, int toolID) {
+        ItemStack item = player.getInventory().getItemInMainHand();
+        if (!item.hasItemMeta()) {
+            plugin.getLogger().severe("Failed to take arch tool from " + player.getName());
+            return;
+        }
+        PersistentDataContainer pdc = item.getItemMeta().getPersistentDataContainer();
+
+        if (pdc.has(TOOL_KEY, PersistentDataType.INTEGER)) {
+            if (pdc.get(TOOL_KEY, PersistentDataType.INTEGER) == toolID) {
+                HashMap<Integer, ItemStack> remaining = player.getInventory().removeItem(item);
+                if (remaining.isEmpty()) {
+                    craftingLog.logTransactionTaken(player.getName(), item.getItemMeta().getDisplayName(), 1);
+                }
+            }
         }
     }
 
@@ -241,6 +263,4 @@ public class CustomTools {
         createToolFile();
         loadTools();
     }
-
-
 }

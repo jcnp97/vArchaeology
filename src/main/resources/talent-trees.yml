@@ -1,174 +1,212 @@
 # vArchaeology Talent Trees
 talentList:
   1: # talentID
-    name: "&aSagacity"
-    material: FLINT # material icon for GUI display
-    custom-model-data: 100000
+    name: "Sagacity"
+    material: GRAVEL # material icon for GUI display
+    custom-model-data: 1
     required-level: 60
+    lore-data: 15.0
     lore:
-      - "&7Archaeology XP when breaking blocks."
+      - "&7Provides &a15% XP/level &7when breaking blocks."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   2:
-    name: "&aInsightful Judgement"
+    name: "Insightful Judgement"
     material: FLINT
     custom-model-data: 100000
     required-level: 63
+    lore-data: 2.0
     lore:
-      - "&7Archaeology XP when obtaining drops."
+      - "&7Provides &a2% XP/level &7when getting drops."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   3:
-    name: "&aExtraction"
-    material: FLINT
+    name: "Extraction"
+    material: STONE_SHOVEL
     custom-model-data: 100000
     required-level: 66
+    lore-data: 0.1
     lore:
-      - "&7base gathering rate."
+      - "&7Provides &a0.1%/level &7of gathering rate."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   4:
-    name: "&aAdept Restoration"
-    material: FLINT
-    custom-model-data: 100000
+    name: "Adept Restoration"
+    material: SKULL_POTTERY_SHERD
+    custom-model-data: 1
     required-level: 69
+    lore-data: 1.0
     lore:
-      - "&7Archaeology XP when restoring artefacts."
+      - "&7Provides &a2% XP/level &7when restoring artefacts."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   5:
-    name: "&aProsperity"
-    material: FLINT
-    custom-model-data: 100000
+    name: "Prosperity"
+    material: SUNFLOWER
+    custom-model-data: 1
     required-level: 72
+    lore-data: 2.0
     lore:
-      - "&7Archaeology materials sell price."
+      - "&7Provides &a2%/level &7sell price for materials."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   6:
-    name: "&aArchaeological Prowess"
-    material: FLINT
-    custom-model-data: 100000
+    name: "Archaeological Prowess"
+    material: GLOW_BERRIES
+    custom-model-data: 1
     required-level: 75
+    lore-data: 1000.0
     lore:
-      - "&7permanent Archaeology aptitude."
+      - "&7Provides &a1,000/level &7Archaeology aptitude."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   7:
-    name: "&aDivine Opulence"
-    material: FLINT
+    name: "Divine Opulence"
+    material: GOLD_INGOT
     custom-model-data: 100000
     required-level: 78
+    lore-data: 2.0
     lore:
-      - "&7restored artefacts sell price."
+      - "&7Provides &a2%/level &7sell price for artefacts."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   8:
-    name: "&aRapid Discovery"
-    material: FLINT
+    name: "Rapid Discovery"
+    material: FLOW_BANNER
     custom-model-data: 100000
     required-level: 81
+    lore-data: 0.01
     lore:
-      - "&7Artefact Discovery progress."
+      - "&7Provides &a0.01%/level &7Artefact Discovery progress."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   9:
-    name: "&aStroke of Luck"
+    name: "Stroke of Luck"
     material: FLINT
     custom-model-data: 100000
     required-level: 99
+    lore-data: 1.0
     lore:
-      - "&7Luck Factor"
+      - "&7Provides &a1/level &7of Luck Factor stat."
+      - "&7Talent Cost: &c1"
+      - ""
+      - "&eLeft-click to upgrade"
   # Specialized Talents
   10:
-    name: "&4Myriad of Quintessence"
+    name: "Myriad of Quintessence"
     material: FLINT
-    custom-model-data: 100000
+    custom-model-data: 100006
     required-level: 70
     required-ID: 1, 3
     lore:
       - "&a+3 &7drop weight on Exotic materials."
-      - "&cRequires:"
-      - "&7• &eSagacity Level 10"
-      - "&7• &eExtraction Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   11:
-    name: "&4Blessed Treatment"
+    name: "Blessed Treatment"
     material: FLINT
     custom-model-data: 100000
     required-level: 80
     required-ID: 2, 4
     lore:
       - "&a+500 &7Aptitude when restoring artefacts."
-      - "&cRequires:"
-      - "&7• &eInsightful Judgement Level 10"
-      - "&7• &eAdept Restoration Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   12:
-    name: "&4Lucky Break"
+    name: "Lucky Break"
     material: FLINT
     custom-model-data: 100000
     required-level: 90
     required-ID: 5, 7
     lore:
       - "&a+10% &7chance to double block-breaking base XP."
-      - "&cRequires:"
-      - "&7• &eProsperity Level 10"
-      - "&7• &eDivine Opulence Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   13:
-    name: "&4Quality Maker"
+    name: "Quality Maker"
     material: FLINT
     custom-model-data: 100000
     required-level: 100
     required-ID: 6, 8
     lore:
       - "&a+50,000 &7Archaeology Aptitude."
-      - "&cRequires:"
-      - "&7• &eArchaeological Prowess Level 10"
-      - "&7• &eRapid Discovery Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   14:
-    name: "&4Better Odds"
+    name: "Better Odds"
     material: FLINT
     custom-model-data: 100000
     required-level: 100
     required-ID: 9
     lore:
       - "&7Doubles the effect of Stroke of Luck."
-      - "&cRequires:"
-      - "&7• &eStroke of Luck Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   15:
-    name: "&4Good Fortune"
+    name: "Good Fortune"
     material: FLINT
     custom-model-data: 100000
     required-level: 104
     required-ID: 1, 2
     lore:
       - "&a+5% &7chance to double material base XP."
-      - "&cRequires:"
-      - "&7• &eSagacity Level 10"
-      - "&7• &eInsightful Judgement Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   16:
-    name: "&4Chaotic Renewal"
+    name: "Chaotic Renewal"
     material: FLINT
     custom-model-data: 100000
     required-level: 108
     required-ID: 3, 4
     lore:
       - "&a+5% &7chance to double Artefact Restoration XP."
-      - "&cRequires:"
-      - "&7• &eExtraction Level 10"
-      - "&7• &eAdept Restoration Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   17:
-    name: "&4Heaven's Grace"
+    name: "Heaven's Grace"
     material: FLINT
     custom-model-data: 100000
     required-level: 112
     required-ID: 5, 6
     lore:
       - "&a+20% &7Archaeology XP on all sources."
-      - "&cRequires:"
-      - "&7• &eProsperity Level 10"
-      - "&7• &eArchaeological Prowess Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   18:
-    name: "&4Masterful Discovery"
+    name: "Masterful Discovery"
     material: FLINT
     custom-model-data: 100000
     required-level: 116
     required-ID: 7, 8
     lore:
       - "&a+0.15% &7Artefact Discovery progress."
-      - "&cRequires:"
-      - "&7• &eDivine Opulence Level 10"
-      - "&7• &eRapid Discovery Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"
   19:
-    name: "&4Master of Archaeology"
-    material: FLINT
+    name: "Master of Archaeology"
+    material: BRUSH
     custom-model-data: 100000
     required-level: 120
     required-ID: 1, 2, 3, 4, 5, 6, 7, 8
     lore:
       - "&7Increases max level of all basic talent by 10."
-      - "&cRequires:"
-      - "&7• &eAll Talents Level 10"
+      - "&7Talent Cost: &c10"
+      - ""
+      - "&eLeft-click to upgrade"

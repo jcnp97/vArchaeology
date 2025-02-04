@@ -3,6 +3,7 @@ package asia.virtualmc.vArchaeology.commands;
 import asia.virtualmc.vArchaeology.Main;
 import asia.virtualmc.vArchaeology.guis.RankGUI;
 import asia.virtualmc.vArchaeology.storage.PlayerData;
+import asia.virtualmc.vArchaeology.storage.Statistics;
 import asia.virtualmc.vArchaeology.storage.TalentTree;
 
 import asia.virtualmc.vArchaeology.utilities.EffectsUtil;
@@ -23,6 +24,7 @@ public class PlayerDataCommands {
     private final PlayerData playerData;
     private final TalentTree talentTree;
     private final RankGUI rankGUI;
+    private final Statistics statistics;
     private final EffectsUtil effectsUtil;
     private final Map<UUID, Long> resetConfirmations;
     private static final long RESET_TIMEOUT = 10000;
@@ -31,11 +33,13 @@ public class PlayerDataCommands {
                               PlayerData playerData,
                               TalentTree talentTree,
                               RankGUI rankGUI,
-                              EffectsUtil effectsUtil) {
+                              EffectsUtil effectsUtil,
+                              Statistics statistics) {
         this.plugin = plugin;
         this.playerData = playerData;
         this.talentTree = talentTree;
         this.rankGUI = rankGUI;
+        this.statistics = statistics;
         this.effectsUtil = effectsUtil;
         this.resetConfirmations = new HashMap<>();
         registerCommands();
@@ -50,6 +54,7 @@ public class PlayerDataCommands {
                 .withSubcommand(archResetStats())
                 .withSubcommand(archAddBonusXP())
                 .withSubcommand(archSetRankPoints())
+                .withSubcommand(archAddComponents())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -225,6 +230,20 @@ public class PlayerDataCommands {
                     rankGUI.setRankPoints(targetUUID, value);
                     sender.sendMessage(Component.text("[vArchaeology] Successfully set " + target.getName() + "'s Rank Points " + " to " + value)
                             .color(TextColor.color(0, 255, 162)));
+                });
+    }
+
+    private CommandAPICommand archAddComponents() {
+        return new CommandAPICommand("addcomp")
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("amount", 0))
+                .withPermission("varchaeology.command.addcomp")
+                .executes((sender, args) -> {
+                    Player target = (Player) args.get("player");
+                    UUID uuid = target.getUniqueId();
+                    int amount = (int) args.get("amount");
+
+                    statistics.addComponents(uuid, amount);
                 });
     }
 }

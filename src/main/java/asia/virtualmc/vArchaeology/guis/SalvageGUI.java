@@ -177,7 +177,7 @@ public class SalvageGUI implements Listener {
             };
             for (int i = 1; i <= 7; i++) {
                 if (currentValue.get(i) != 0) {
-                    salvageLog.logTransaction(player.getName(), componentName[i - 1], currentValue.get(i));
+                    salvageLog.logTransactionReceived(player.getName(), componentName[i - 1], currentValue.get(i));
                     statistics.addStatistics(playerUUID, i + 1, currentValue.get(i));
                     player.sendMessage("§aYou have obtained §a" + currentValue.get(i) + "x §e" + componentName[i - 1] + " Components.");
                 }
