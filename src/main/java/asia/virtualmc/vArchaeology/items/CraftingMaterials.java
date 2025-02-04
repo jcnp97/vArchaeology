@@ -150,6 +150,8 @@ public class CraftingMaterials {
         giveItem.setAmount(Math.min(amount, giveItem.getMaxStackSize()));
         Map<Integer, ItemStack> overflow = player.getInventory().addItem(giveItem);
 
+        craftingLog.logTransactionReceived(player.getName(), giveItem.getItemMeta().getDisplayName(), amount);
+
         if (!overflow.isEmpty()) {
             overflow.values().forEach(overflowItem ->
                     player.getWorld().dropItemNaturally(player.getLocation(), overflowItem));
@@ -188,6 +190,75 @@ public class CraftingMaterials {
                 break;
             }
         }
+    }
+
+    public boolean[] checkTimeSpaceFragmentMaterials(Player player) {
+        boolean[] found = new boolean[7];
+
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || !item.hasItemMeta()) continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (!meta.getPersistentDataContainer().has(CRAFT_KEY, PersistentDataType.INTEGER)) continue;
+
+            int craftValue = meta.getPersistentDataContainer().get(CRAFT_KEY, PersistentDataType.INTEGER);
+            if (craftValue >= 1 && craftValue <= 6) {
+                found[craftValue] = true;
+            }
+        }
+
+        for (int i = 1; i <= 6; i++) {
+            if (!found[i]) {
+                return found;
+            }
+        }
+        return found;
+    }
+
+    public boolean hasTimeSpaceFragmentMaterials(Player player) {
+        boolean[] found = new boolean[7];
+
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item == null || !item.hasItemMeta()) continue;
+
+            ItemMeta meta = item.getItemMeta();
+            if (!meta.getPersistentDataContainer().has(CRAFT_KEY, PersistentDataType.INTEGER)) continue;
+
+            int craftValue = meta.getPersistentDataContainer().get(CRAFT_KEY, PersistentDataType.INTEGER);
+            if (craftValue >= 1 && craftValue <= 6) {
+                found[craftValue] = true;
+            }
+        }
+
+        for (int i = 1; i <= 6; i++) {
+            if (!found[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void removeTimeSpaceFragmentMaterials(Player player) {
+        for (int required = 1; required <= 6; required++) {
+            for (int slot = 0; slot < player.getInventory().getSize(); slot++) {
+                ItemStack item = player.getInventory().getItem(slot);
+                if (item == null || !item.hasItemMeta()) continue;
+
+                ItemMeta meta = item.getItemMeta();
+                if (!meta.getPersistentDataContainer().has(CRAFT_KEY, PersistentDataType.INTEGER)) continue;
+
+                int craftValue = meta.getPersistentDataContainer().get(CRAFT_KEY, PersistentDataType.INTEGER);
+                if (craftValue == required) {
+                    if (item.getAmount() > 1) {
+                        item.setAmount(item.getAmount() - 1);
+                    } else {
+                        player.getInventory().setItem(slot, null);
+                    }
+                    break;
+                }
+            }
+        }
+        player.updateInventory();
     }
 
     public boolean hasCraftingMaterial(Player player, int craftID) {
