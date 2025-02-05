@@ -1,4 +1,3 @@
-// PlayerDataManager.class
 package asia.virtualmc.vArchaeology.storage;
 
 import asia.virtualmc.vArchaeology.Main;
@@ -19,7 +18,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerData {
-    private static final long UPDATE_INTERVAL = 12000L;
     private static final int MAX_EXP = 1_000_000_000;
     private static final int MIN_LEVEL = 1;
     private static final int MAX_LEVEL = 120;
