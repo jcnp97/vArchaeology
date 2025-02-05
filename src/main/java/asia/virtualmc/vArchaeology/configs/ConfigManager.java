@@ -9,6 +9,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.ChatColor;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.*;
@@ -59,7 +60,7 @@ public class ConfigManager {
     public final Map<Integer, List<String>> groupLore = new HashMap<>();
     public String acquiredLore;
     // talent-tree.yml
-    public final Map<Integer, Talent> talentMap = new HashMap<>();
+    public static final Map<Integer, Talent> talentMap = new HashMap<>();
     public final String[] dropNames = {"Common", "Uncommon", "Rare", "Unique", "Special", "Mythical", "Exotic"};
 
     public ConfigManager(Main plugin) {
@@ -420,7 +421,7 @@ public class ConfigManager {
         acquiredLore = config.getString("globalSettings.acquired-lore");
     }
 
-    public void readTalentConfig() {
+    private void readTalentConfig() {
         File talentFile = new File(plugin.getDataFolder(), "talent-trees.yml");
         if (!talentFile.exists()) {
             plugin.saveResource("talent-trees.yml", false);
@@ -464,27 +465,19 @@ public class ConfigManager {
                 }
             }
         }
+        plugin.getLogger().info("Talent map size: " + talentMap.size());
+        for (Integer key : talentMap.keySet()) {
+            plugin.getLogger().info("Loaded Talent ID: " + key + " -> " + talentMap.get(key).name());
+        }
     }
 
-    public static class Talent {
-        public final int id;
-        public final String name;
-        public final Material material;
-        public final int customModelData;
-        public final int requiredLevel;
-        public final List<Integer> requiredIDs;
-        public final List<String> lore;
-        public final double loreData;
-
-        public Talent(int id, String name, Material material, int customModelData, int requiredLevel, List<Integer> requiredIDs, List<String> lore, double loreData) {
-            this.id = id;
-            this.name = name;
-            this.material = material;
-            this.customModelData = customModelData;
-            this.requiredLevel = requiredLevel;
-            this.requiredIDs = requiredIDs;
-            this.lore = lore;
-            this.loreData = loreData;
-        }
+    public record Talent(int id,
+                         @NotNull String name,
+                         @NotNull Material material,
+                         int customModelData,
+                         int requiredLevel,
+                         @NotNull List<Integer> requiredIDs,
+                         @NotNull List<String> lore,
+                         double loreData) {
     }
 }

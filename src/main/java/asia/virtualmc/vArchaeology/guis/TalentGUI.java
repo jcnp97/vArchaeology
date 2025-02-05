@@ -13,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -22,7 +23,6 @@ public class TalentGUI {
     private final PlayerData playerData;
     private final EffectsUtil effectsUtil;
     private final ConfigManager configManager;
-    private final Map<Integer, ConfigManager.Talent> talents;
 
     public TalentGUI(Main plugin,
                      TalentTree talentTree,
@@ -35,7 +35,6 @@ public class TalentGUI {
         this.playerData = playerData;
         this.effectsUtil = effectsUtil;
         this.configManager = configManager;
-        this.talents = configManager.talentMap;
     }
 
     public void openTalentGUI(Player player) {
@@ -50,12 +49,12 @@ public class TalentGUI {
         int talentPoints = playerData.getTalentPoints(uuid);
 
         for (int i = 1; i <= 9; i++) {
-            ConfigManager.Talent talent = talents.get(i);
+            ConfigManager.Talent talent = ConfigManager.talentMap.get(i);
             int talentLevel = playerTalents.getOrDefault(i, 0);
             ItemStack talentIcon = createTalentIcon(archLevel, talent, talentLevel);
             GuiItem talentGUI;
 
-            if (archLevel >= talent.requiredLevel) {
+            if (archLevel >= talent.requiredLevel()) {
                 int talentID = i;
                 talentGUI = new GuiItem(talentIcon, event -> {
                     if (talentPoints > 0 && talentLevel < (talentID19 * 10) + 10) {
@@ -74,16 +73,16 @@ public class TalentGUI {
         }
 
         for (int i = 10; i <= 19; i++) {
-            ConfigManager.Talent talent = talents.get(i);
+            ConfigManager.Talent talent = ConfigManager.talentMap.get(i);
             int talentLevel = playerTalents.getOrDefault(i, 0);
-            List<Integer> reqID = talent.requiredIDs;
+            List<Integer> reqID = talent.requiredIDs();
 
             ItemStack talentIcon = createTalentIconSP(archLevel, talent, talentLevel, playerTalents, reqID);
             GuiItem talentGUI;
 
             boolean hasPrerequisiteTalent = hasPrerequisites(reqID, playerTalents);
 
-            if (archLevel >= talent.requiredLevel && hasPrerequisiteTalent) {
+            if (archLevel >= talent.requiredLevel() && hasPrerequisiteTalent) {
                 int talentID = i;
                 talentGUI = new GuiItem(talentIcon, event -> {
                     if (talentPoints > 9 && talentLevel == 0) {
@@ -112,11 +111,11 @@ public class TalentGUI {
     private ItemStack createTalentIcon(int archLevel, ConfigManager.Talent talent, int talentLevel) {
         ItemStack talentIcon;
         List<String> lore = new ArrayList<>();
-        boolean hasRequiredLevel = archLevel >= talent.requiredLevel;
+        boolean hasRequiredLevel = archLevel >= talent.requiredLevel();
 
 
         if (talentLevel > 0 && hasRequiredLevel) {
-            talentIcon = new ItemStack(talent.material);
+            talentIcon = new ItemStack(talent.material());
         } else {
             talentIcon = new ItemStack(Material.PAPER);
         }
@@ -125,18 +124,18 @@ public class TalentGUI {
         ItemMeta meta = talentIcon.getItemMeta();
 
         if (talentLevel > 0 && hasRequiredLevel) {
-            meta.setDisplayName("§6" + talent.name + " " + talentLevel + " §7(§a" +
-                    (talent.loreData * talentLevel) + "%§7)");
-            meta.setCustomModelData(talent.customModelData);
-            meta.setLore(talent.lore);
+            meta.setDisplayName("§6" + talent.name() + " " + talentLevel + " §7(§a" +
+                    (talent.loreData() * talentLevel) + "%§7)");
+            meta.setCustomModelData(talent.customModelData());
+            meta.setLore(talent.lore());
         } else if (talentLevel == 0 && hasRequiredLevel) {
-            meta.setDisplayName("§6" + talent.name);
+            meta.setDisplayName("§6" + talent.name());
             meta.setCustomModelData(100021);
-            meta.setLore(talent.lore);
+            meta.setLore(talent.lore());
         } else {
-            meta.setDisplayName("§6" + talent.name + " §c(Locked)");
+            meta.setDisplayName("§6" + talent.name() + " §c(Locked)");
             lore.add("§7Requires:");
-            lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel);
+            lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel());
             meta.setLore(lore);
             meta.setCustomModelData(100020);
         }
@@ -153,10 +152,10 @@ public class TalentGUI {
         ItemStack talentIcon;
         List<String> lore = new ArrayList<>();
         boolean hasPrerequisiteTalent = hasPrerequisites(requiredID, talentTree);
-        boolean hasRequiredLevel = archLevel >= talent.requiredLevel;
+        boolean hasRequiredLevel = archLevel >= talent.requiredLevel();
 
         if (talentLevel > 0 && hasRequiredLevel) {
-            talentIcon = new ItemStack(talent.material);
+            talentIcon = new ItemStack(talent.material());
         } else {
             talentIcon = new ItemStack(Material.PAPER);
         }
@@ -165,29 +164,29 @@ public class TalentGUI {
         ItemMeta meta = talentIcon.getItemMeta();
 
         if (hasRequiredLevel && hasPrerequisiteTalent) {
-            meta.setDisplayName("§4" + talent.name);
-            meta.setLore(talent.lore);
+            meta.setDisplayName("§4" + talent.name());
+            meta.setLore(talent.lore());
 
             if (talentLevel == 0) {
                 meta.setCustomModelData(100021);
             } else {
-                meta.setCustomModelData(talent.customModelData);
+                meta.setCustomModelData(talent.customModelData());
             }
         } else {
-            meta.setDisplayName("§4" + talent.name + " §c(Locked)");
+            meta.setDisplayName("§4" + talent.name() + " §c(Locked)");
             meta.setCustomModelData(100020);
             lore.add("§7Requires:");
             for (int reqID : requiredID) {
                 if (talentTree.getOrDefault(reqID, 0) < 10) {
-                    lore.add("§7• §c§m" + talents.get(reqID).name + " Level 10");
+                    lore.add("§7• §c§m" + ConfigManager.talentMap.get(reqID).name() + " Level 10");
                 } else {
-                    lore.add("§7• §e" + talents.get(reqID).name + " Level 10");
+                    lore.add("§7• §e" + ConfigManager.talentMap.get(reqID).name() + " Level 10");
                 }
             }
             if (hasRequiredLevel) {
-                lore.add("§7• §eRequires Archaeology Level " + talent.requiredLevel);
+                lore.add("§7• §eRequires Archaeology Level " + talent.requiredLevel());
             } else {
-                lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel);
+                lore.add("§7• §c§mArchaeology Level " + talent.requiredLevel());
             }
             meta.setLore(lore);
         }

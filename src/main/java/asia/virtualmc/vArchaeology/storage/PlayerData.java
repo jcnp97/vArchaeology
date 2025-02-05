@@ -175,7 +175,7 @@ public class PlayerData {
             case "add" -> {
                 if (exp <= 0) return;
                 stats.archEXP = Math.min(MAX_EXP, stats.archEXP + exp);
-                if (stats.archLevel < 120) {
+                if (stats.archLevel < MAX_LEVEL - 1) {
                     bossBarUtil.bossBarUpdate(uuid, exp, stats.archEXP, configManager.experienceTable.get(stats.archLevel + 1), stats.archLevel);
                     checkAndApplyLevelUp(uuid);
                 }
@@ -246,7 +246,7 @@ public class PlayerData {
                 "<#00FFA2>Level " + previousLevel + " ➛ " + stats.archLevel);
         effectsUtil.sendPlayerMessage(uuid,"<gradient:#FFE6A3:#FFD06E>You have </gradient><#00FFA2>" +
                 stats.traitPoints + " trait points <gradient:#FFE6A3:#FFD06E>that you can spend on [/varch trait].</gradient>");
-        if (stats.archLevel == 99 || stats.archLevel == 120) {
+        if (stats.archLevel == 99 || stats.archLevel == MAX_LEVEL) {
             effectsUtil.spawnFireworks(uuid, 12, 3);
             effectsUtil.playSoundUUID(uuid, "minecraft:cozyvanilla.all.master_levelup", Sound.Source.PLAYER, 1.0f, 1.0f);
         } else {
