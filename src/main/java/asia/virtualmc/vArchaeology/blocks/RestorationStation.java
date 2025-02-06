@@ -18,6 +18,7 @@ import eu.decentsoftware.holograms.api.holograms.Hologram;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -83,12 +84,28 @@ public class RestorationStation implements Listener {
     private void loadRestorationStation() {
         FileConfiguration config = plugin.getConfig();
         if (config.contains("settings.interactableBlocks.restoration-station")) {
-            String[] coords = config.getString("settings.interactableBlocks.restoration-station").split(",");
+            String stationString = config.getString("settings.interactableBlocks.restoration-station");
+            String[] parts = stationString.split(";", 2);
+            if (parts.length < 2) {
+                plugin.getLogger().severe("Invalid restoration station format in config.yml. Expected format: world;x, y, z");
+                restorationStationLocation = null;
+                return;
+            }
+
+            String worldName = parts[0].trim();
+            World world = plugin.getServer().getWorld(worldName);
+            if (world == null) {
+                plugin.getLogger().severe("World '" + worldName + "' not found. Restoration station block will not be created.");
+                restorationStationLocation = null;
+                return;
+            }
+
+            String[] coords = parts[1].split(",");
             try {
                 double x = Double.parseDouble(coords[0].trim());
                 double y = Double.parseDouble(coords[1].trim());
                 double z = Double.parseDouble(coords[2].trim());
-                this.restorationStationLocation = new Location(plugin.getServer().getWorlds().get(0), x, y, z);
+                restorationStationLocation = new Location(world, x, y, z);
 
                 if (x == 0 && y == 0 && z == 0) {
                     plugin.getLogger().severe("Restoration station coordinates are (0, 0, 0). Block will not be created.");
@@ -97,8 +114,7 @@ public class RestorationStation implements Listener {
                     ensureBlockExists();
                     createPermanentHologram();
                 }
-
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 plugin.getLogger().severe("Invalid restoration station coordinates in config.yml");
             }
         } else {
@@ -137,8 +153,12 @@ public class RestorationStation implements Listener {
         if (targetBlock != null) {
             Location blockLocation = targetBlock.getLocation();
             FileConfiguration config = plugin.getConfig();
-            String locationString = String.format("%d, %d, %d",
-                    blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ());
+            // Save in the new format: world;x, y, z
+            String locationString = String.format("%s;%d, %d, %d",
+                    blockLocation.getWorld().getName(),
+                    blockLocation.getBlockX(),
+                    blockLocation.getBlockY(),
+                    blockLocation.getBlockZ());
             config.set("settings.interactableBlocks.restoration-station", locationString);
             plugin.saveConfig();
 
@@ -148,6 +168,12 @@ public class RestorationStation implements Listener {
             player.sendMessage("§cNo block in view to set as a restoration station!");
         }
     }
+
+    private String formatLocation(Location location) {
+        return String.format("(%.1f, %.1f, %.1f)",
+                location.getX(), location.getY(), location.getZ());
+    }
+
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
@@ -275,11 +301,6 @@ public class RestorationStation implements Listener {
         }
         activeHolograms.clear();
         cooldowns.clear();
-    }
-
-    private String formatLocation(Location location) {
-        return String.format("(%.1f, %.1f, %.1f)",
-                location.getX(), location.getY(), location.getZ());
     }
 
     // GUI Methods

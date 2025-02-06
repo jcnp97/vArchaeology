@@ -48,6 +48,7 @@ public final class Main extends JavaPlugin {
     private ItemCommands itemCommands;
     private ArtefactCollections artefactCollections;
     private CraftingMaterials craftingMaterials;
+    private CustomAugments customAugments;
     // utils
     private BossBarUtil bossBarUtil;
     private EffectsUtil effectsUtil;
@@ -105,6 +106,7 @@ public final class Main extends JavaPlugin {
         this.customCharms = new CustomCharms(this);
         this.customItems = new CustomItems(this);
         this.miscItems = new MiscItems(this);
+        this.customAugments = new CustomAugments(this);
         this.artefactItems = new ArtefactItems(this, effectsUtil);
         this.miscListener = new MiscListener(this);
         this.toolRestrictionListener = new ToolRestrictionListener(this);
@@ -125,7 +127,7 @@ public final class Main extends JavaPlugin {
         this.collectionsGUI = new CollectionsGUI(this, effectsUtil, configManager, playerData, sellGUI);
         this.collectionLog = new CollectionLog(this, playerDataDB, configManager, effectsUtil);
         this.artefactCollections = new ArtefactCollections(this, effectsUtil, collectionLog, configManager);
-        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections, craftingMaterials);
+        this.itemCommands = new ItemCommands(this, customItems, customTools, customCharms, miscItems, artefactCollections, craftingMaterials, customAugments);
         this.collectionLogGUI = new CollectionLogGUI(this, effectsUtil, configManager, customItems, artefactCollections, collectionLog);
         this.rankGUI = new RankGUI(this, effectsUtil, playerData, statistics, configManager, collectionLog);
         this.playerDataCommands = new PlayerDataCommands(this, playerData, talentTree, rankGUI, effectsUtil, statistics);

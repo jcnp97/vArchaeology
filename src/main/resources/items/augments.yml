@@ -1,0 +1,174 @@
+# Rarity ID
+# 1: Standard
+# 2: Unusual
+# 3: Heroic
+# 4: Ascendant
+# 5: Exalted
+augmentsList:
+  common_aversion:
+    id: 1
+    name: "Common Aversion V"
+    material: ENCHANTED_BOOK
+    model-data: 100000
+    lore:
+      - "&7You will no longer receive common"
+      - "&7archaeology drops in exchange for"
+      - "&7reduced gathering rate by 4%."
+    uncommon_aversion:
+      id: 2
+      name: "Uncommon Aversion V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      lore:
+        - "&7You will no longer receive uncommon"
+        - "&7archaeology drops in exchange for"
+        - "&7reduced gathering rate by 4%."
+    rare_aversion:
+      id: 3
+      name: "Rare Affinity V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases your rare archaeology"
+        - "&7drops by 100% in exchange for"
+        - "&7reduced gathering rate by 2%."
+    unique_aversion:
+      id: 4
+      name: "Unique Affinity V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases your unique archaeology"
+        - "&7drops by 100% in exchange for"
+        - "&7reduced gathering rate by 2%."
+    special_aversion:
+      id: 5
+      name: "Special Affinity V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases your special archaeology"
+        - "&7drops by 100% in exchange for"
+        - "&7reduced gathering rate by 2%."
+    mythical_aversion:
+      id: 6
+      name: "Mythical Affinity V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases your mythical archaeology"
+        - "&7drops by 100% in exchange for"
+        - "&7reduced gathering rate by 2%."
+    exotic_aversion:
+      id: 7
+      name: "Exotic Overflow V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Guarantees an exotic drop on your"
+        - "&7next action. Cooldown: 1 hour."
+    elevate:
+      id: 8
+      name: "Elevate III"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 45% chance to upgrade your"
+        - "&7material drop tier by 1. If triggered"
+        - "&7on exotic tier, you will receive an"
+        - "&7extra common drop."
+    bountiful_harvest:
+      id: 9
+      name: "Bountiful Harvest V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases your gathering rate by 8%"
+    double_drop:
+      id: 10
+      name: "Double Drop V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 10% chance to receive another"
+        - "&7random archaeology drop."
+    fortune:
+      id: 11
+      name: "Fortune V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 1% chance to get a random"
+        - "&7archaeology drop. Cooldown: 30s."
+    hoarding:
+      id: 12
+      name: "Hoarding V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 1% chance to temporarily"
+        - "&7double your gathering rate that lasts"
+        - "&7for 30s. Cooldown: 60s."
+    triple_drop:
+      id: 13
+      name: "Triple Drop I"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 2% chance to receive two"
+        - "&7random archaeology drop."
+    master_discoverer:
+      id: 14
+      name: "Master Discoverer I"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Provides a 0.1% chance to discover an"
+        - "&7Artefact instantly. Resets discovery"
+        - "&7to 0%."
+    furnace:
+      id: 15
+      name: "Furnace V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Instantly consumes all your archaeology"
+        - "&7drops in exchange for 500% more XP."
+    wisdom:
+      id: 16
+      name: "Wisdom V"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7Increases block-break XP by 250%."
+    springtime_blossom:
+      id: 17
+      name: "Springtime Blossom I"
+      material: ENCHANTED_BOOK
+      model-data: 100000
+      rarity: 1
+      lore:
+        - "&7During Spring season, you will gain the"
+        - "&7following effects:"
+        - "&7• Increases XP gain by 25%"
+        - "&7• Increases gathering rate by 25%"
+        - "&7• +1% to double drop archaeology drops"
+        - ""
+        - "&7Other Effects:"
+        - "&7Temporal Focus: Removes cooldown limit"
+        - "&7of Artefact Discovery for the next 5"
+        - "&7block breaks. 0.1% chance to trigger."

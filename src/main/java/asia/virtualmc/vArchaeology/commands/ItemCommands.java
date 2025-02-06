@@ -16,6 +16,7 @@ public class ItemCommands {
     private final MiscItems miscItems;
     private final ArtefactCollections artefactCollections;
     private final CraftingMaterials craftingMaterials;
+    private final CustomAugments customAugments;
 
     public ItemCommands(Main plugin,
                         CustomItems customItems,
@@ -23,7 +24,8 @@ public class ItemCommands {
                         CustomCharms customCharms,
                         MiscItems miscItems,
                         ArtefactCollections artefactCollections,
-                        CraftingMaterials craftingMaterials) {
+                        CraftingMaterials craftingMaterials,
+                        CustomAugments customAugments) {
         this.plugin = plugin;
         this.customItems = customItems;
         this.customTools = customTools;
@@ -31,6 +33,7 @@ public class ItemCommands {
         this.miscItems = miscItems;
         this.artefactCollections = artefactCollections;
         this.craftingMaterials = craftingMaterials;
+        this.customAugments = customAugments;
         registerCommands();
     }
 
@@ -43,6 +46,7 @@ public class ItemCommands {
                 .withSubcommand(archGetStars())
                 .withSubcommand(archGetCollection())
                 .withSubcommand(archGetCraftingMaterials())
+                .withSubcommand(archGetAllAugments())
                 .withHelp("[vArchaeology] Main command for vArchaeology", "Access vArchaeology commands")
                 .register();
     }
@@ -225,6 +229,19 @@ public class ItemCommands {
 
                     sender.sendMessage("Attempting to give " + value + " of " + item_id + " to " + target.getName());
                     craftingMaterials.giveCraftingMaterial(target.getUniqueId(), item_id, value);
+                });
+    }
+
+    private CommandAPICommand archGetAllAugments() {
+        return new CommandAPICommand("allaugments")
+                .withArguments(new PlayerArgument("player"))
+                .withArguments(new IntegerArgument("value", 1))
+                .withPermission("varchaeology.command.getmat")
+                .executes((sender, args) -> {
+                    Player target = (Player) args.get("player");
+                    int value = (int) args.get("value");
+
+                    customAugments.giveAllAugments(target.getUniqueId(), value);
                 });
     }
 }

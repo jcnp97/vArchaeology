@@ -465,10 +465,10 @@ public class ConfigManager {
                 }
             }
         }
-        plugin.getLogger().info("Talent map size: " + talentMap.size());
-        for (Integer key : talentMap.keySet()) {
-            plugin.getLogger().info("Loaded Talent ID: " + key + " -> " + talentMap.get(key).name());
-        }
+//        plugin.getLogger().info("Talent map size: " + talentMap.size());
+//        for (Integer key : talentMap.keySet()) {
+//            plugin.getLogger().info("Loaded Talent ID: " + key + " -> " + talentMap.get(key).name());
+//        }
     }
 
     public record Talent(int id,

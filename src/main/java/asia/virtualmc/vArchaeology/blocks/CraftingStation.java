@@ -18,6 +18,7 @@ import eu.decentsoftware.holograms.api.holograms.Hologram;
 import net.kyori.adventure.sound.Sound;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -96,12 +97,38 @@ public class CraftingStation implements Listener {
     private void loadCraftingStation() {
         FileConfiguration config = plugin.getConfig();
         if (config.contains("settings.interactableBlocks.crafting-station")) {
-            String[] coords = config.getString("settings.interactableBlocks.crafting-station").split(",");
+            String rawLocation = config.getString("settings.interactableBlocks.crafting-station");
+            if (rawLocation == null) {
+                plugin.getLogger().severe("Crafting station location in config.yml is null.");
+                craftingStationLocation = null;
+                return;
+            }
+            String[] parts = rawLocation.split(";");
+            if (parts.length != 2) {
+                plugin.getLogger().severe("Invalid crafting station format in config.yml. Expected format: <world>;<x, y, z>");
+                craftingStationLocation = null;
+                return;
+            }
+            String worldName = parts[0].trim();
+            String coordinatesPart = parts[1].trim();
+            String[] coords = coordinatesPart.split(",");
+            if (coords.length != 3) {
+                plugin.getLogger().severe("Invalid crafting station coordinates in config.yml. Expected three coordinates separated by commas.");
+                craftingStationLocation = null;
+                return;
+            }
             try {
                 double x = Double.parseDouble(coords[0].trim());
                 double y = Double.parseDouble(coords[1].trim());
                 double z = Double.parseDouble(coords[2].trim());
-                this.craftingStationLocation = new Location(plugin.getServer().getWorlds().get(0), x, y, z);
+
+                World world = plugin.getServer().getWorld(worldName);
+                if (world == null) {
+                    plugin.getLogger().severe("World '" + worldName + "' for crafting station not found.");
+                    craftingStationLocation = null;
+                    return;
+                }
+                this.craftingStationLocation = new Location(world, x, y, z);
 
                 if (x == 0 && y == 0 && z == 0) {
                     plugin.getLogger().severe("Crafting station coordinates are (0, 0, 0). Block will not be created.");
@@ -110,9 +137,9 @@ public class CraftingStation implements Listener {
                     ensureBlockExists();
                     createPermanentHologram();
                 }
-
             } catch (NumberFormatException e) {
                 plugin.getLogger().severe("Invalid crafting station coordinates in config.yml");
+                craftingStationLocation = null;
             }
         } else {
             plugin.getLogger().severe("No crafting station location found in config.yml.");
@@ -150,8 +177,12 @@ public class CraftingStation implements Listener {
         if (targetBlock != null) {
             Location blockLocation = targetBlock.getLocation();
             FileConfiguration config = plugin.getConfig();
-            String locationString = String.format("%d, %d, %d",
-                    blockLocation.getBlockX(), blockLocation.getBlockY(), blockLocation.getBlockZ());
+            String worldName = blockLocation.getWorld().getName();
+            String locationString = String.format("%s;%d, %d, %d",
+                    worldName,
+                    blockLocation.getBlockX(),
+                    blockLocation.getBlockY(),
+                    blockLocation.getBlockZ());
             config.set("settings.interactableBlocks.crafting-station", locationString);
             plugin.saveConfig();
 
@@ -161,6 +192,7 @@ public class CraftingStation implements Listener {
             player.sendMessage("§cNo block in view to set as a crafting station!");
         }
     }
+
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
